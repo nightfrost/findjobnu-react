@@ -26,7 +26,6 @@ const JobList: React.FC<Props> = ({
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Helper to generate scoped page numbers with ellipsis
   function getPageNumbers(current: number, total: number, window: number = 2) {
     const pages = [];
     if (total <= 10) {
@@ -75,7 +74,7 @@ const JobList: React.FC<Props> = ({
                               {job.jobDescription.slice(0, 350)}
                               {job.jobDescription.length > 350 && "..."}
                             </>
-                          : "Klik på 'Se mere' for at læse mere om stillingen..."}
+                          : <i>Klik på 'Se mere' for at læse mere om stillingen...</i>}
                       </p>
                       {job.jobDescription && job.jobDescription.trim() !== "" && (
                         <button
@@ -119,7 +118,7 @@ const JobList: React.FC<Props> = ({
           );
         })}
       </div>
-      {/* Paging controls */}
+      {/* Paging controls - move to component and parse needed variables*/}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <div className="join">
