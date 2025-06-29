@@ -19,7 +19,20 @@ const JobList: React.FC<Props> = ({
   totalCount,
   onPageChange,
 }) => {
-  const [openJobId, setOpenJobId] = useState<number | null>(null);
+  const [openJobIds, setOpenJobIds] = useState<Set<number>>(new Set());
+
+  const handleToggleDescription = (jobID?: number | null) => {
+    if (jobID == null) return;
+    setOpenJobIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobID)) {
+        newSet.delete(jobID);
+      } else {
+        newSet.add(jobID);
+      }
+      return newSet;
+    });
+  };
 
   if (loading) return <div className="text-center py-8">Indlæser...</div>;
   if (!jobs.length) return <div className="text-center py-8">Ingen job fundet.</div>;
@@ -49,7 +62,7 @@ const JobList: React.FC<Props> = ({
     <>
       <div className="grid gap-4">
         {jobs.map(job => {
-          const isOpen = openJobId === job.jobID;
+          const isOpen = job.jobID != null && openJobIds.has(job.jobID);
           return (
             <div key={job.jobID} className="card bg-base-100 shadow p-4">
               <div>
@@ -79,7 +92,7 @@ const JobList: React.FC<Props> = ({
                       {job.jobDescription && job.jobDescription.trim() !== "" && (
                         <button
                           className="btn btn-xs btn-outline mt-2"
-                          onClick={() => setOpenJobId(job.jobID ?? null)}
+                          onClick={() => handleToggleDescription(job.jobID)}
                         >
                           Vis mere
                         </button>
@@ -97,7 +110,7 @@ const JobList: React.FC<Props> = ({
                       )}
                       <button
                         className="btn btn-xs btn-outline mt-2"
-                        onClick={() => setOpenJobId(null)}
+                        onClick={() => handleToggleDescription(job.jobID)}
                       >
                         Skjul beskrivelse
                       </button>
