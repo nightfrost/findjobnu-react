@@ -1,6 +1,7 @@
 /* eslint-disable */
 import React, { useState } from "react";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
+import Paging from "./Paging";
 
 interface Props {
   jobs: JobIndexPosts[];
@@ -39,25 +40,6 @@ const JobList: React.FC<Props> = ({
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  function getPageNumbers(current: number, total: number, window: number = 2) {
-    const pages = [];
-    if (total <= 10) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-      return pages;
-    }
-
-    pages.push(1);
-    let start = Math.max(2, current - window);
-    let end = Math.min(total - 1, current + window);
-
-    if (start > 2) pages.push("...");
-    for (let i = start; i <= end; i++) pages.push(i);
-    if (end < total - 1) pages.push("...");
-    pages.push(total);
-
-    return pages;
-  }
-
   return (
     <>
       <div className="grid gap-4">
@@ -87,7 +69,7 @@ const JobList: React.FC<Props> = ({
                               {job.jobDescription.slice(0, 350)}
                               {job.jobDescription.length > 350 && "..."}
                             </>
-                          : <i>Klik på 'Se mere' for at læse mere om stillingen...</i>}
+                          : <i>Klik på 'Ansøg' for at læse mere om stillingen...</i>}
                       </p>
                       {job.jobDescription && job.jobDescription.trim() !== "" && (
                         <button
@@ -124,51 +106,18 @@ const JobList: React.FC<Props> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Se mere
+                  Ansøg
                 </a>
               </div>
             </div>
           );
         })}
       </div>
-      {/* Paging controls - move to component and parse needed variables*/}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-6">
-          <div className="join">
-            <button
-              className="join-item btn btn-sm"
-              disabled={currentPage === 1}
-              onClick={() => onPageChange(currentPage - 1)}
-            >
-              «
-            </button>
-            {getPageNumbers(currentPage, totalPages).map((page, idx) =>
-              page === "..." ? (
-                <button key={idx} className="join-item btn btn-sm btn-disabled">
-                  ...
-                </button>
-              ) : (
-                <button
-                  key={page}
-                  className={`join-item btn btn-sm${
-                    currentPage === page ? " btn-active" : ""
-                  }`}
-                  onClick={() => onPageChange(Number(page))}
-                >
-                  {page}
-                </button>
-              )
-            )}
-            <button
-              className="join-item btn btn-sm"
-              disabled={currentPage === totalPages}
-              onClick={() => onPageChange(currentPage + 1)}
-            >
-              »
-            </button>
-          </div>
-        </div>
-      )}
+      <Paging
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </>
   );
 };
