@@ -1,7 +1,29 @@
 {
-  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "$schema": "node_modules/@openapitools/openapi-generator-cli/config.schema.json",
   "spaces": 2,
   "generator-cli": {
-    "version": "7.13.0"
+    "version": "7.13.0", 
+    "generators": {
+      "findjob-api-client": { 
+        "generatorName": "typescript-fetch",
+        "inputSpec": "https://findjob.nu/swagger/v1/swagger.json",
+        "output": "./src/generated/findjob-api", 
+        "configOptions": {
+          "enumPropertyNaming": "camelCase", 
+          "nullSafeAndStrict": true,
+          "hostname": "findjob.nu"
+        }
+      },
+      "findjob-auth-client": { 
+        "generatorName": "typescript-fetch",
+        "inputSpec": "https://auth.findjob.nu/swagger/v1/swagger.json",
+        "output": "./src/generated/findjob-auth", 
+        "configOptions": {
+          "enumPropertyNaming": "camelCase", 
+          "nullSafeAndStrict": true,
+          "hostname": "auth.findjob.nu"
+        }
+      }
+    }
   }
 }
