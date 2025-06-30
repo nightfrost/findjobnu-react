@@ -1,7 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setLoggedIn(!!localStorage.getItem("accessToken"));
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setLoggedIn(false);
+    window.location.href = "/";
+  };
 
   return (
     <div className="navbar bg-base-100 shadow mb-4 relative">
@@ -53,8 +65,23 @@ const Navbar: React.FC = () => {
       </div>
       {/* Right: Auth buttons */}
       <div className="flex-none gap-2 ml-4">
-        <button className="btn btn-outline btn-primary mr-4">Tilmeld</button>
-        <button className="btn btn-primary">Log ind</button>
+        {!loggedIn ? (
+          <>
+            <a
+              href="/register"
+              className="btn btn-outline btn-primary mr-4"
+            >
+              Tilmeld
+            </a>
+            <a href="/login" className="btn btn-primary">
+              Log ind
+            </a>
+          </>
+        ) : (
+          <button className="btn btn-error" onClick={handleLogout}>
+            Log ud
+          </button>
+        )}
       </div>
     </div>
   );
