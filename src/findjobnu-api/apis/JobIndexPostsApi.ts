@@ -35,12 +35,12 @@ export interface GetJobPostsByIdRequest {
 }
 
 export interface GetJobPostsBySearchRequest {
+    page: number;
     searchTerm?: string;
     location?: string;
     category?: string;
     postedAfter?: Date;
     postedBefore?: Date;
-    page?: number;
 }
 
 /**
@@ -145,30 +145,37 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
     /**
      */
     async getJobPostsBySearchRaw(requestParameters: GetJobPostsBySearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobIndexPostsPagedList>> {
+        if (requestParameters['page'] == null) {
+            throw new runtime.RequiredError(
+                'page',
+                'Required parameter "page" was null or undefined when calling getJobPostsBySearch().'
+            );
+        }
+
         const queryParameters: any = {};
 
         if (requestParameters['searchTerm'] != null) {
-            queryParameters['searchTerm'] = requestParameters['searchTerm'];
+            queryParameters['SearchTerm'] = requestParameters['searchTerm'];
         }
 
         if (requestParameters['location'] != null) {
-            queryParameters['location'] = requestParameters['location'];
+            queryParameters['Location'] = requestParameters['location'];
         }
 
         if (requestParameters['category'] != null) {
-            queryParameters['category'] = requestParameters['category'];
+            queryParameters['Category'] = requestParameters['category'];
         }
 
         if (requestParameters['postedAfter'] != null) {
-            queryParameters['postedAfter'] = (requestParameters['postedAfter'] as any).toISOString();
+            queryParameters['PostedAfter'] = (requestParameters['postedAfter'] as any).toISOString();
         }
 
         if (requestParameters['postedBefore'] != null) {
-            queryParameters['postedBefore'] = (requestParameters['postedBefore'] as any).toISOString();
+            queryParameters['PostedBefore'] = (requestParameters['postedBefore'] as any).toISOString();
         }
 
         if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+            queryParameters['Page'] = requestParameters['page'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -185,7 +192,7 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
 
     /**
      */
-    async getJobPostsBySearch(requestParameters: GetJobPostsBySearchRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList | null | undefined > {
+    async getJobPostsBySearch(requestParameters: GetJobPostsBySearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList | null | undefined > {
         const response = await this.getJobPostsBySearchRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 200:
@@ -195,6 +202,30 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
             default:
                 return await response.value();
         }
+    }
+
+    /**
+     */
+    async getSavedJobPostsByUserRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<JobIndexPosts>>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/jobindexposts/saved`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(JobIndexPostsFromJSON));
+    }
+
+    /**
+     */
+    async getSavedJobPostsByUser(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<JobIndexPosts>> {
+        const response = await this.getSavedJobPostsByUserRaw(initOverrides);
+        return await response.value();
     }
 
 }

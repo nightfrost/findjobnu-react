@@ -12,6 +12,7 @@
     "generate-auth": "openapi-generator-cli generate -i https://auth.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-auth"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.10",
     "daisyui": "^5.0.43",
     "react": "^19.1.0",

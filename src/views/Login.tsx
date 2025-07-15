@@ -18,12 +18,15 @@ const Login: React.FC = () => {
     setError(null);
     try {
       const res = await api.login({ loginRequest: form });
-      // Store tokens in localStorage/sessionStorage as needed
+      localStorage.setItem("email", res.email ?? "");
       localStorage.setItem("accessToken", res.accessToken ?? "");
       localStorage.setItem("refreshToken", res.refreshToken ?? "");
-      window.location.href = "/"; // Redirect to home
+      localStorage.setItem("userId", res.userId ?? "");
+      localStorage.setItem("accessTokenExpiration", res.accessTokenExpiration?.toISOString() ?? "");
+      window.location.href = "/";
     } catch (err: any) {
       setError("Login fejlede. Tjek dine oplysninger.");
+      console.log("Login error:", err);
     } finally {
       setLoading(false);
     }

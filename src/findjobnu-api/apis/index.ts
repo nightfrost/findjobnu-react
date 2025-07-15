@@ -2,3 +2,4 @@
 /* eslint-disable */
 export * from './CitiesApi';
 export * from './JobIndexPostsApi';
+export * from './UserProfileApi';

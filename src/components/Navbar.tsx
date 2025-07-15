@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,6 +12,7 @@ const Navbar: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userId");
     setLoggedIn(false);
     window.location.href = "/";
   };
@@ -69,7 +71,7 @@ const Navbar: React.FC = () => {
           <>
             <a
               href="/register"
-              className="btn btn-outline btn-primary mr-4"
+              className="btn btn-outline btn-success mr-4"
             >
               Tilmeld
             </a>
@@ -78,9 +80,14 @@ const Navbar: React.FC = () => {
             </a>
           </>
         ) : (
-          <button className="btn btn-error" onClick={handleLogout}>
+          <>
+          <a href="/profile" className="btn btn-success mr-4">
+            <UserCircleIcon/> Min Profil
+          </a>
+          <button type="button" className="btn btn-outline btn-error" onClick={handleLogout}>
             Log ud
           </button>
+          </>
         )}
       </div>
     </div>

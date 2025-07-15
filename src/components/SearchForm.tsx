@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { CitiesApi, Configuration, type Cities } from "../findjobnu-api/";
+import { MagnifyingGlassCircleIcon } from "@heroicons/react/24/outline";
 
 type SearchParams = {
   searchTerm?: string;
@@ -78,12 +79,14 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories }) => {
 
   return (
     <form className="flex flex-col md:flex-row gap-2 mb-6 relative" onSubmit={handleSubmit}>
-      <input
-        className="input input-bordered flex-1"
+      <div className="relative flex-1">
+        <input
+        className="input input-bordered w-full flex-1"
         placeholder="Søgeord"
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
       />
+      </div>
       <div
         className="relative flex-1"
         tabIndex={-1}
@@ -114,9 +117,10 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories }) => {
           </ul>
         )}
       </div>
-      <select
+      <div className="relative flex-1">
+        <select
         id="category-select"
-        className="select select-bordered flex-1"
+        className="select select-bordered w-full flex-1"
         value={category}
         onChange={e => setCategory(e.target.value)}
         aria-label="Vælg kategori"
@@ -126,8 +130,11 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories }) => {
           <option key={cat} value={cat}>{cat}</option>
         ))}
       </select>
+      </div>
+      
       <button className="btn btn-primary" type="submit">
-        Search
+        <MagnifyingGlassCircleIcon className="h-5 w-5" />
+        Søg
       </button>
     </form>
   );

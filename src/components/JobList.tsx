@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import Paging from "./Paging";
+import { UserProfileApi } from "../findjobnu-api/apis/UserProfileApi";
+import { Configuration } from "../findjobnu-api";
+import { PaperClipIcon } from "@heroicons/react/24/outline";
 
 interface Props {
   jobs: JobIndexPosts[];
@@ -21,6 +24,38 @@ const JobList: React.FC<Props> = ({
   onPageChange,
 }) => {
   const [openJobIds, setOpenJobIds] = useState<Set<number>>(new Set());
+  const [savingJobIds, setSavingJobIds] = useState<Set<number>>(new Set());
+  const [savedJobIds, setSavedJobIds] = useState<Set<number>>(new Set());
+
+  const handleSaveJob = async (jobId: number) => {
+    const userId = localStorage.getItem("userId");
+    const accessToken = localStorage.getItem("accessToken");
+    if (!userId || !jobId || !accessToken) return;
+
+    const api = new UserProfileApi(
+      new Configuration({
+        basePath: "https://findjob.nu",
+        accessToken: accessToken ?? undefined, // <-- pass as function!
+        headers: {
+                Authorization: `Bearer ${accessToken}`
+              }
+      })
+    );
+
+    setSavingJobIds(prev => new Set(prev).add(jobId));
+    try {
+      await api.saveJob({ userId: String(userId), jobId: String(jobId) });
+      setSavedJobIds(prev => new Set(prev).add(jobId));
+    } catch (e) {
+      // Optionally handle error
+    } finally {
+      setSavingJobIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
+      });
+    }
+  };
 
   const handleToggleDescription = (jobID?: number | null) => {
     if (jobID == null) return;
@@ -45,6 +80,10 @@ const JobList: React.FC<Props> = ({
       <div className="grid gap-4">
         {jobs.map(job => {
           const isOpen = job.jobID != null && openJobIds.has(job.jobID);
+          const isSaving = job.jobID != null && savingJobIds.has(job.jobID);
+          const isSaved = job.jobID != null && savedJobIds.has(job.jobID);
+          const isLoggedIn = localStorage.getItem("userId") != null && localStorage.getItem("accessToken") != null;
+
           return (
             <div key={job.jobID} className="card bg-base-100 shadow p-4">
               <div>
@@ -100,14 +139,24 @@ const JobList: React.FC<Props> = ({
                   )}
                 </div>
 
-                <a
-                  href={job.jobUrl ?? undefined}
-                  className="btn btn-s btn-success mt-4"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Ansøg
-                </a>
+                <div className="flex justify-between items-center mt-4">
+                  <a
+                    href={job.jobUrl ?? undefined}
+                    className="btn btn-s btn-success"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Ansøg
+                  </a>
+                  <button
+                    className="btn btn-s btn-outline btn-secondary"
+                    disabled={isSaving || isSaved || !isLoggedIn}
+                    onClick={() => handleSaveJob(job.jobID!)}
+                  >
+                    <PaperClipIcon className="h-5 w-5"/>
+                    {isSaved ? "Gemt!" : isSaving ? "Gemmer..." : "Gem"}
+                  </button>
+                </div>
               </div>
             </div>
           );

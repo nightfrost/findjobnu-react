@@ -1,9 +1,11 @@
 apis/CitiesApi.ts
 apis/JobIndexPostsApi.ts
+apis/UserProfileApi.ts
 apis/index.ts
 index.ts
 models/Cities.ts
 models/JobIndexPosts.ts
 models/JobIndexPostsPagedList.ts
+models/UserProfile.ts
 models/index.ts
 runtime.ts
