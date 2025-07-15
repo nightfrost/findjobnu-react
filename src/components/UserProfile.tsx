@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UserProfileApi, Configuration } from "../findjobnu-api";
 import type { UserProfile } from "../findjobnu-api/models/UserProfile";
+import { handleApiError } from "../helpers/ErrorHelper";
 
 interface Props {
   userId: string;
@@ -37,7 +38,9 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         setProfile(data);
         setForm(data);
       } catch (e) {
-        setError("Kunne ikke hente profil." + e);
+        handleApiError(e).then((errorMessage) => {
+          setError(errorMessage.message);
+        });
       }
       setLoading(false);
     };
@@ -58,7 +61,9 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       setProfile(form);
       setEditMode(false);
     } catch (e) {
-      setError("Kunne ikke opdatere profil.");
+      handleApiError(e).then((errorMessage) => {
+          setError(errorMessage.message);
+        });
     }
     setLoading(false);
   };

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AuthenticationApi, Configuration, type LoginRequest } from "../findjobnu-auth";
+import { UserProfileApi, Configuration as upConfiguration, type ConfigurationParameters } from "../findjobnu-api";
 
 const api = new AuthenticationApi(new Configuration());
 
@@ -23,6 +24,27 @@ const Login: React.FC = () => {
       localStorage.setItem("refreshToken", res.refreshToken ?? "");
       localStorage.setItem("userId", res.userId ?? "");
       localStorage.setItem("accessTokenExpiration", res.accessTokenExpiration?.toISOString() ?? "");
+      
+      //Attempt to cache SavedJobs
+      const upConfigurationParams: ConfigurationParameters = {
+        basePath: "https://findjob.nu",
+        accessToken: res.accessToken ?? undefined,
+        headers: {
+          Authorization: `Bearer ${res.accessToken}`
+        }
+      };
+
+      const userProfileApi = new UserProfileApi(new upConfiguration(
+        upConfigurationParams
+      ));
+
+      try {
+        const savedJobsResponse = await userProfileApi.getSavedJob({ userId: res.userId ?? "" });
+        localStorage.setItem("savedJobsArray", savedJobsResponse.join(","));
+      } catch (e) {
+        console.error("Error fetching saved jobs:", e);
+        // If fetching saved jobs fails, we can still proceed with login
+      }
       window.location.href = "/";
     } catch (err: any) {
       setError("Login fejlede. Tjek dine oplysninger.");

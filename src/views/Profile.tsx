@@ -1,5 +1,7 @@
 import React from "react";
 import UserProfileComponent from "../components/UserProfile";
+import JobList from "../components/JobList";
+import SavedJobs from "../components/SavedJobs";
 
 const Profile: React.FC = () => {
   // You may want to get userId from your auth context/provider
@@ -8,6 +10,7 @@ const Profile: React.FC = () => {
   return (
     <div className="container mx-auto px-4">
       <UserProfileComponent userId={userId} />
+      <SavedJobs userId={userId} />
     </div>
   );
 };

@@ -22,7 +22,7 @@ const Register: React.FC = () => {
       await api.register({ registerRequest: form });
       setSuccess(true);
     } catch (err: any) {
-      setError("Registrering fejlede. Prøv igen.");
+      setError("Registrering fejlede. Prøv igen. " + err.message);
     } finally {
       setLoading(false);
     }

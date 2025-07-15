@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { UserProfileApi, JobIndexPostsApi, Configuration } from "../findjobnu-api";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import JobList from "./JobList";
+import { handleApiError } from "../helpers/ErrorHelper";
 
 interface Props {
   userId: string;
@@ -16,7 +17,9 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
   const jobApi = new JobIndexPostsApi(
     new Configuration({
       basePath: "https://findjob.nu",
-      accessToken: "bearer " + token,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     })
   );
 
@@ -28,7 +31,9 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
         const jobResults = await jobApi.getSavedJobPostsByUser();
         setJobs(jobResults.filter(Boolean) as JobIndexPosts[]);
       } catch (e) {
-        setError("Kunne ikke hente gemte jobs.");
+        handleApiError(e).then((errorMessage) => {
+          setError(errorMessage.message);
+        });
       }
       setLoading(false);
     };

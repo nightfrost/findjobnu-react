@@ -4,7 +4,8 @@ import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import Paging from "./Paging";
 import { UserProfileApi } from "../findjobnu-api/apis/UserProfileApi";
 import { Configuration } from "../findjobnu-api";
-import { PaperClipIcon } from "@heroicons/react/24/outline";
+import { BookmarkIcon } from "@heroicons/react/24/outline";
+import { handleApiError } from "../helpers/ErrorHelper";
 
 interface Props {
   jobs: JobIndexPosts[];
@@ -35,7 +36,7 @@ const JobList: React.FC<Props> = ({
     const api = new UserProfileApi(
       new Configuration({
         basePath: "https://findjob.nu",
-        accessToken: accessToken ?? undefined, // <-- pass as function!
+        accessToken: accessToken ?? undefined,
         headers: {
                 Authorization: `Bearer ${accessToken}`
               }
@@ -47,7 +48,10 @@ const JobList: React.FC<Props> = ({
       await api.saveJob({ userId: String(userId), jobId: String(jobId) });
       setSavedJobIds(prev => new Set(prev).add(jobId));
     } catch (e) {
-      // Optionally handle error
+      handleApiError(e).then(error => {
+        console.error("Error saving job:", error.message);
+        window.location.reload();
+      });
     } finally {
       setSavingJobIds(prev => {
         const newSet = new Set(prev);
@@ -83,6 +87,7 @@ const JobList: React.FC<Props> = ({
           const isSaving = job.jobID != null && savingJobIds.has(job.jobID);
           const isSaved = job.jobID != null && savedJobIds.has(job.jobID);
           const isLoggedIn = localStorage.getItem("userId") != null && localStorage.getItem("accessToken") != null;
+          const isAlreadySaved = localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.jobID));
 
           return (
             <div key={job.jobID} className="card bg-base-100 shadow p-4">
@@ -150,11 +155,11 @@ const JobList: React.FC<Props> = ({
                   </a>
                   <button
                     className="btn btn-s btn-outline btn-secondary"
-                    disabled={isSaving || isSaved || !isLoggedIn}
+                    disabled={isSaving || isSaved || !isLoggedIn || isAlreadySaved}
                     onClick={() => handleSaveJob(job.jobID!)}
                   >
-                    <PaperClipIcon className="h-5 w-5"/>
-                    {isSaved ? "Gemt!" : isSaving ? "Gemmer..." : "Gem"}
+                    <BookmarkIcon className="h-5 w-5"/>
+                    {isSaved || isAlreadySaved ? "Gemt!" : isSaving ? "Gemmer..." : "Gem"}
                   </button>
                 </div>
               </div>

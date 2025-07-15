@@ -13,6 +13,9 @@ const Navbar: React.FC = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("email");
+    localStorage.removeItem("accessTokenExpiration");
+    localStorage.removeItem("savedJobsArray");
     setLoggedIn(false);
     window.location.href = "/";
   };
