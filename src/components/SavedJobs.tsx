@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { UserProfileApi, JobIndexPostsApi, Configuration } from "../findjobnu-api";
+import { JobIndexPostsApi, Configuration } from "../findjobnu-api";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import JobList from "./JobList";
 import { handleApiError } from "../helpers/ErrorHelper";
@@ -29,7 +29,7 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
       setError(null);
       try {
         const jobResults = await jobApi.getSavedJobPostsByUser();
-        setJobs(jobResults.filter(Boolean) as JobIndexPosts[]);
+        setJobs(jobResults.filter(Boolean));
       } catch (e) {
         handleApiError(e).then((errorMessage) => {
           setError(errorMessage.message);

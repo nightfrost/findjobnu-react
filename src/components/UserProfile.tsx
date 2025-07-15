@@ -53,7 +53,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   };
 
   const handleSave = async () => {
-    if (!form || !form.id) return;
+    if (!form?.id) return;
     setLoading(true);
     setError(null);
     try {

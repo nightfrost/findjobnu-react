@@ -1,6 +1,5 @@
 import React from "react";
 import UserProfileComponent from "../components/UserProfile";
-import JobList from "../components/JobList";
 import SavedJobs from "../components/SavedJobs";
 
 const Profile: React.FC = () => {
