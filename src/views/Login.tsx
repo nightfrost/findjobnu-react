@@ -33,7 +33,6 @@ const Login: React.FC = () => {
           Authorization: `Bearer ${res.accessToken}`
         }
       };
-
       const userProfileApi = new UserProfileApi(new upConfiguration(
         upConfigurationParams
       ));
@@ -43,7 +42,6 @@ const Login: React.FC = () => {
         localStorage.setItem("savedJobsArray", savedJobsResponse.join(","));
       } catch (e) {
         console.error("Error fetching saved jobs:", e);
-        // If fetching saved jobs fails, we can still proceed with login
       }
       window.location.href = "/";
     } catch (err: any) {

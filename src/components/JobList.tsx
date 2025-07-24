@@ -31,6 +31,8 @@ const JobList: React.FC<Props> = ({
   const handleSaveJob = async (jobId: number) => {
     const userId = localStorage.getItem("userId");
     const accessToken = localStorage.getItem("accessToken");
+    const savedJobsArray = localStorage.getItem("savedJobsArray");
+    
     if (!userId || !jobId || !accessToken) return;
 
     const api = new UserProfileApi(
@@ -43,7 +45,12 @@ const JobList: React.FC<Props> = ({
       })
     );
 
-    
+    if (savedJobsArray) {
+      const savedJobs = new Set(savedJobsArray.split(",").map(Number));
+      if (savedJobs.has(jobId)) {
+        return; // Already saved, no need to proceed
+      }
+    }
 
     setSavingJobIds(prev => new Set(prev).add(jobId));
     try {
@@ -60,8 +67,17 @@ const JobList: React.FC<Props> = ({
         newSet.delete(jobId);
         return newSet;
       });
+      try {
+        // Attempt to refresh saved jobs after saving
+        const savedJobsResponse = await api.getSavedJob({ userId: userId ?? "" });
+        localStorage.setItem("savedJobsArray", savedJobsResponse.join(","));
+      } catch (e) {
+        console.error("Error fetching saved jobs after saving:", e);
+      }
     }
   };
+
+  
 
   const handleToggleDescription = (jobID?: number | null) => {
     if (jobID == null) return;
