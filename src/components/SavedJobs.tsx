@@ -8,10 +8,14 @@ interface Props {
   userId: string;
 }
 
+const PAGE_SIZE = 10;
+
 const SavedJobs: React.FC<Props> = ({ userId }) => {
   const [jobs, setJobs] = useState<JobIndexPosts[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   const token = localStorage.getItem("accessToken");
   const jobApi = new JobIndexPostsApi(
@@ -28,8 +32,9 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
       setLoading(true);
       setError(null);
       try {
-        const jobResults = await jobApi.getSavedJobPostsByUser();
-        setJobs(jobResults.filter(Boolean));
+        const response = await jobApi.getSavedJobPostsByUser({ page: currentPage });
+        setJobs(response?.items?.filter(Boolean) ?? []);
+        setTotalCount(response?.totalCount ?? 0);
       } catch (e) {
         handleApiError(e).then((errorMessage) => {
           setError(errorMessage.message);
@@ -38,19 +43,22 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
       setLoading(false);
     };
     fetchSavedJobs();
-  }, [userId]);
+  }, [userId, currentPage]);
 
-  // Paging is optional for saved jobs, but you can add it if needed
+  if (jobs.length === 0 && !loading) {
+    return <div className="text-center py-8">Ingen gemte jobs fundet.</div>;
+  }
+
   return (
     <div className="mt-8">
       <h2 className="card-title mb-4">Gemte Jobs</h2>
       <JobList
         jobs={jobs}
         loading={loading}
-        currentPage={1}
-        pageSize={jobs.length || 1}
-        totalCount={jobs.length}
-        onPageChange={() => {}}
+        currentPage={currentPage}
+        pageSize={PAGE_SIZE}
+        totalCount={totalCount}
+        onPageChange={setCurrentPage}
       />
       {error && <div className="text-center py-8 text-red-500">{error}</div>}
     </div>

@@ -31,6 +31,11 @@ import {
     TokenRefreshRequestToJSON,
 } from '../models/index';
 
+export interface ConfirmEmailRequest {
+    userId: string;
+    token: string;
+}
+
 export interface LoginOperationRequest {
     loginRequest: LoginRequest;
 }
@@ -51,6 +56,59 @@ export interface RevokeTokenRequest {
  * 
  */
 export class AuthenticationApi extends runtime.BaseAPI {
+
+    /**
+     * Confirms the user\'s email using the provided userId and token, then redirects to https://findjob.nu on success.
+     * Confirms a user\'s email address.
+     */
+    async confirmEmailRaw(requestParameters: ConfirmEmailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling confirmEmail().'
+            );
+        }
+
+        if (requestParameters['token'] == null) {
+            throw new runtime.RequiredError(
+                'token',
+                'Required parameter "token" was null or undefined when calling confirmEmail().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['userId'] != null) {
+            queryParameters['userId'] = requestParameters['userId'];
+        }
+
+        if (requestParameters['token'] != null) {
+            queryParameters['token'] = requestParameters['token'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/confirm-email`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Confirms the user\'s email using the provided userId and token, then redirects to https://findjob.nu on success.
+     * Confirms a user\'s email address.
+     */
+    async confirmEmail(requestParameters: ConfirmEmailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.confirmEmailRaw(requestParameters, initOverrides);
+    }
 
     /**
      * An example endpoint that requires authentication to access.
@@ -173,7 +231,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
     }
 
     /**
-     * Registers a new user with the provided email and password.
+     * Registers a new user with the provided email, password, and optional phone number.
      * Registers a new user.
      */
     async registerRaw(requestParameters: RegisterOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AuthResponse>> {
@@ -206,7 +264,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
     }
 
     /**
-     * Registers a new user with the provided email and password.
+     * Registers a new user with the provided email, password, and optional phone number.
      * Registers a new user.
      */
     async register(requestParameters: RegisterOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AuthResponse> {

@@ -26,6 +26,11 @@ export interface CreateUserProfileRequest {
     userProfile: UserProfile;
 }
 
+export interface DeleteSavedJobRequest {
+    userId: string;
+    jobId: string;
+}
+
 export interface GetSavedJobRequest {
     userId: string;
 }
@@ -81,6 +86,43 @@ export class UserProfileApi extends runtime.BaseAPI {
     async createUserProfile(requestParameters: CreateUserProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserProfile> {
         const response = await this.createUserProfileRaw(requestParameters, initOverrides);
         return await response.value();
+    }
+
+    /**
+     */
+    async deleteSavedJobRaw(requestParameters: DeleteSavedJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling deleteSavedJob().'
+            );
+        }
+
+        if (requestParameters['jobId'] == null) {
+            throw new runtime.RequiredError(
+                'jobId',
+                'Required parameter "jobId" was null or undefined when calling deleteSavedJob().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/userprofile/{userId}/savedjobs/{jobId}`.replace(`{${"userId"}}`, encodeURIComponent(String(requestParameters['userId']))).replace(`{${"jobId"}}`, encodeURIComponent(String(requestParameters['jobId']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async deleteSavedJob(requestParameters: DeleteSavedJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.deleteSavedJobRaw(requestParameters, initOverrides);
     }
 
     /**

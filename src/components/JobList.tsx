@@ -43,6 +43,8 @@ const JobList: React.FC<Props> = ({
       })
     );
 
+    
+
     setSavingJobIds(prev => new Set(prev).add(jobId));
     try {
       await api.saveJob({ userId: String(userId), jobId: String(jobId) });

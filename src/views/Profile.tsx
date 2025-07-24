@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import UserProfileComponent from "../components/UserProfile";
 import SavedJobs from "../components/SavedJobs";
+import { useNavigate } from "react-router-dom";
 
 const Profile: React.FC = () => {
-  // You may want to get userId from your auth context/provider
   const userId = localStorage.getItem("userId") || "";
+  const token = localStorage.getItem("accessToken");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!userId || !token) {
+      navigate("/login");
+    }
+  }, [userId, token, navigate]);
 
   return (
     <div className="container mx-auto px-4">

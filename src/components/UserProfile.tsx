@@ -19,7 +19,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const api = new UserProfileApi(
     new Configuration({
       basePath: "https://findjob.nu",
-      accessToken: token ?? undefined, // <-- pass as function!
+      accessToken: token ?? undefined, 
       headers: {
               Authorization: `Bearer ${token}`
             }
@@ -31,7 +31,6 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       setLoading(true);
       setError(null);
       try {
-        // Assuming userId is string, but API expects number for getUserProfileById
         const data = await api.getUserProfileByUserId(
           { userid: userId }
         );
@@ -40,6 +39,9 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       } catch (e) {
         handleApiError(e).then((errorMessage) => {
           setError(errorMessage.message);
+          if (errorMessage.type === "not_found") {
+            setProfile(null);
+          }
         });
       }
       setLoading(false);
@@ -68,9 +70,46 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     setLoading(false);
   };
 
+  const handleCreateProfile = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // You may want to adjust default values as needed
+      const newProfile: UserProfile = {
+        id: undefined,
+        firstName: "",
+        lastName: "",
+        phoneNumber: "",
+        address: "",
+        dateOfBirth: null,
+        userId: userId,
+      };
+      const created = await api.createUserProfile({ userProfile: newProfile });
+      setProfile(created);
+      setForm(created);
+      setEditMode(true);
+    } catch (e) {
+      handleApiError(e).then((errorMessage) => {
+        setError(errorMessage.message);
+      });
+    }
+    setLoading(false);
+  };
+
   if (loading) return <div className="text-center py-8">Indlæser profil...</div>;
+
+  if (error || profile === null) {
+    return (
+      <div className="text-center py-8">
+        Ingen profil fundet.<br />
+        <button className="btn btn-primary mt-4" onClick={handleCreateProfile}>
+          Opret profil
+        </button>
+      </div>
+    );
+  }
+
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
-  if (!profile) return <div className="text-center py-8">Ingen profil fundet.</div>;
 
   return (
     <div className="card bg-base-100 shadow p-6 max-w-lg mx-auto mt-8">

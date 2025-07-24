@@ -43,6 +43,10 @@ export interface GetJobPostsBySearchRequest {
     postedBefore?: Date;
 }
 
+export interface GetSavedJobPostsByUserRequest {
+    page: number;
+}
+
 /**
  * 
  */
@@ -206,8 +210,19 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
 
     /**
      */
-    async getSavedJobPostsByUserRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<JobIndexPosts>>> {
+    async getSavedJobPostsByUserRaw(requestParameters: GetSavedJobPostsByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobIndexPostsPagedList>> {
+        if (requestParameters['page'] == null) {
+            throw new runtime.RequiredError(
+                'page',
+                'Required parameter "page" was null or undefined when calling getSavedJobPostsByUser().'
+            );
+        }
+
         const queryParameters: any = {};
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -218,14 +233,21 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(JobIndexPostsFromJSON));
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobIndexPostsPagedListFromJSON(jsonValue));
     }
 
     /**
      */
-    async getSavedJobPostsByUser(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<JobIndexPosts>> {
-        const response = await this.getSavedJobPostsByUserRaw(initOverrides);
-        return await response.value();
+    async getSavedJobPostsByUser(requestParameters: GetSavedJobPostsByUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList | null | undefined > {
+        const response = await this.getSavedJobPostsByUserRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 200:
+                return await response.value();
+            case 204:
+                return null;
+            default:
+                return await response.value();
+        }
     }
 
 }

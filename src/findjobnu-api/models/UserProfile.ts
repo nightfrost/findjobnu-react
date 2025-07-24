@@ -63,6 +63,12 @@ export interface UserProfile {
     address?: string | null;
     /**
      * 
+     * @type {string}
+     * @memberof UserProfile
+     */
+    city?: string | null;
+    /**
+     * 
      * @type {Date}
      * @memberof UserProfile
      */
@@ -102,6 +108,7 @@ export function UserProfileFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'dateOfBirth': json['dateOfBirth'] == null ? undefined : (new Date(json['dateOfBirth'])),
         'phoneNumber': json['phoneNumber'] == null ? undefined : json['phoneNumber'],
         'address': json['address'] == null ? undefined : json['address'],
+        'city': json['city'] == null ? undefined : json['city'],
         'lastUpdatedAt': json['lastUpdatedAt'] == null ? undefined : (new Date(json['lastUpdatedAt'])),
         'savedJobPosts': json['savedJobPosts'] == null ? undefined : json['savedJobPosts'],
     };
@@ -125,6 +132,7 @@ export function UserProfileToJSONTyped(value?: UserProfile | null, ignoreDiscrim
         'dateOfBirth': value['dateOfBirth'] == null ? undefined : ((value['dateOfBirth'] as any).toISOString()),
         'phoneNumber': value['phoneNumber'],
         'address': value['address'],
+        'city': value['city'],
         'lastUpdatedAt': value['lastUpdatedAt'] == null ? undefined : ((value['lastUpdatedAt'] as any).toISOString()),
         'savedJobPosts': value['savedJobPosts'],
     };
