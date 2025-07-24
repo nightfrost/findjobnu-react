@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { UserProfileApi, Configuration } from "../findjobnu-api";
+import React, { useEffect, useRef, useState } from "react";
+import { UserProfileApi, Configuration, CitiesApi, type Cities } from "../findjobnu-api";
 import type { UserProfile } from "../findjobnu-api/models/UserProfile";
 import { handleApiError } from "../helpers/ErrorHelper";
 
@@ -13,6 +13,10 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [location, setLocation] = useState("");
+  const [citySuggestions, setCitySuggestions] = useState<Cities[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const token = localStorage.getItem("accessToken");
   
@@ -25,6 +29,8 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
             }
     })
   );
+
+  const citiesApi = new CitiesApi(new Configuration({ basePath: "https://findjob.nu" }));
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -54,6 +60,57 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleLocationFocus = async () => {
+    if (!location) {
+      try {
+        const results = await citiesApi.getAllCities();
+        setCitySuggestions(results ?? []);
+        setShowSuggestions(true);
+      } catch {
+        setCitySuggestions([]);
+      }
+    } else {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setLocation(value);
+      if (!form) return;
+      setForm(form => form ? { ...form, city: value ?? "" } : form); // <-- update form.city
+  
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  
+      if (value.length > 0) {
+        timeoutRef.current = setTimeout(async () => {
+          try {
+            const results = await citiesApi.getCitiesByQuery({ query: value });
+            setCitySuggestions(results ?? []);
+            setShowSuggestions(true);
+          } catch {
+            setCitySuggestions([]);
+          }
+        }, 300);
+      } else {
+        (async () => {
+          try {
+            const results = await citiesApi.getAllCities();
+            setCitySuggestions(results ?? []);
+            setShowSuggestions(true);
+          } catch {
+            setCitySuggestions([]);
+          }
+        })();
+      }
+    };
+  
+  const handleSuggestionClick = (city: Cities) => {
+  setLocation(city.cityName ?? "");
+  setForm(form => form ? { ...form, city: city.cityName ?? "" } : form); // <-- update form.city
+  setShowSuggestions(false);
+};
+
   const handleSave = async () => {
     if (!form?.id) return;
     setLoading(true);
@@ -74,7 +131,6 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     setLoading(true);
     setError(null);
     try {
-      // You may want to adjust default values as needed
       const newProfile: UserProfile = {
         id: undefined,
         firstName: "",
@@ -83,6 +139,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         address: "",
         dateOfBirth: null,
         userId: userId,
+        city: "",
       };
       const created = await api.createUserProfile({ userProfile: newProfile });
       setProfile(created);
@@ -128,7 +185,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Fornavn"
             />
           ) : (
-            <div>{profile.firstName}</div>
+            <div>{profile.firstName && profile.firstName?.trim() !== "" ? profile.firstName : <span className="text-gray-400">Ikke angivet</span>}</div>
           )}
         </div>
         <div>
@@ -144,7 +201,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Efternavn"
             />
           ) : (
-            <div>{profile.lastName}</div>
+            <div>{profile.lastName && profile.lastName?.trim() !== "" ? profile.lastName : <span className="text-gray-400">Ikke angivet</span>}</div>
           )}
         </div>
         <div>
@@ -160,7 +217,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Telefonnummer"
             />
           ) : (
-            <div>{profile.phoneNumber ?? <span className="text-gray-400">Ikke angivet</span>}</div>
+            <div>{profile.phoneNumber && profile.phoneNumber?.trim() !== "" ? profile.phoneNumber : <span className="text-gray-400">Ikke angivet</span>}</div>
           )}
         </div>
         <div>
@@ -176,7 +233,54 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Adresse"
             />
           ) : (
-            <div>{profile.address ?? <span className="text-gray-400">Ikke angivet</span>}</div>
+            <div>
+              {profile.address && profile.address.trim() !== ""
+                ? profile.address
+                : <span className="text-gray-400">Ikke angivet</span>}
+            </div>
+          )}
+        </div>
+        <div>
+          <label className="label" htmlFor="City">By</label>
+          {editMode ? (
+            <div
+      className="relative flex-1"
+      tabIndex={-1}
+      onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
+      onFocus={() => showSuggestions && setShowSuggestions(true)}
+    >
+      <input
+        className="select select-bordered w-full"
+        placeholder="By"
+        name="city"
+        id="city"
+        value={form?.city ?? location}
+        onChange={handleLocationChange}
+        onFocus={handleLocationFocus}
+        autoComplete="off"
+      />
+      {showSuggestions && citySuggestions.length > 0 && (
+        <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 overflow-y-auto shadow-lg rounded-box p-0">
+          {citySuggestions.map(city => (
+            <li key={city.id}>
+              <button
+                type="button"
+                className="menu-item text-white px-3 py-2 hover:bg-base-200 w-full text-left"
+                onClick={() => handleSuggestionClick(city)}
+              >
+                {city.cityName}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+          ) : (
+            <div>
+              {profile.city
+                ? profile.city
+                : <span className="text-gray-400">Ikke angivet</span>}
+            </div>
           )}
         </div>
         <div>
