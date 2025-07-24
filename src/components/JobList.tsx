@@ -173,11 +173,11 @@ const JobList: React.FC<Props> = ({
                   </a>
                   <button
                     className="btn btn-s btn-outline btn-secondary"
-                    disabled={isSaving || isSaved || !isLoggedIn || isAlreadySaved}
+                    disabled={isSaving || !isLoggedIn}
                     onClick={() => handleSaveJob(job.jobID!)}
                   >
                     <BookmarkIcon className="h-5 w-5"/>
-                    {isSaved || isAlreadySaved ? "Gemt!" : isSaving ? "Gemmer..." : "Gem"}
+                    {isSaved || isAlreadySaved ? "Fjern" : isSaving ? "Gemmer..." : "Gem"}
                   </button>
                 </div>
               </div>
