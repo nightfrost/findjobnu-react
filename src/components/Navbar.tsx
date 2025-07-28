@@ -84,7 +84,7 @@ const Navbar: React.FC = () => {
           </>
         ) : (
           <>
-          <a href="/profile" className="btn btn-success mr-4">
+          <a href="/profile" className="btn btn-outline btn-success mr-4">
             <UserCircleIcon/> Min Profil
           </a>
           <button type="button" className="btn btn-outline btn-error" onClick={handleLogout}>

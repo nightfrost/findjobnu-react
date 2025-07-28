@@ -107,7 +107,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories }) => {
               <li key={city.id}>
                 <button
                   type="button"
-                  className="menu-item text-white px-3 py-2 hover:bg-base-200 w-full text-left"
+                  className="menu-item text px-3 py-2 hover:bg-base-200 w-full text-left"
                   onClick={() => handleSuggestionClick(city)}
                 >
                   {city.cityName}

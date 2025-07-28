@@ -235,7 +235,7 @@ const JobList: React.FC<Props> = ({
                 <div className="flex justify-between items-center mt-4">
                   <a
                     href={job.jobUrl ?? undefined}
-                    className="btn btn-s btn-success"
+                    className="btn btn-outline btn-s btn-success"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
