@@ -19,5 +19,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["vite.config.ts"],
-  "exclude": ["src/findjobnu-api/*"]
+  "exclude": ["src/findjobnu-api/*", "src/findjobnu-auth/*"]
 }

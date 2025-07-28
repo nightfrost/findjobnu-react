@@ -13,7 +13,7 @@ interface Connection {
   lastSync?: Date;
 }
 
-const ConnectionsComponent: React.FC<Props> = ({ userId }) => {
+const ConnectionsComponent: React.FC<Props> = () => {
   // Mock data - in a real app, this would come from an API
   const [connections, setConnections] = useState<Connection[]>([
     {

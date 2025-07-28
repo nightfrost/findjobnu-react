@@ -18,16 +18,16 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
   const [totalCount, setTotalCount] = useState(0);
 
   const token = localStorage.getItem("accessToken");
-  const jobApi = new JobIndexPostsApi(
-    new Configuration({
-      basePath: "https://findjob.nu",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-  );
 
   useEffect(() => {
+    const jobApi = new JobIndexPostsApi(
+      new Configuration({
+        basePath: "https://findjob.nu",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    );
     const fetchSavedJobs = async () => {
       setLoading(true);
       setError(null);
@@ -43,7 +43,7 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
       setLoading(false);
     };
     fetchSavedJobs();
-  }, [userId, currentPage]);
+  }, [userId, currentPage, token]);
 
   if (jobs.length === 0 && !loading) {
     return <div className="text-center py-8">Ingen gemte jobs fundet.</div>;

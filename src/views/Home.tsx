@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { JobIndexPostsApi, Configuration, type JobIndexPosts } from "../findjobnu-api/";
 import SearchForm from "../components/SearchForm";
 import JobList from "../components/JobList";
-import Footer from "../components/Footer";
 
 const api = new JobIndexPostsApi(
   new Configuration({ basePath: "https://findjob.nu" })
@@ -63,6 +62,7 @@ const Home: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchAllJobs();
     fetchCategories();

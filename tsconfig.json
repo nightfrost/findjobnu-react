@@ -4,5 +4,5 @@
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ],
-  "exclude": ["src/findjobnu-api/*"]
+  "exclude": ["src/findjobnu-api/*", "src/findjobnu-auth/*"],
 }

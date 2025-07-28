@@ -28,7 +28,7 @@ const Register: React.FC = () => {
       localStorage.setItem("userId", res.userId ?? "");
       localStorage.setItem("accessTokenExpiration", res.accessTokenExpiration?.toISOString() ?? "");
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const apiErr = await handleApiError(err);
       setError("Registrering fejlede. " + (apiErr?.message ?? ""));
     } finally {

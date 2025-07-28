@@ -44,7 +44,7 @@ const Login: React.FC = () => {
         console.error("Error fetching saved jobs:", e);
       }
       window.location.href = "/";
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError("Login fejlede. Tjek dine oplysninger.");
       console.log("Login error:", err);
     } finally {

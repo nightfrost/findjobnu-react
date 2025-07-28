@@ -20,19 +20,16 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
 
   const token = localStorage.getItem("accessToken");
   
-  const api = new UserProfileApi(
-    new Configuration({
-      basePath: "https://findjob.nu",
-      accessToken: token ?? undefined, 
-      headers: {
-              Authorization: `Bearer ${token}`
-            }
-    })
-  );
-
-  const citiesApi = new CitiesApi(new Configuration({ basePath: "https://findjob.nu" }));
-
   useEffect(() => {
+    const api = new UserProfileApi(
+      new Configuration({
+        basePath: "https://findjob.nu",
+        accessToken: token ?? undefined, 
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    );
     const fetchProfile = async () => {
       setLoading(true);
       setError(null);
@@ -53,7 +50,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       setLoading(false);
     };
     fetchProfile();
-  }, [userId]);
+  }, [userId, token]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!form) return;
@@ -61,6 +58,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   };
 
   const handleLocationFocus = async () => {
+    const citiesApi = new CitiesApi(new Configuration({ basePath: "https://findjob.nu" }));
     if (!location) {
       try {
         const results = await citiesApi.getAllCities();
@@ -75,43 +73,53 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setLocation(value);
-      if (!form) return;
-      setForm(form => form ? { ...form, city: value ?? "" } : form); // <-- update form.city
-  
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  
-      if (value.length > 0) {
-        timeoutRef.current = setTimeout(async () => {
-          try {
-            const results = await citiesApi.getCitiesByQuery({ query: value });
-            setCitySuggestions(results ?? []);
-            setShowSuggestions(true);
-          } catch {
-            setCitySuggestions([]);
-          }
-        }, 300);
-      } else {
-        (async () => {
-          try {
-            const results = await citiesApi.getAllCities();
-            setCitySuggestions(results ?? []);
-            setShowSuggestions(true);
-          } catch {
-            setCitySuggestions([]);
-          }
-        })();
-      }
-    };
-  
+    const citiesApi = new CitiesApi(new Configuration({ basePath: "https://findjob.nu" }));
+    const value = e.target.value;
+    setLocation(value);
+    if (!form) return;
+    setForm(form => form ? { ...form, city: value ?? "" } : form); // <-- update form.city
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    if (value.length > 0) {
+      timeoutRef.current = setTimeout(async () => {
+        try {
+          const results = await citiesApi.getCitiesByQuery({ query: value });
+          setCitySuggestions(results ?? []);
+          setShowSuggestions(true);
+        } catch {
+          setCitySuggestions([]);
+        }
+      }, 300);
+    } else {
+      (async () => {
+        try {
+          const results = await citiesApi.getAllCities();
+          setCitySuggestions(results ?? []);
+          setShowSuggestions(true);
+        } catch {
+          setCitySuggestions([]);
+        }
+      })();
+    }
+  };
+
   const handleSuggestionClick = (city: Cities) => {
-  setLocation(city.cityName ?? "");
-  setForm(form => form ? { ...form, city: city.cityName ?? "" } : form); // <-- update form.city
-  setShowSuggestions(false);
-};
+    setLocation(city.cityName ?? "");
+    setForm(form => form ? { ...form, city: city.cityName ?? "" } : form); // <-- update form.city
+    setShowSuggestions(false);
+  };
 
   const handleSave = async () => {
+    const api = new UserProfileApi(
+      new Configuration({
+        basePath: "https://findjob.nu",
+        accessToken: token ?? undefined, 
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    );
     if (!form?.id) return;
     setLoading(true);
     setError(null);
@@ -128,6 +136,15 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   };
 
   const handleCreateProfile = async () => {
+    const api = new UserProfileApi(
+      new Configuration({
+        basePath: "https://findjob.nu",
+        accessToken: token ?? undefined, 
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    );
     setLoading(true);
     setError(null);
     try {
