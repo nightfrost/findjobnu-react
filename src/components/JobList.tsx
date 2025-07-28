@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { useState } from "react";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import Paging from "./Paging";
@@ -56,6 +55,18 @@ const JobList: React.FC<Props> = ({
     try {
       await api.saveJob({ userId: String(userId), jobId: String(jobId) });
       setSavedJobIds(prev => new Set(prev).add(jobId));
+      
+      // Also update localStorage immediately
+      const currentSavedJobs = localStorage.getItem("savedJobsArray");
+      if (currentSavedJobs) {
+        const savedJobsArray = currentSavedJobs.split(",");
+        if (!savedJobsArray.includes(String(jobId))) {
+          savedJobsArray.push(String(jobId));
+          localStorage.setItem("savedJobsArray", savedJobsArray.join(","));
+        }
+      } else {
+        localStorage.setItem("savedJobsArray", String(jobId));
+      }
     } catch (e) {
       handleApiError(e).then(error => {
         console.error("Error saving job:", error.message);
@@ -77,6 +88,59 @@ const JobList: React.FC<Props> = ({
     }
   };
 
+  const handleRemoveSavedJob = async (jobId: number) => {
+    const userId = localStorage.getItem("userId");
+    const accessToken = localStorage.getItem("accessToken");
+    
+    if (!userId || !jobId || !accessToken) return;
+
+    const api = new UserProfileApi(
+      new Configuration({
+        basePath: "https://findjob.nu",
+        accessToken: accessToken ?? undefined,
+        headers: {
+                Authorization: `Bearer ${accessToken}`
+              }
+      })
+    );
+
+    setSavingJobIds(prev => new Set(prev).add(jobId));
+    try {
+      await api.deleteSavedJob({ userId: String(userId), jobId: String(jobId) });
+      setSavedJobIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
+      });
+      
+      // Also update localStorage immediately
+      const currentSavedJobs = localStorage.getItem("savedJobsArray");
+      if (currentSavedJobs) {
+        const savedJobsArray = currentSavedJobs.split(",").map(Number);
+        const updatedSavedJobs = savedJobsArray.filter(id => id !== jobId);
+        localStorage.setItem("savedJobsArray", updatedSavedJobs.join(","));
+      }
+    } catch (e) {
+      handleApiError(e).then(error => {
+        console.error("Error removing saved job:", error.message);
+        window.location.reload();
+      });
+    } finally {
+      setSavingJobIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
+      });
+      try {
+        // Attempt to refresh saved jobs after removing
+        const savedJobsResponse = await api.getSavedJob({ userId: userId ?? "" });
+        localStorage.setItem("savedJobsArray", savedJobsResponse.join(","));
+      } catch (e) {
+        console.error("Error fetching saved jobs after removing:", e);
+      }
+    }
+  };
+
   
 
   const handleToggleDescription = (jobID?: number | null) => {
@@ -92,7 +156,12 @@ const JobList: React.FC<Props> = ({
     });
   };
 
-  if (loading) return <div className="text-center py-8">Indlæser...</div>;
+  if (loading) return (
+    <div className="text-center py-8 flex flex-col items-center gap-2">
+      <span className="loading loading-spinner loading-lg"></span>
+      <span>Indlæser...</span>
+    </div>
+  );
   if (!jobs.length) return <div className="text-center py-8">Ingen job fundet.</div>;
 
   const totalPages = Math.ceil(totalCount / pageSize);
@@ -106,6 +175,7 @@ const JobList: React.FC<Props> = ({
           const isSaved = job.jobID != null && savedJobIds.has(job.jobID);
           const isLoggedIn = localStorage.getItem("userId") != null && localStorage.getItem("accessToken") != null;
           const isAlreadySaved = localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.jobID));
+          const isJobSaved = isSaved || isAlreadySaved;
 
           return (
             <div key={job.jobID} className="card bg-base-100 shadow p-4">
@@ -174,10 +244,10 @@ const JobList: React.FC<Props> = ({
                   <button
                     className="btn btn-s btn-outline btn-secondary"
                     disabled={isSaving || !isLoggedIn}
-                    onClick={() => handleSaveJob(job.jobID!)}
+                    onClick={isJobSaved ? () => handleRemoveSavedJob(job.jobID!) : () => handleSaveJob(job.jobID!)}
                   >
                     <BookmarkIcon className="h-5 w-5"/>
-                    {isSaved || isAlreadySaved ? "Fjern" : isSaving ? "Gemmer..." : "Gem"}
+                    {isJobSaved ? "Fjern" : isSaving ? "Gemmer..." : "Gem"}
                   </button>
                 </div>
               </div>

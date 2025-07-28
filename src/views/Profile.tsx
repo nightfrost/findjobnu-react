@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import UserProfileComponent from "../components/UserProfile";
 import SavedJobs from "../components/SavedJobs";
+import ConnectionsComponent from "../components/Connections";
 import { useNavigate } from "react-router-dom";
 
 const Profile: React.FC = () => {
@@ -16,8 +17,16 @@ const Profile: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4">
-      <UserProfileComponent userId={userId} />
-      <SavedJobs userId={userId} />
+      {/* Top section with UserProfile and Connections side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <UserProfileComponent userId={userId} />
+        <ConnectionsComponent userId={userId} />
+      </div>
+      
+      {/* Bottom section with SavedJobs spanning full width */}
+      <div className="w-full">
+        <SavedJobs userId={userId} />
+      </div>
     </div>
   );
 };

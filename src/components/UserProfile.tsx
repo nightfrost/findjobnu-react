@@ -153,15 +153,17 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     setLoading(false);
   };
 
-  if (loading) return <div className="text-center py-8">Indlæser profil...</div>;
+  if (loading) return <div className="card bg-base-100 shadow p-6 w-full h-fit"><div className="text-center py-8">Indlæser profil...</div></div>;
 
   if (error || profile === null) {
     return (
-      <div className="text-center py-8">
-        Ingen profil fundet.<br />
-        <button className="btn btn-primary mt-4" onClick={handleCreateProfile}>
-          Opret profil
-        </button>
+      <div className="card bg-base-100 shadow p-6 w-full h-fit">
+        <div className="text-center py-8">
+          Ingen profil fundet.<br />
+          <button className="btn btn-primary mt-4" onClick={handleCreateProfile}>
+            Opret profil
+          </button>
+        </div>
       </div>
     );
   }
@@ -169,7 +171,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <div className="card bg-base-100 shadow p-6 max-w-lg mx-auto mt-8">
+    <div className="card bg-base-100 shadow p-6 w-full h-fit">
       <h2 className="card-title mb-4">Min Profil</h2>
       <div className="grid gap-4">
         <div>
@@ -185,7 +187,11 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Fornavn"
             />
           ) : (
-            <div>{profile.firstName && profile.firstName?.trim() !== "" ? profile.firstName : <span className="text-gray-400">Ikke angivet</span>}</div>
+            <div>
+              {profile.firstName && profile.firstName.trim() !== ""
+                ? profile.firstName
+                : <span className="text-gray-400">Ikke angivet</span>}
+            </div>
           )}
         </div>
         <div>
@@ -201,7 +207,11 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Efternavn"
             />
           ) : (
-            <div>{profile.lastName && profile.lastName?.trim() !== "" ? profile.lastName : <span className="text-gray-400">Ikke angivet</span>}</div>
+            <div>
+              {profile.lastName && profile.lastName.trim() !== ""
+                ? profile.lastName
+                : <span className="text-gray-400">Ikke angivet</span>}
+            </div>
           )}
         </div>
         <div>
@@ -217,7 +227,11 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
               title="Telefonnummer"
             />
           ) : (
-            <div>{profile.phoneNumber && profile.phoneNumber?.trim() !== "" ? profile.phoneNumber : <span className="text-gray-400">Ikke angivet</span>}</div>
+            <div>
+              {profile.phoneNumber && profile.phoneNumber.trim() !== ""
+                ? profile.phoneNumber
+                : <span className="text-gray-400">Ikke angivet</span>}
+            </div>
           )}
         </div>
         <div>
@@ -277,7 +291,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     </div>
           ) : (
             <div>
-              {profile.city
+              {profile.city && profile.city.trim() !== ""
                 ? profile.city
                 : <span className="text-gray-400">Ikke angivet</span>}
             </div>

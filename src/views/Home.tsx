@@ -86,7 +86,6 @@ const Home: React.FC = () => {
         totalCount={totalCount}
         onPageChange={handlePageChange}
       />
-      <Footer />
     </div>
   );
 };

@@ -14,8 +14,8 @@ function getPageNumbers(current: number, total: number, window: number = 2) {
   }
 
   pages.push(1);
-  let start = Math.max(2, current - window);
-  let end = Math.min(total - 1, current + window);
+  const start = Math.max(2, current - window);
+  const end = Math.min(total - 1, current + window);
 
   if (start > 2) pages.push("...");
   for (let i = start; i <= end; i++) pages.push(i);
@@ -32,21 +32,24 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
     <div className="flex justify-center mt-6">
       <div className="join">
         <button
-          className="join-item btn btn-sm"
+          className="join-item btn"
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
           «
         </button>
-        {getPageNumbers(currentPage, totalPages).map((page, idx) =>
+        {getPageNumbers(currentPage, totalPages).map((page, idx, arr) =>
           page === "..." ? (
-            <button key={idx} className="join-item btn btn-sm btn-disabled">
+            <button
+              key={`ellipsis-${arr[idx - 1]}-${arr[idx + 1]}`}
+              className="join-item btn btn-disabled"
+            >
               ...
             </button>
           ) : (
             <button
               key={page}
-              className={`join-item btn btn-sm${currentPage === page ? " btn-active" : ""}`}
+              className={`join-item btn ${currentPage === page ? " btn-active" : ""}`}
               onClick={() => onPageChange(Number(page))}
             >
               {page}
@@ -54,7 +57,7 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
           )
         )}
         <button
-          className="join-item btn btn-sm"
+          className="join-item btn"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
         >

@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AuthenticationApi, Configuration, type RegisterRequest } from "../findjobnu-auth";
+import { Link } from "react-router-dom";
+import { handleApiError } from "../helpers/ErrorHelper";
 
 const api = new AuthenticationApi(new Configuration());
 
@@ -27,49 +29,66 @@ const Register: React.FC = () => {
       localStorage.setItem("accessTokenExpiration", res.accessTokenExpiration?.toISOString() ?? "");
       setSuccess(true);
     } catch (err: any) {
-      setError("Registrering fejlede. Prøv igen. " + err.message);
+      const apiErr = await handleApiError(err);
+      setError("Registrering fejlede. " + (apiErr?.message ?? ""));
     } finally {
       setLoading(false);
     }
   };
 
-    return (
-      <div className="max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
-        <h2 className="text-2xl font-bold mb-6 text-center">Opret bruger</h2>
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="input input-bordered w-full"
-            value={form.email ?? ""}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Adgangskode"
-            className="input input-bordered w-full"
-            value={form.password ?? ""}
-            onChange={handleChange}
-            required
-          />
-          <button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading}
-          >
-            {loading ? "Opretter..." : "Opret konto"}
-          </button>
-          {error && <div className="text-error text-center">{error}</div>}
-          {success && (
-            <div className="text-success text-center">
-              Bruger oprettet! Du kan nu editere din profil.
-            </div>
-          )}
-        </form>
-      </div>
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        window.location.replace("/profile");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  return (
+    <div className="max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
+      <h2 className="text-2xl font-bold mb-6 text-center">Opret bruger</h2>
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="input input-bordered w-full"
+          value={form.email ?? ""}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Adgangskode"
+          className="input input-bordered w-full"
+          value={form.password ?? ""}
+          onChange={handleChange}
+          required
+        />
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+          disabled={loading}
+        >
+          {loading ? "Opretter..." : "Opret konto"}
+        </button>
+        {error && <div className="text-error text-center">{error}</div>}
+        {success && (
+          <div className="text-success text-center flex flex-col items-center gap-2">
+            <span>
+              Bruger oprettet! Tjek din E-mail for at bekræfte din konto. Du kan allerede nu editere din{" "}
+              <Link to="/profile" className="link link-primary" onClick={() => window.location.replace("/profile")}>profil</Link>.
+            </span>
+            <span className="flex items-center gap-2 mt-2">
+              <span className="loading loading-spinner loading-md"></span>
+              <span>Du bliver omdirigeret til din profil...</span>
+            </span>
+          </div>
+        )}
+      </form>
+    </div>
   );
 };
 
