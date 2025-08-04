@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useUser } from "../context/UserContext";
 import { UserProfileApi, Configuration, CitiesApi, type Cities } from "../findjobnu-api";
 import type { UserProfile } from "../findjobnu-api/models/UserProfile";
 import { handleApiError } from "../helpers/ErrorHelper";
@@ -18,7 +19,8 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const token = localStorage.getItem("accessToken");
+  const { user } = useUser();
+  const token = user?.accessToken;
   
   useEffect(() => {
     const api = new UserProfileApi(

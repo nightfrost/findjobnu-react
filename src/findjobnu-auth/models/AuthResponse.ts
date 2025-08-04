@@ -36,6 +36,18 @@ export interface AuthResponse {
      * @type {string}
      * @memberof AuthResponse
      */
+    firstName?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthResponse
+     */
+    lastName?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthResponse
+     */
     accessToken?: string | null;
     /**
      * 
@@ -49,6 +61,18 @@ export interface AuthResponse {
      * @memberof AuthResponse
      */
     accessTokenExpiration?: Date;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthResponse
+     */
+    linkedInId?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuthResponse
+     */
+    findJobNuUri?: string | null;
 }
 
 /**
@@ -70,9 +94,13 @@ export function AuthResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
         
         'userId': json['userId'] == null ? undefined : json['userId'],
         'email': json['email'] == null ? undefined : json['email'],
+        'firstName': json['firstName'] == null ? undefined : json['firstName'],
+        'lastName': json['lastName'] == null ? undefined : json['lastName'],
         'accessToken': json['accessToken'] == null ? undefined : json['accessToken'],
         'refreshToken': json['refreshToken'] == null ? undefined : json['refreshToken'],
         'accessTokenExpiration': json['accessTokenExpiration'] == null ? undefined : (new Date(json['accessTokenExpiration'])),
+        'linkedInId': json['linkedInId'] == null ? undefined : json['linkedInId'],
+        'findJobNuUri': json['findJobNuUri'] == null ? undefined : json['findJobNuUri'],
     };
 }
 
@@ -89,9 +117,13 @@ export function AuthResponseToJSONTyped(value?: AuthResponse | null, ignoreDiscr
         
         'userId': value['userId'],
         'email': value['email'],
+        'firstName': value['firstName'],
+        'lastName': value['lastName'],
         'accessToken': value['accessToken'],
         'refreshToken': value['refreshToken'],
         'accessTokenExpiration': value['accessTokenExpiration'] == null ? undefined : ((value['accessTokenExpiration']).toISOString()),
+        'linkedInId': value['linkedInId'],
+        'findJobNuUri': value['findJobNuUri'],
     };
 }
 

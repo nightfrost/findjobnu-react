@@ -5,6 +5,7 @@ import { UserProfileApi } from "../findjobnu-api/apis/UserProfileApi";
 import { Configuration } from "../findjobnu-api";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import { handleApiError } from "../helpers/ErrorHelper";
+import { useUser } from "../context/UserContext";
 
 interface Props {
   jobs: JobIndexPosts[];
@@ -26,10 +27,11 @@ const JobList: React.FC<Props> = ({
   const [openJobIds, setOpenJobIds] = useState<Set<number>>(new Set());
   const [savingJobIds, setSavingJobIds] = useState<Set<number>>(new Set());
   const [savedJobIds, setSavedJobIds] = useState<Set<number>>(new Set());
+  const { user } = useUser();
 
   const handleSaveJob = async (jobId: number) => {
-    const userId = localStorage.getItem("userId");
-    const accessToken = localStorage.getItem("accessToken");
+    const userId = user?.userId;
+    const accessToken = user?.accessToken;
     const savedJobsArray = localStorage.getItem("savedJobsArray");
     
     if (!userId || !jobId || !accessToken) return;
@@ -89,8 +91,8 @@ const JobList: React.FC<Props> = ({
   };
 
   const handleRemoveSavedJob = async (jobId: number) => {
-    const userId = localStorage.getItem("userId");
-    const accessToken = localStorage.getItem("accessToken");
+    const userId = user?.userId;
+    const accessToken = user?.accessToken;
     
     if (!userId || !jobId || !accessToken) return;
 
@@ -173,7 +175,7 @@ const JobList: React.FC<Props> = ({
           const isOpen = job.jobID != null && openJobIds.has(job.jobID);
           const isSaving = job.jobID != null && savingJobIds.has(job.jobID);
           const isSaved = job.jobID != null && savedJobIds.has(job.jobID);
-          const isLoggedIn = localStorage.getItem("userId") != null && localStorage.getItem("accessToken") != null;
+          const isLoggedIn = user?.userId != null && user?.accessToken != null;
           const isAlreadySaved = localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.jobID));
           const isJobSaved = isSaved || isAlreadySaved;
 

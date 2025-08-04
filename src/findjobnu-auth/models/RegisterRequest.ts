@@ -36,7 +36,25 @@ export interface RegisterRequest {
      * @type {string}
      * @memberof RegisterRequest
      */
+    firstName?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
+    lastName?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
     phone?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequest
+     */
+    linkedInId?: string | null;
 }
 
 /**
@@ -58,7 +76,10 @@ export function RegisterRequestFromJSONTyped(json: any, ignoreDiscriminator: boo
         
         'email': json['email'] == null ? undefined : json['email'],
         'password': json['password'] == null ? undefined : json['password'],
+        'firstName': json['firstName'] == null ? undefined : json['firstName'],
+        'lastName': json['lastName'] == null ? undefined : json['lastName'],
         'phone': json['phone'] == null ? undefined : json['phone'],
+        'linkedInId': json['linkedInId'] == null ? undefined : json['linkedInId'],
     };
 }
 
@@ -75,7 +96,10 @@ export function RegisterRequestToJSONTyped(value?: RegisterRequest | null, ignor
         
         'email': value['email'],
         'password': value['password'],
+        'firstName': value['firstName'],
+        'lastName': value['lastName'],
         'phone': value['phone'],
+        'linkedInId': value['linkedInId'],
     };
 }
 

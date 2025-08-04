@@ -32,7 +32,7 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
     <div className="flex justify-center mt-6">
       <div className="join">
         <button
-          className="join-item btn"
+          className="join-item btn btn-outline"
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
@@ -42,14 +42,14 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
           page === "..." ? (
             <button
               key={`ellipsis-${arr[idx - 1]}-${arr[idx + 1]}`}
-              className="join-item btn btn-disabled"
+              className="join-item btn btn-outline btn-disabled"
             >
               ...
             </button>
           ) : (
             <button
               key={page}
-              className={`join-item btn ${currentPage === page ? " btn-active" : ""}`}
+              className={`join-item btn btn-outline ${currentPage === page ? " btn-active" : ""}`}
               onClick={() => onPageChange(Number(page))}
             >
               {page}
@@ -57,7 +57,7 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
           )
         )}
         <button
-          className="join-item btn"
+          className="join-item btn btn-outline"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
         >

@@ -19,6 +19,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   TokenRefreshRequest,
+  UserInformationResult,
 } from '../models/index';
 import {
     AuthResponseFromJSON,
@@ -29,6 +30,8 @@ import {
     RegisterRequestToJSON,
     TokenRefreshRequestFromJSON,
     TokenRefreshRequestToJSON,
+    UserInformationResultFromJSON,
+    UserInformationResultToJSON,
 } from '../models/index';
 
 export interface ConfirmEmailRequest {
@@ -50,6 +53,10 @@ export interface RegisterOperationRequest {
 
 export interface RevokeTokenRequest {
     refreshToken: string;
+}
+
+export interface VerifyLinkedInConnectionRequest {
+    userId: string;
 }
 
 /**
@@ -143,6 +150,38 @@ export class AuthenticationApi extends runtime.BaseAPI {
      */
     async getProtectedData(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
         const response = await this.getProtectedDataRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Checks if the user has verified their LinkedIn account using the provided userId. Returns the LinkedInId on success, or NoContent if the user is not verified or not a LinkedIn user.
+     * Gets the user information for the current context user.
+     */
+    async getUserInformationRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<UserInformationResult>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/user-info`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => UserInformationResultFromJSON(jsonValue));
+    }
+
+    /**
+     * Checks if the user has verified their LinkedIn account using the provided userId. Returns the LinkedInId on success, or NoContent if the user is not verified or not a LinkedIn user.
+     * Gets the user information for the current context user.
+     */
+    async getUserInformation(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserInformationResult> {
+        const response = await this.getUserInformationRaw(initOverrides);
         return await response.value();
     }
 
@@ -312,6 +351,44 @@ export class AuthenticationApi extends runtime.BaseAPI {
      */
     async revokeToken(requestParameters: RevokeTokenRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.revokeTokenRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Confirms the user\'s LinkedIn verification using the provided userId, then returns true or false.
+     * Confirms wether a user has verified through LinkedIn.
+     */
+    async verifyLinkedInConnectionRaw(requestParameters: VerifyLinkedInConnectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling verifyLinkedInConnection().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/linkedin-verification/{userId}`.replace(`{${"userId"}}`, encodeURIComponent(String(requestParameters['userId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Confirms the user\'s LinkedIn verification using the provided userId, then returns true or false.
+     * Confirms wether a user has verified through LinkedIn.
+     */
+    async verifyLinkedInConnection(requestParameters: VerifyLinkedInConnectionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.verifyLinkedInConnectionRaw(requestParameters, initOverrides);
     }
 
 }

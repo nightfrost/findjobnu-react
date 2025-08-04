@@ -1,8 +1,9 @@
 /**
- * Checks if the current access token is expired and clears localStorage if it is
+ * Checks if the current access token is expired and clears localStorage and user state if it is
+ * @param setUser - function to update user state (from UserContext)
  * @returns boolean - true if token was expired and cleared, false if token is still valid
  */
-export const checkAndClearExpiredToken = (): boolean => {
+export const checkAndClearExpiredToken = (setUser?: (user: any) => void): boolean => {
   const accessToken = localStorage.getItem("accessToken");
   const accessTokenExpiration = localStorage.getItem("accessTokenExpiration");
 
@@ -19,7 +20,8 @@ export const checkAndClearExpiredToken = (): boolean => {
     if (currentDate >= expirationDate) {
       // Token is expired, clear all auth-related localStorage items
       clearAuthLocalStorage();
-      console.log("Access token expired. Cleared localStorage.");
+      if (setUser) setUser(null);
+      console.log("Access token expired. Cleared localStorage and user state.");
       return true;
     }
 
@@ -28,6 +30,7 @@ export const checkAndClearExpiredToken = (): boolean => {
     console.error("Error parsing token expiration date:", error);
     // If we can't parse the date, assume token is invalid and clear storage
     clearAuthLocalStorage();
+    if (setUser) setUser(null);
     return true;
   }
 };

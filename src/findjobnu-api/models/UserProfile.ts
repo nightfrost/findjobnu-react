@@ -79,6 +79,12 @@ export interface UserProfile {
      * @memberof UserProfile
      */
     savedJobPosts?: Array<string> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof UserProfile
+     */
+    keywords?: Array<string> | null;
 }
 
 /**
@@ -111,6 +117,7 @@ export function UserProfileFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'city': json['city'] == null ? undefined : json['city'],
         'lastUpdatedAt': json['lastUpdatedAt'] == null ? undefined : (new Date(json['lastUpdatedAt'])),
         'savedJobPosts': json['savedJobPosts'] == null ? undefined : json['savedJobPosts'],
+        'keywords': json['keywords'] == null ? undefined : json['keywords'],
     };
 }
 
@@ -135,6 +142,7 @@ export function UserProfileToJSONTyped(value?: UserProfile | null, ignoreDiscrim
         'city': value['city'],
         'lastUpdatedAt': value['lastUpdatedAt'] == null ? undefined : ((value['lastUpdatedAt'] as any).toISOString()),
         'savedJobPosts': value['savedJobPosts'],
+        'keywords': value['keywords'],
     };
 }
 

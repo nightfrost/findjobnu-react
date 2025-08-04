@@ -1,9 +1,12 @@
 apis/AuthenticationApi.ts
+apis/LinkedInAuthApi.ts
 apis/index.ts
 index.ts
 models/AuthResponse.ts
 models/LoginRequest.ts
 models/RegisterRequest.ts
 models/TokenRefreshRequest.ts
+models/UserInformationDTO.ts
+models/UserInformationResult.ts
 models/index.ts
 runtime.ts

@@ -85,6 +85,12 @@ export interface JobIndexPosts {
      * @memberof JobIndexPosts
      */
     footerPicture?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobIndexPosts
+     */
+    keywords?: Array<string> | null;
 }
 
 /**
@@ -115,6 +121,7 @@ export function JobIndexPostsFromJSONTyped(json: any, ignoreDiscriminator: boole
         'category': json['category'] == null ? undefined : json['category'],
         'bannerPicture': json['bannerPicture'] == null ? undefined : json['bannerPicture'],
         'footerPicture': json['footerPicture'] == null ? undefined : json['footerPicture'],
+        'keywords': json['keywords'] == null ? undefined : json['keywords'],
     };
 }
 
@@ -140,6 +147,7 @@ export function JobIndexPostsToJSONTyped(value?: JobIndexPosts | null, ignoreDis
         'category': value['category'],
         'bannerPicture': value['bannerPicture'],
         'footerPicture': value['footerPicture'],
+        'keywords': value['keywords'],
     };
 }
 

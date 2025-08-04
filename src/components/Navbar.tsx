@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { useUser } from "../context/UserContext";
 
 const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setLoggedIn(!!localStorage.getItem("accessToken"));
-  }, []);
+  const { user, logout } = useUser();
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("email");
-    localStorage.removeItem("accessTokenExpiration");
-    localStorage.removeItem("savedJobsArray");
-    setLoggedIn(false);
+    logout();
     window.location.href = "/";
   };
 
@@ -70,7 +61,7 @@ const Navbar: React.FC = () => {
       </div>
       {/* Right: Auth buttons */}
       <div className="flex-none gap-2 ml-4">
-        {!loggedIn ? (
+        {!user ? (
           <>
             <a
               href="/register"

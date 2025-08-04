@@ -39,6 +39,10 @@ export interface GetUserProfileByUserIdRequest {
     userid: string;
 }
 
+export interface ImportLinkedInProfileRequest {
+    linkedInId: string;
+}
+
 export interface SaveJobRequest {
     userId: string;
     jobId: string;
@@ -184,6 +188,41 @@ export class UserProfileApi extends runtime.BaseAPI {
      */
     async getUserProfileByUserId(requestParameters: GetUserProfileByUserIdRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserProfile> {
         const response = await this.getUserProfileByUserIdRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async importLinkedInProfileRaw(requestParameters: ImportLinkedInProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<boolean>> {
+        if (requestParameters['linkedInId'] == null) {
+            throw new runtime.RequiredError(
+                'linkedInId',
+                'Required parameter "linkedInId" was null or undefined when calling importLinkedInProfile().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/userprofile/import-linkedin-profile/{linkedInId}`.replace(`{${"linkedInId"}}`, encodeURIComponent(String(requestParameters['linkedInId']))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<boolean>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     */
+    async importLinkedInProfile(requestParameters: ImportLinkedInProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<boolean> {
+        const response = await this.importLinkedInProfileRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

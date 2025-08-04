@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useUser } from "../context/UserContext";
 import { JobIndexPostsApi, Configuration } from "../findjobnu-api";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import JobList from "./JobList";
@@ -17,7 +18,8 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  const token = localStorage.getItem("accessToken");
+  const { user } = useUser();
+  const token = user?.accessToken;
 
   useEffect(() => {
     const jobApi = new JobIndexPostsApi(

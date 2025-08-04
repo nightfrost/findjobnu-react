@@ -6,22 +6,27 @@ import Login from "./views/Login";
 import Register from "./views/Register";
 import Footer from "./components/Footer";
 import Profile from "./views/Profile";
+import LinkedInAuthHandler from "./views/LinkedInAuthHandler";
 import { checkAndClearExpiredToken } from "./helpers/AuthHelper";
+import { useUser, UserProvider } from "./context/UserContext";
 
 const App: React.FC = () => {
-  // Check for expired token on app initialization and periodically
+  return (
+    <UserProvider>
+      <AppWithAuthCheck />
+    </UserProvider>
+  );
+};
+
+const AppWithAuthCheck: React.FC = () => {
+  const { setUser } = useUser();
   useEffect(() => {
-    // Check immediately when app loads
-    checkAndClearExpiredToken();
-
-    // Set up interval to check every 5 minutes
+    checkAndClearExpiredToken(setUser);
     const interval = setInterval(() => {
-      checkAndClearExpiredToken();
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
-
-    // Cleanup interval on component unmount
+      checkAndClearExpiredToken(setUser);
+    }, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [setUser]);
 
   return (
     <Router>
@@ -32,7 +37,8 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile/>} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/linkedin-auth" element={<LinkedInAuthHandler />} />
           </Routes>
         </div>
         <Footer />

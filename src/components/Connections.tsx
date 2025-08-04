@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Configuration, UserProfileApi } from "../findjobnu-api";
+import { Configuration as AuthConfiguration, AuthenticationApi } from "../findjobnu-auth";
 
 interface Props {
   userId: string;
+  accessToken: string;
 }
 
 interface Connection {
@@ -13,7 +16,7 @@ interface Connection {
   lastSync?: Date;
 }
 
-const ConnectionsComponent: React.FC<Props> = () => {
+const ConnectionsComponent: React.FC<Props> = ( {userId, accessToken}) => {
   // Mock data - in a real app, this would come from an API
   const [connections, setConnections] = useState<Connection[]>([
     {
@@ -33,13 +36,45 @@ const ConnectionsComponent: React.FC<Props> = () => {
       lastSync: undefined,
     },
   ]);
-
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Fetch user profile to check if LinkedIn user
+    const fetchUserProfile = async () => {
+      try {
+        const authApi = new AuthenticationApi(
+          new AuthConfiguration({
+            basePath: "https://auth.findjob.nu",
+            accessToken: accessToken ?? undefined,
+            headers: {
+              Authorization: `Bearer ${accessToken}`
+            }
+          })
+        );
+        const response = await authApi.getUserInformation();
+        // If the user is a LinkedIn user, update the LinkedIn connection status
+        if (response.success) {
+          setConnections(prev => 
+            prev.map(conn => 
+              conn.platform === "LinkedIn" 
+                ? { ...conn, isConnected: response.userInformation?.hasVerifiedLinkedIn ?? false, username: response.userInformation?.userName ?? "", profileUrl: response.userInformation?.linkedInProfileUrl ?? "", lastSync: response.userInformation?.lastLinkedInSync ?? new Date() }
+                : conn
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userId, accessToken]);
+  
 
   const handleConnect = async (connectionId: string) => {
     setLoading(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     
     setConnections(prev => 
       prev.map(conn => 

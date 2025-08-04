@@ -62,7 +62,6 @@ const Home: React.FC = () => {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchAllJobs();
     fetchCategories();
