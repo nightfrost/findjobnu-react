@@ -1,0 +1,108 @@
+import React, { useState } from "react";
+import type { Skill } from "../findjobnu-api/models/Skill";
+import { SkillProficiency } from "../findjobnu-api/models/SkillProficiency";
+
+interface Props {
+  skills: Skill[];
+  onAdd: (skill: Skill) => void;
+  onUpdate: (skill: Skill) => void;
+  onDelete: (id: number) => void;
+  readOnly?: boolean;
+}
+
+const emptySkill: Skill = {
+  name: "",
+  proficiency: SkillProficiency.NUMBER_0,
+};
+
+const SkillList: React.FC<Props> = ({ skills, onAdd, onUpdate, onDelete, readOnly = false }) => {
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<Skill>(emptySkill);
+
+  const handleEdit = (skill: Skill) => {
+    if (readOnly) return;
+    setEditingId(skill.id!);
+    setForm(skill);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: name === "proficiency" ? Number(value) : value,
+    });
+  };
+
+  const handleSave = () => {
+    if (editingId) {
+      onUpdate({ ...form, id: editingId });
+    } else {
+      onAdd(form);
+    }
+    setEditingId(null);
+    setForm(emptySkill);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setForm(emptySkill);
+  };
+
+  return (
+    <div>
+      <ul className="list-disc ml-6">
+        {skills.map((skill) => (
+          <li key={skill.id} className="mb-2">
+            {editingId === skill.id && !readOnly ? (
+              <div className="space-y-2">
+                <input className="input input-bordered w-full" name="name" value={form.name || ""} onChange={handleChange} placeholder="Færdighed" title="Færdighed" />
+                <select className="select select-bordered w-full" name="proficiency" value={form.proficiency} onChange={handleChange} title="Kompetenceniveau">
+                  <option value={SkillProficiency.NUMBER_0}>Begynder</option>
+                  <option value={SkillProficiency.NUMBER_1}>Let øvet</option>
+                  <option value={SkillProficiency.NUMBER_2}>Øvet</option>
+                  <option value={SkillProficiency.NUMBER_3}>Ekspert</option>
+                </select>
+                <div className="flex gap-2 mt-2">
+                  <button className="btn btn-success" onClick={handleSave}>Gem</button>
+                  <button className="btn btn-outline btn-error" onClick={handleCancel}>Annuller</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span>{skill.name} ({["Begynder","Let øvet","Øvet","Ekspert"][skill.proficiency]})</span>
+                {!readOnly && (
+                  <>
+                    <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(skill)}>Rediger</button>
+                    <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(skill.id!)}>Slet</button>
+                  </>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+      {!readOnly && editingId === null && (
+        <div className="mt-4">
+          <button className="btn btn-primary" onClick={() => setEditingId(0)}>Tilføj færdighed</button>
+        </div>
+      )}
+      {!readOnly && editingId === 0 && (
+        <div className="space-y-2 mt-2">
+          <input className="input input-bordered w-full" name="name" value={form.name || ""} onChange={handleChange} placeholder="Færdighed" title="Færdighed" />
+          <select className="select select-bordered w-full" name="proficiency" value={form.proficiency} onChange={handleChange} title="Kompetenceniveau">
+            <option value={SkillProficiency.NUMBER_0}>Begynder</option>
+            <option value={SkillProficiency.NUMBER_1}>Let øvet</option>
+            <option value={SkillProficiency.NUMBER_2}>Øvet</option>
+            <option value={SkillProficiency.NUMBER_3}>Ekspert</option>
+          </select>
+          <div className="flex gap-2 mt-2">
+            <button className="btn btn-success" onClick={handleSave}>Gem</button>
+            <button className="btn btn-outline btn-error" onClick={handleCancel}>Annuller</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SkillList;

@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { Category } from './Category';
+import {
+    CategoryFromJSON,
+    CategoryFromJSONTyped,
+    CategoryToJSON,
+    CategoryToJSONTyped,
+} from './Category';
+
 /**
  * 
  * @export
@@ -69,10 +77,10 @@ export interface JobIndexPosts {
     published?: Date | null;
     /**
      * 
-     * @type {string}
+     * @type {Array<Category>}
      * @memberof JobIndexPosts
      */
-    category?: string | null;
+    categories?: Array<Category> | null;
     /**
      * 
      * @type {string}
@@ -118,7 +126,7 @@ export function JobIndexPostsFromJSONTyped(json: any, ignoreDiscriminator: boole
         'jobLocation': json['jobLocation'] == null ? undefined : json['jobLocation'],
         'jobUrl': json['jobUrl'] == null ? undefined : json['jobUrl'],
         'published': json['published'] == null ? undefined : (new Date(json['published'])),
-        'category': json['category'] == null ? undefined : json['category'],
+        'categories': json['categories'] == null ? undefined : ((json['categories'] as Array<any>).map(CategoryFromJSON)),
         'bannerPicture': json['bannerPicture'] == null ? undefined : json['bannerPicture'],
         'footerPicture': json['footerPicture'] == null ? undefined : json['footerPicture'],
         'keywords': json['keywords'] == null ? undefined : json['keywords'],
@@ -144,7 +152,7 @@ export function JobIndexPostsToJSONTyped(value?: JobIndexPosts | null, ignoreDis
         'jobLocation': value['jobLocation'],
         'jobUrl': value['jobUrl'],
         'published': value['published'] == null ? undefined : ((value['published'] as any).toISOString()),
-        'category': value['category'],
+        'categories': value['categories'] == null ? undefined : ((value['categories'] as Array<any>).map(CategoryToJSON)),
         'bannerPicture': value['bannerPicture'],
         'footerPicture': value['footerPicture'],
         'keywords': value['keywords'],

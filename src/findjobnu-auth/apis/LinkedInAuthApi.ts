@@ -74,4 +74,35 @@ export class LinkedInAuthApi extends runtime.BaseAPI {
         await this.linkedInLoginRaw(initOverrides);
     }
 
+    /**
+     * Removes the LinkedIn profile association for the specified user ID.
+     * Unlinks a LinkedIn profile from the user\'s account.
+     */
+    async unlinkLinkedInProfileRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/linkedin/unlink`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Removes the LinkedIn profile association for the specified user ID.
+     * Unlinks a LinkedIn profile from the user\'s account.
+     */
+    async unlinkLinkedInProfile(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.unlinkLinkedInProfileRaw(initOverrides);
+    }
+
 }

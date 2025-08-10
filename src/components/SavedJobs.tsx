@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext";
-import { JobIndexPostsApi, Configuration } from "../findjobnu-api";
+import { JobIndexPostsApi } from "../findjobnu-api";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import JobList from "./JobList";
 import { handleApiError } from "../helpers/ErrorHelper";
+import { createApiClient } from "../helpers/ApiFactory";
 
 interface Props {
   userId: string;
@@ -22,14 +23,7 @@ const SavedJobs: React.FC<Props> = ({ userId }) => {
   const token = user?.accessToken;
 
   useEffect(() => {
-    const jobApi = new JobIndexPostsApi(
-      new Configuration({
-        basePath: "https://findjob.nu",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-    );
+    const jobApi = createApiClient(JobIndexPostsApi, token);
     const fetchSavedJobs = async () => {
       setLoading(true);
       setError(null);

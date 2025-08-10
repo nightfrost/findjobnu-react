@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import Paging from "./Paging";
-import { UserProfileApi } from "../findjobnu-api/apis/UserProfileApi";
-import { Configuration } from "../findjobnu-api";
-import { BookmarkIcon } from "@heroicons/react/24/outline";
+import { ProfileApi } from "../findjobnu-api";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { useUser } from "../context/UserContext";
+import { createApiClient } from "../helpers/ApiFactory";
 
 interface Props {
   jobs: JobIndexPosts[];
@@ -33,18 +32,10 @@ const JobList: React.FC<Props> = ({
     const userId = user?.userId;
     const accessToken = user?.accessToken;
     const savedJobsArray = localStorage.getItem("savedJobsArray");
-    
+
     if (!userId || !jobId || !accessToken) return;
 
-    const api = new UserProfileApi(
-      new Configuration({
-        basePath: "https://findjob.nu",
-        accessToken: accessToken ?? undefined,
-        headers: {
-                Authorization: `Bearer ${accessToken}`
-              }
-      })
-    );
+    const api = createApiClient(ProfileApi, accessToken);
 
     if (savedJobsArray) {
       const savedJobs = new Set(savedJobsArray.split(",").map(Number));
@@ -55,9 +46,9 @@ const JobList: React.FC<Props> = ({
 
     setSavingJobIds(prev => new Set(prev).add(jobId));
     try {
-      await api.saveJob({ userId: String(userId), jobId: String(jobId) });
+      await api.saveJobForUser({ userId: String(userId), jobId: String(jobId) });
       setSavedJobIds(prev => new Set(prev).add(jobId));
-      
+
       // Also update localStorage immediately
       const currentSavedJobs = localStorage.getItem("savedJobsArray");
       if (currentSavedJobs) {
@@ -82,8 +73,8 @@ const JobList: React.FC<Props> = ({
       });
       try {
         // Attempt to refresh saved jobs after saving
-        const savedJobsResponse = await api.getSavedJob({ userId: userId ?? "" });
-        localStorage.setItem("savedJobsArray", savedJobsResponse.join(","));
+        const savedJobsResponse = await api.getSavedJobsByUserId({ userId: userId ?? "" });
+        localStorage.setItem("savedJobsArray", savedJobsResponse.items?.map(item => item.jobID?.toString()).join(",") ?? "");
       } catch (e) {
         console.error("Error fetching saved jobs after saving:", e);
       }
@@ -93,28 +84,20 @@ const JobList: React.FC<Props> = ({
   const handleRemoveSavedJob = async (jobId: number) => {
     const userId = user?.userId;
     const accessToken = user?.accessToken;
-    
+
     if (!userId || !jobId || !accessToken) return;
 
-    const api = new UserProfileApi(
-      new Configuration({
-        basePath: "https://findjob.nu",
-        accessToken: accessToken ?? undefined,
-        headers: {
-                Authorization: `Bearer ${accessToken}`
-              }
-      })
-    );
+    const api = createApiClient(ProfileApi, accessToken);
 
     setSavingJobIds(prev => new Set(prev).add(jobId));
     try {
-      await api.deleteSavedJob({ userId: String(userId), jobId: String(jobId) });
+      await api.removeSavedJobForUser({ userId: String(userId), jobId: String(jobId) });
       setSavedJobIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(jobId);
         return newSet;
       });
-      
+
       // Also update localStorage immediately
       const currentSavedJobs = localStorage.getItem("savedJobsArray");
       if (currentSavedJobs) {
@@ -135,15 +118,15 @@ const JobList: React.FC<Props> = ({
       });
       try {
         // Attempt to refresh saved jobs after removing
-        const savedJobsResponse = await api.getSavedJob({ userId: userId ?? "" });
-        localStorage.setItem("savedJobsArray", savedJobsResponse.join(","));
+        const savedJobsResponse = await api.getSavedJobsByUserId({ userId: userId ?? "" });
+        localStorage.setItem("savedJobsArray", savedJobsResponse.items?.map(item => item.jobID?.toString()).join(",") ?? "");
       } catch (e) {
         console.error("Error fetching saved jobs after removing:", e);
       }
     }
   };
 
-  
+
 
   const handleToggleDescription = (jobID?: number | null) => {
     if (jobID == null) return;
@@ -178,11 +161,34 @@ const JobList: React.FC<Props> = ({
           const isLoggedIn = user?.userId != null && user?.accessToken != null;
           const isAlreadySaved = localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.jobID));
           const isJobSaved = isSaved || isAlreadySaved;
+          // Format published date (if present) using Danish locale; fallback to ISO date if locale unsupported
+          let publishedLabel: string | null = null;
+          if (job.published) {
+            const dateObj = job.published instanceof Date ? job.published : new Date(job.published);
+            publishedLabel = dateObj.toLocaleDateString('da-DK', { year: 'numeric', month: 'short', day: '2-digit' });
+          }
+          // Derive button label without nested ternaries
+          let saveButtonText = 'Gem';
+          if (isJobSaved) {
+            saveButtonText = 'Fjern';
+          } else if (isSaving) {
+            saveButtonText = 'Gemmer...';
+          }
 
           return (
             <div key={job.jobID} className="card bg-base-100 shadow p-4">
               <div>
-                <h2 className="card-title">{job.jobTitle}</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="card-title ">
+                    <span>{job.jobTitle}</span>
+                  </h2>
+                  {publishedLabel && (
+                    <span className="text-sm text-gray-500 text-right ml-auto">
+                      Publiceret: {publishedLabel}
+                    </span>
+                  )}
+                </div>
+
                 <p className="text-sm text-gray-500">
                   {job.companyName} &middot; {job.jobLocation}
                 </p>
@@ -194,15 +200,15 @@ const JobList: React.FC<Props> = ({
                   />
                 )}
 
-                <div className="mt-8">
+                <div className="mt-4">
                   {!isOpen ? (
                     <>
                       <p>
                         {job.jobDescription && job.jobDescription.trim() !== ""
                           ? <>
-                              {job.jobDescription.slice(0, 350)}
-                              {job.jobDescription.length > 350 && "..."}
-                            </>
+                            {job.jobDescription.slice(0, 350)}
+                            {job.jobDescription.length > 350 && "..."}
+                          </>
                           : <i>Klik på 'Ansøg' for at læse mere om stillingen...</i>}
                       </p>
                       {job.jobDescription && job.jobDescription.trim() !== "" && (
@@ -237,19 +243,27 @@ const JobList: React.FC<Props> = ({
                 <div className="flex justify-between items-center mt-4">
                   <a
                     href={job.jobUrl ?? undefined}
-                    className="btn btn-outline btn-s btn-success"
+                    className="btn btn-s btn-success"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     Ansøg
                   </a>
                   <button
-                    className="btn btn-s btn-outline btn-secondary"
+                    className="btn btn-outline btn-s btn-error"
                     disabled={isSaving || !isLoggedIn}
                     onClick={isJobSaved ? () => handleRemoveSavedJob(job.jobID!) : () => handleSaveJob(job.jobID!)}
                   >
-                    <BookmarkIcon className="h-5 w-5"/>
-                    {isJobSaved ? "Fjern" : isSaving ? "Gemmer..." : "Gem"}
+                    {isJobSaved ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m3 3 1.664 1.664M21 21l-1.5-1.5m-5.485-1.242L12 17.25 4.5 21V8.742m.164-4.078a2.15 2.15 0 0 1 1.743-1.342 48.507 48.507 0 0 1 11.186 0c1.1.128 1.907 1.077 1.907 2.185V19.5M4.664 4.664 19.5 19.5" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                      </svg>
+                    )}
+                    {saveButtonText}
                   </button>
                 </div>
               </div>

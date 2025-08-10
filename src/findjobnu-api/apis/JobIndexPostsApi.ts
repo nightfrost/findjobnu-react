@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  CategoriesResponse,
   JobIndexPosts,
   JobIndexPostsPagedList,
 } from '../models/index';
 import {
+    CategoriesResponseFromJSON,
+    CategoriesResponseToJSON,
     JobIndexPostsFromJSON,
     JobIndexPostsToJSON,
     JobIndexPostsPagedListFromJSON,
@@ -41,6 +44,10 @@ export interface GetJobPostsBySearchRequest {
     category?: string;
     postedAfter?: Date;
     postedBefore?: Date;
+}
+
+export interface GetRecommendedJobsForUserRequest {
+    page: number;
 }
 
 export interface GetSavedJobPostsByUserRequest {
@@ -79,14 +86,21 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
 
     /**
      */
-    async getAllJobPosts(requestParameters: GetAllJobPostsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList> {
+    async getAllJobPosts(requestParameters: GetAllJobPostsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList | null | undefined > {
         const response = await this.getAllJobPostsRaw(requestParameters, initOverrides);
-        return await response.value();
+        switch (response.raw.status) {
+            case 200:
+                return await response.value();
+            case 204:
+                return null;
+            default:
+                return await response.value();
+        }
     }
 
     /**
      */
-    async getJobCategoriesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<string>>> {
+    async getJobCategoriesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CategoriesResponse>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -98,14 +112,21 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse<any>(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => CategoriesResponseFromJSON(jsonValue));
     }
 
     /**
      */
-    async getJobCategories(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<string>> {
+    async getJobCategories(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CategoriesResponse | null | undefined > {
         const response = await this.getJobCategoriesRaw(initOverrides);
-        return await response.value();
+        switch (response.raw.status) {
+            case 200:
+                return await response.value();
+            case 204:
+                return null;
+            default:
+                return await response.value();
+        }
     }
 
     /**
@@ -198,6 +219,48 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
      */
     async getJobPostsBySearch(requestParameters: GetJobPostsBySearchRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList | null | undefined > {
         const response = await this.getJobPostsBySearchRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 200:
+                return await response.value();
+            case 204:
+                return null;
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async getRecommendedJobsForUserRaw(requestParameters: GetRecommendedJobsForUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobIndexPostsPagedList>> {
+        if (requestParameters['page'] == null) {
+            throw new runtime.RequiredError(
+                'page',
+                'Required parameter "page" was null or undefined when calling getRecommendedJobsForUser().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/jobindexposts/recommended-jobs`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobIndexPostsPagedListFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getRecommendedJobsForUser(requestParameters: GetRecommendedJobsForUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostsPagedList | null | undefined > {
+        const response = await this.getRecommendedJobsForUserRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 200:
                 return await response.value();

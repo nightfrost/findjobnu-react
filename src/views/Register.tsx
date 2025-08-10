@@ -4,7 +4,7 @@ import { AuthenticationApi, Configuration as AuthConfiguration, type RegisterReq
 import { LinkedInAuthApi } from "../findjobnu-auth/apis/LinkedInAuthApi";
 import { Link } from "react-router-dom";
 import { handleApiError } from "../helpers/ErrorHelper";
-import { UserProfileApi, Configuration as UserProfileConfiguration } from "../findjobnu-api";
+import { ProfileApi, Configuration as UserProfileConfiguration } from "../findjobnu-api";
 
 const api = new AuthenticationApi(new AuthConfiguration());
 const linkedInApi = new LinkedInAuthApi(new AuthConfiguration());
@@ -42,7 +42,7 @@ const Register: React.FC = () => {
       });
 
       //initialize user profile
-      const upApi = new UserProfileApi(
+  const upApi = new ProfileApi(
         new UserProfileConfiguration({
           basePath: "https://findjob.nu",
           accessToken: res.accessToken ?? undefined, 
@@ -51,11 +51,13 @@ const Register: React.FC = () => {
           }
         })
       );
-      await upApi.createUserProfile({ userProfile: {
+      await upApi.createProfile({ profile: {
           userId: res.userId ?? "",
-          firstName: form.firstName ?? "",
-          lastName: form.lastName ?? "",
-          phoneNumber: form.phone ?? "",
+          basicInfo: {
+            firstName: form.firstName ?? "",
+            lastName: form.lastName ?? "",
+            phoneNumber: form.phone ?? "",
+          }
         }});
 
       setSuccess(true);
@@ -118,14 +120,14 @@ const Register: React.FC = () => {
         />
         <button
           type="submit"
-          className="btn btn-primary w-full"
+          className="btn btn-success w-full"
           disabled={loading}
         >
           {loading ? "Opretter..." : "Opret konto"}
         </button>
         <button
           type="button"
-          className="btn btn-info btn-outline w-full flex items-center justify-center gap-2"
+          className="btn bg-[#0967C2] text-white border-[#0059b3] btn-info btn-outline w-full flex items-center justify-center gap-2"
           onClick={handleLinkedInLogin}
           disabled={loading}
         >

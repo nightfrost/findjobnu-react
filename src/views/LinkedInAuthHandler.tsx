@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserProfileApi, Configuration as UserProfileConfiguration } from "../findjobnu-api";
+import { ProfileApi, Configuration as UserProfileConfiguration } from "../findjobnu-api";
 
 function parseQueryParams(search: string) {
   const params = new URLSearchParams(search);
@@ -27,7 +27,7 @@ const LinkedInAuthHandler: React.FC = () => {
     const handleAuth = async () => {
       const params = parseQueryParams(location.search);
       //initialize user profile
-      const upApi = new UserProfileApi(
+  const upApi = new ProfileApi(
         new UserProfileConfiguration({
           basePath: "https://findjob.nu",
           accessToken: params.accessToken ?? undefined, 
@@ -36,12 +36,14 @@ const LinkedInAuthHandler: React.FC = () => {
           }
         })
       );
-      const existingProfile = await upApi.getUserProfileByUserId({ userid: params.userId ?? "" });
-      if (!existingProfile?.firstName || !existingProfile?.lastName) { 
-        await upApi.createUserProfile({ userProfile: {
+      const existingProfile = await upApi.getProfileByUserId({ userId: params.userId ?? "" });
+      if (!existingProfile?.basicInfo?.firstName || !existingProfile?.basicInfo?.lastName) { 
+        await upApi.createProfile({ profile: {
             userId: params.userId ?? "",
-            firstName: params.firstName ?? "",
-            lastName: params.lastName ?? "",
+            basicInfo: {
+              firstName: params.firstName ?? "",
+              lastName: params.lastName ?? "",
+            }
         }});
       }
 

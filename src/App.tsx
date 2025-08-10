@@ -9,6 +9,7 @@ import Profile from "./views/Profile";
 import LinkedInAuthHandler from "./views/LinkedInAuthHandler";
 import { checkAndClearExpiredToken } from "./helpers/AuthHelper";
 import { useUser, UserProvider } from "./context/UserContext";
+import JobSearch from "./views/JobSearch";
 
 const App: React.FC = () => {
   return (
@@ -30,7 +31,7 @@ const AppWithAuthCheck: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen bg-base-200 flex flex-col">
+      <div className="min-h-screen bg-base-300 flex flex-col">
         <Navbar />
         <div className="flex-1">
           <Routes>
@@ -39,6 +40,10 @@ const AppWithAuthCheck: React.FC = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/linkedin-auth" element={<LinkedInAuthHandler />} />
+            <Route path="/settings" element={<div>Settings Page</div>} />
+            <Route path="/about" element={<div>About Page</div>} />
+            <Route path="/contact" element={<div>Contact Page</div>} />
+            <Route path="/jobsearch" element={<JobSearch />}></Route>
           </Routes>
         </div>
         <Footer />
