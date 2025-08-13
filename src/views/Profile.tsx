@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import UserProfileComponent from "../components/UserProfile";
-import SavedJobs from "../components/SavedJobs";
 import ConnectionsComponent from "../components/Connections";
 import { useNavigate } from "react-router-dom";
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useUser } from "../context/UserContext";
 import { createAuthClient, createApiClient } from "../helpers/ApiFactory";
 import { AuthenticationApi, type LoginRequest } from "../findjobnu-auth";
@@ -10,9 +10,35 @@ const Login: React.FC = () => {
   const [form, setForm] = useState<LoginRequest>({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const [emailInvalid, setEmailInvalid] = useState(false);
+  const [passwordInvalid, setPasswordInvalid] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (name === "email" && emailTouched) {
+      setEmailInvalid(!e.target.checkValidity());
+    }
+    if (name === "password" && passwordTouched) {
+      setPasswordInvalid(!e.target.checkValidity());
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    if (name === "email") {
+      setEmailTouched(true);
+      setEmailInvalid(!e.target.checkValidity());
+    }
+    if (name === "password") {
+      setPasswordTouched(true);
+      setPasswordInvalid(!e.target.checkValidity());
+    }
   };
 
   const handleLinkedInLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -24,6 +50,14 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formRef.current && !formRef.current.reportValidity()) {
+      // mark fields as touched and update invalid states to display hints appropriately
+      setEmailTouched(true);
+      setPasswordTouched(true);
+      if (emailRef.current) setEmailInvalid(!emailRef.current.checkValidity());
+      if (passwordRef.current) setPasswordInvalid(!passwordRef.current.checkValidity());
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -58,25 +92,43 @@ const Login: React.FC = () => {
   return (
     <div className="max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
       <h2 className="text-2xl font-bold mb-6 text-center">Log ind</h2>
-      <form onSubmit={handleSubmit} className="grid gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-4" ref={formRef}>
         <input
           type="email"
           name="email"
           placeholder="Email"
-          className="input input-bordered w-full"
+          className="input input-bordered validator w-full"
           value={form.email ?? ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          ref={emailRef}
           required
         />
+        {emailTouched && emailInvalid && (
+          <div className="validator-hint">Indtast en gyldig e-mailadresse</div>
+        )}
         <input
           type="password"
           name="password"
           placeholder="Adgangskode"
-          className="input input-bordered w-full"
+          className="input input-bordered validator w-full"
           value={form.password ?? ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          ref={passwordRef}
+          minLength={8}
+          pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}"
+          title="Mindst 8 tegn, inkl. tal, små og store bogstaver"
           required
         />
+        {passwordTouched && passwordInvalid && (
+          <p className="validator-hint">
+            Mindst 8 tegn, inklusive
+            <br/>Mindst ét tal
+            <br/>Mindst ét lille bogstav
+            <br/>Mindst ét stort bogstav
+          </p>
+        )}
         <button
           type="submit"
           className="btn btn-success w-full"

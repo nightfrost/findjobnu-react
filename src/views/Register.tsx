@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useUser } from "../context/UserContext";
 import { AuthenticationApi, Configuration as AuthConfiguration, type RegisterRequest } from "../findjobnu-auth";
 import { LinkedInAuthApi } from "../findjobnu-auth/apis/LinkedInAuthApi";
@@ -14,9 +14,37 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const firstNameRef = useRef<HTMLInputElement | null>(null);
+  const lastNameRef = useRef<HTMLInputElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+
+  const [firstNameTouched, setFirstNameTouched] = useState(false);
+  const [lastNameTouched, setLastNameTouched] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
+  const [firstNameInvalid, setFirstNameInvalid] = useState(false);
+  const [lastNameInvalid, setLastNameInvalid] = useState(false);
+  const [emailInvalid, setEmailInvalid] = useState(false);
+  const [passwordInvalid, setPasswordInvalid] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (name === "firstName" && firstNameTouched) setFirstNameInvalid(!e.target.checkValidity());
+    if (name === "lastName" && lastNameTouched) setLastNameInvalid(!e.target.checkValidity());
+    if (name === "email" && emailTouched) setEmailInvalid(!e.target.checkValidity());
+    if (name === "password" && passwordTouched) setPasswordInvalid(!e.target.checkValidity());
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name } = e.target;
+    if (name === "firstName") { setFirstNameTouched(true); setFirstNameInvalid(!e.target.checkValidity()); }
+    if (name === "lastName") { setLastNameTouched(true); setLastNameInvalid(!e.target.checkValidity()); }
+    if (name === "email") { setEmailTouched(true); setEmailInvalid(!e.target.checkValidity()); }
+    if (name === "password") { setPasswordTouched(true); setPasswordInvalid(!e.target.checkValidity()); }
   };
 
   const handleLinkedInLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -28,6 +56,17 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formRef.current && !formRef.current.reportValidity()) {
+      setFirstNameTouched(true);
+      setLastNameTouched(true);
+      setEmailTouched(true);
+      setPasswordTouched(true);
+      if (firstNameRef.current) setFirstNameInvalid(!firstNameRef.current.checkValidity());
+      if (lastNameRef.current) setLastNameInvalid(!lastNameRef.current.checkValidity());
+      if (emailRef.current) setEmailInvalid(!emailRef.current.checkValidity());
+      if (passwordRef.current) setPasswordInvalid(!passwordRef.current.checkValidity());
+      return;
+    }
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -81,43 +120,77 @@ const Register: React.FC = () => {
   return (
     <div className="max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
       <h2 className="text-2xl font-bold mb-6 text-center">Opret bruger</h2>
-      <form onSubmit={handleSubmit} className="grid gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-4" ref={formRef}>
         <input
           type="text"
           name="firstName"
           placeholder="Fornavn"
-          className="input input-bordered w-full"
+          className="input input-bordered validator w-full"
           value={form.firstName ?? ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          ref={firstNameRef}
           required
+          minLength={2}
+          pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
+          title="Mindst 2 bogstaver. Brug kun bogstaver, mellemrum, bindestreg eller apostrof."
         />
+        {firstNameTouched && firstNameInvalid && (
+          <p className="validator-hint">Mindst 2 bogstaver</p>
+        )}
         <input
           type="text"
           name="lastName"
           placeholder="Efternavn"
-          className="input input-bordered w-full"
+          className="input input-bordered validator w-full"
           value={form.lastName ?? ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          ref={lastNameRef}
           required
+          minLength={2}
+          pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
+          title="Mindst 2 bogstaver. Brug kun bogstaver, mellemrum, bindestreg eller apostrof."
         />
+        {lastNameTouched && lastNameInvalid && (
+          <p className="validator-hint">Mindst 2 bogstaver</p>
+        )}
         <input
           type="email"
           name="email"
           placeholder="Email"
-          className="input input-bordered w-full"
+          className="input input-bordered validator w-full"
           value={form.email ?? ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          ref={emailRef}
           required
         />
+        {emailTouched && emailInvalid && (
+          <div className="validator-hint">Indtast en gyldig e-mailadresse</div>
+        )}
         <input
           type="password"
           name="password"
           placeholder="Adgangskode"
-          className="input input-bordered w-full"
+          className="input input-bordered validator w-full"
           value={form.password ?? ""}
           onChange={handleChange}
+          onBlur={handleBlur}
+          ref={passwordRef}
           required
+          minLength={8}
+          pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}"
+          title="Mindst 8 tegn, inkl. tal, små og store bogstaver"
         />
+        {passwordTouched && passwordInvalid && (
+          <p className="validator-hint">
+            Mindst 8 tegn, inklusive
+            <br/>Mindst ét tal
+            <br/>Mindst ét lille bogstav
+            <br/>Mindst ét stort bogstav
+          </p>
+        )}
         <button
           type="submit"
           className="btn btn-success w-full"
