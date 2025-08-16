@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useState } from "react";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import Paging from "./Paging";
@@ -5,6 +6,7 @@ import { ProfileApi } from "../findjobnu-api";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { useUser } from "../context/UserContext";
 import { createApiClient } from "../helpers/ApiFactory";
+import JobListSkeleton from "./JobListSkeleton";
 
 interface Props {
   jobs: JobIndexPosts[];
@@ -141,20 +143,15 @@ const JobList: React.FC<Props> = ({
     });
   };
 
-  if (loading) return (
-    <div className="text-center py-8 flex flex-col items-center gap-2">
-      <span className="loading loading-spinner loading-lg"></span>
-      <span>Indlæser...</span>
-    </div>
-  );
+  if (loading) return <JobListSkeleton count={pageSize} />;
   if (!jobs.length) return <div className="text-center py-8">Ingen job fundet.</div>;
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <>
-      <div className="grid gap-4">
-        {jobs.map(job => {
+      <div className="grid gap-3">
+        {jobs.map((job, idx) => {
           const isOpen = job.jobID != null && openJobIds.has(job.jobID);
           const isSaving = job.jobID != null && savingJobIds.has(job.jobID);
           const isSaved = job.jobID != null && savedJobIds.has(job.jobID);
@@ -176,8 +173,9 @@ const JobList: React.FC<Props> = ({
           }
 
           return (
-            <div key={job.jobID} className="card bg-base-100 shadow p-4">
-              <div>
+            <React.Fragment key={job.jobID ?? idx}>
+              <div className="card bg-base-100 shadow rounded-lg p-4">
+                <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="card-title ">
                     <span>{job.jobTitle}</span>
@@ -193,11 +191,16 @@ const JobList: React.FC<Props> = ({
                   {job.companyName} &middot; {job.jobLocation}
                 </p>
                 {job.bannerPicture && (
-                  <img
-                    src={`data:image/jpeg;base64,${job.bannerPicture}`}
-                    alt=""
-                    className="w-170 object-cover rounded my-2 center mx-auto"
-                  />
+                  <div className="w-full max-w-3xl mx-auto my-2 rounded overflow-hidden">
+                    <img
+                      src={`data:image/jpeg;base64,${job.bannerPicture}`}
+                      alt=""
+                      width={1200}
+                      height={400}
+                      className="w-full h-auto object-cover block"
+                      loading="lazy"
+                    />
+                  </div>
                 )}
 
                 <div className="mt-4">
@@ -224,11 +227,16 @@ const JobList: React.FC<Props> = ({
                     <>
                       <p className="mb-2 whitespace-pre-line">{job.jobDescription}</p>
                       {job.footerPicture && (
-                        <img
-                          src={`data:image/jpeg;base64,${job.footerPicture}`}
-                          alt=""
-                          className="w-170 object-cover rounded my-2 center mx-auto"
-                        />
+                        <div className="w-full max-w-3xl mx-auto my-2 rounded overflow-hidden">
+                          <img
+                            src={`data:image/jpeg;base64,${job.footerPicture}`}
+                            alt=""
+                            width={1200}
+                            height={400}
+                            className="w-full h-auto object-cover block"
+                            loading="lazy"
+                          />
+                        </div>
                       )}
                       <button
                         className="btn btn-xs btn-outline mt-2"
@@ -267,7 +275,9 @@ const JobList: React.FC<Props> = ({
                   </button>
                 </div>
               </div>
-            </div>
+              </div>
+              {idx < jobs.length - 1 && <div className="" />}
+            </React.Fragment>
           );
         })}
       </div>

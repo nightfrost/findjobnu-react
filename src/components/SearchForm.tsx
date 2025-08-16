@@ -214,7 +214,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
           onKeyDown={handleLocationKeyDown}
         />
         {showSuggestions && citySuggestions.length > 0 && (
-          <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 overflow-y-auto shadow-lg rounded-box p-0">
+          <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 min-h-10 overflow-y-auto shadow-lg rounded-box p-0">
             {citySuggestions.map((city, idx) => (
               <li key={city.id}>
                 <button
@@ -246,7 +246,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
           onKeyDown={handleCategoryKeyDown}
         />
         {showCategorySuggestions && categorySuggestions.length > 0 && (
-          <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 overflow-y-auto shadow-lg rounded-box p-0">
+          <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 min-h-10 overflow-y-auto shadow-lg rounded-box p-0">
             {categorySuggestions.map((cat, idx) => (
               <li key={cat}>
                 <button

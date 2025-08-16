@@ -24,18 +24,16 @@ const Navbar: React.FC = () => {
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
             <ul className="flex items-center gap-4 font-medium text-base">
-              {user ? (
-                <>
-                  <li><a className="link link-hover" href="/recommended">Anbefalede Job</a></li>
-                  <li><a className="link link-hover" href="/saved">Gemte Jobs</a></li>
-                </>
-              ) : (
+        {user ? (
+          <li><a className="link link-hover" href="/myjobs">Mine Jobs</a></li>
+        ) : (
                 <>
                   <li><a className="link link-hover" href="/profile">Arbejdssøgende</a></li>
                   <li><a className="link link-hover" href="/settings">Arbejdsgiver</a></li>
                 </>
               )}
-              <li><a className="link link-hover" href="/About">Om os</a></li>
+              <li><a className="link link-hover" href="/cv">Det gode CV</a></li>
+              <li><a className="link link-hover" href="/about">Om os</a></li>
               <li><a className="link link-hover" href="/contact">Kontakt</a></li>
             </ul>
           {!user ? (
@@ -94,17 +92,15 @@ const Navbar: React.FC = () => {
         <div className="md:hidden border-t border-base-200 bg-base-100 shadow-inner">
           <div className="px-4 py-4 flex flex-col gap-4">
             <ul className="flex flex-col gap-2 font-medium text-base">
-              {user ? (
-                <>
-                  <li><a className="link" href="/recommended" onClick={() => setMobileOpen(false)}>Anbefalede Job</a></li>
-                  <li><a className="link" href="/saved" onClick={() => setMobileOpen(false)}>Gemte Jobs</a></li>
-                </>
-              ) : (
+        {user ? (
+          <li><a className="link" href="/myjobs" onClick={() => setMobileOpen(false)}>Mine Jobs</a></li>
+        ) : (
                 <>
                   <li><a className="link" href="/employee" onClick={() => setMobileOpen(false)}>Arbejdssøgende</a></li>
                   <li><a className="link" href="/employer" onClick={() => setMobileOpen(false)}>Arbejdsgiver</a></li>
                 </>
               )}
+              <li><a className="link" href="/cv" onClick={() => setMobileOpen(false)}>Det gode CV</a></li>
               <li><a className="link" href="/about" onClick={() => setMobileOpen(false)}>Om os</a></li>
               <li><a className="link" href="/contact" onClick={() => setMobileOpen(false)}>Kontakt</a></li>
             </ul>

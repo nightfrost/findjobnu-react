@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-api": "openapi-generator-cli generate -i https://findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-api",
+    "serve:compressed": "node server.js",
+    "generate-api": "openapi-generator-cli generate -i http://localhost:5001/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-api",
     "generate-auth": "openapi-generator-cli generate -i https://auth.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-auth"
   },
   "dependencies": {
@@ -31,12 +32,18 @@
     "@types/react-day-picker": "^5.2.1",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react-swc": "^3.9.0",
+    "compression": "^1.7.5",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "express": "^4.19.2",
     "globals": "^16.0.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vite-plugin-compression": "^0.5.1"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

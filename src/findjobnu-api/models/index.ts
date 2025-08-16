@@ -9,6 +9,7 @@ export * from './Category';
 export * from './Cities';
 export * from './Contact';
 export * from './ContactDto';
+export * from './CvReadabilityResult';
 export * from './Education';
 export * from './EducationDto';
 export * from './Experience';

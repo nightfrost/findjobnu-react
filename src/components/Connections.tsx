@@ -141,7 +141,7 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
   };
 
   return (
-    <div className="card bg-base-100 shadow p-6 w-full h-fit">
+    <div className="card bg-base-100 shadow rounded-lg p-6 w-full h-fit">
       <h2 className="card-title mb-4">Tilslutninger</h2>
       <div className="space-y-4">
         {connections.map((connection) => (

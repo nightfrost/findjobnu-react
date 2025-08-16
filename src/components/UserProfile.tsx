@@ -16,7 +16,9 @@ function mapProfileDtoToProfile(dto: ProfileDto): Profile {
     skills: dto.skills as any,
   };
 }
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useEffect, useRef, useState } from "react";
+import ProfileSkeleton from "./ProfileSkeleton";
 
 // Add DateInput component for better validation UX
 const DateInput: React.FC<{ value: string; onChange: (v: string) => void; inputRef?: React.RefObject<HTMLInputElement> }> = ({ value, onChange, inputRef }) => {
@@ -63,14 +65,30 @@ import { createApiClient } from "../helpers/ApiFactory";
 
 interface Props { userId: string; }
 
+type EditingCard = 'basic' | 'about' | 'experiences' | 'educations' | 'skills' | null;
+
 const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateOfBirthInput, setDateOfBirthInput] = useState<string>("");
-  const [editMode, setEditMode] = useState(false);
+  // Which card is currently being edited (null = none)
+  const [editingCard, setEditingCard] = useState<EditingCard>(null);
   const [form, setForm] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState("");
+  const [keywordsInput, setKeywordsInput] = useState<string>("");
+  // Toast confirmation handling
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
+
+  const showToast = (message: string) => {
+    setToast(message);
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
+    toastTimerRef.current = window.setTimeout(() => setToast(null), 3000);
+  };
   // LocationTypeahead handles suggestions
   const dateInputRef = useRef<HTMLInputElement | null>(null);
   const pikadayRef = useRef<Pikaday | null>(null);
@@ -80,7 +98,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
 
   // Date picker setup
   useEffect(() => {
-    if (editMode && dateInputRef.current) {
+    if (editingCard === 'basic' && dateInputRef.current) {
       pikadayRef.current ??= new Pikaday({
         field: dateInputRef.current,
         format: "YYYY-MM-DD",
@@ -93,7 +111,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       }
     }
     return () => { if (pikadayRef.current) { pikadayRef.current.destroy(); pikadayRef.current = null; } };
-  }, [editMode, dateOfBirthInput]);
+  }, [editingCard, dateOfBirthInput]);
 
   // Fetch profile
   useEffect(() => {
@@ -110,7 +128,8 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
           const d = data.basicInfo.dateOfBirth;
           setDateOfBirthInput(`${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`);
         }
-        setLocation(data.basicInfo?.location ?? "");
+  setLocation(data.basicInfo?.location ?? "");
+  setKeywordsInput((mapped.keywords || []).join(", "));
       } catch (e) {
         const err = await handleApiError(e);
         if (err.type !== "not_found") setError(err.message);
@@ -145,9 +164,38 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     const api = createApiClient(ProfileApi, token);
     setLoading(true); setError(null);
     try {
-      const toSave: Profile = { ...form, basicInfo: { ...form.basicInfo, dateOfBirth: dateOfBirthInput ? new Date(dateOfBirthInput) : null, location } }; // Profile is used for saving
+      const norm = (v?: string | null): string | null => {
+        if (v == null) return null;
+        const t = v.trim();
+        if (t === "") return null;
+        // If ISO datetime is provided, trim to date
+        const d = t.length >= 10 ? t.substring(0, 10) : t;
+        return d;
+      };
+      const parsedKeywords = keywordsInput
+        .split(',')
+        .map(k => k.trim())
+        .filter(k => k.length > 0);
+      const toSave: Profile = {
+        ...form,
+        keywords: parsedKeywords,
+        experiences: (form.experiences || []).map(e => ({
+          ...e,
+          fromDate: norm(e.fromDate),
+          toDate: norm(e.toDate),
+        })),
+        educations: (form.educations || []).map(ed => ({
+          ...ed,
+          fromDate: norm(ed.fromDate),
+          toDate: norm(ed.toDate),
+        })),
+        basicInfo: { ...form.basicInfo, dateOfBirth: dateOfBirthInput ? new Date(dateOfBirthInput) : null, location }
+      }; // Profile is used for saving
       await api.updateProfile({ id: form.id, profile: toSave });
-      setProfile(toSave); setForm(toSave); setEditMode(false);
+      setProfile(toSave as unknown as ProfileDto);
+      setForm(toSave);
+      setEditingCard(null);
+  showToast('Profil gemt');
     } catch (e) { const err = await handleApiError(e); setError(err.message); }
     finally { setLoading(false); }
   };
@@ -161,20 +209,18 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         basicInfo: { firstName: "", lastName: "", phoneNumber: "", dateOfBirth: null, location: "" },
         savedJobPosts: [], keywords: [], experiences: [], educations: [], interests: [], accomplishments: [], contacts: [], skills: []
       } as Profile;
-      const created = await api.createProfile({ profile: newProfile });
-      setProfile(created); setForm(created); setEditMode(true);
+  const created = await api.createProfile({ profile: newProfile });
+  setProfile(created); setForm(created); setEditingCard('basic');
+  setKeywordsInput("");
+  showToast('Profil oprettet');
     } catch (e) { const err = await handleApiError(e); setError(err.message); }
     finally { setLoading(false); }
   };
 
-  // Derived UI content to avoid nested ternaries in JSX
-  const dobDate = profile?.basicInfo?.dateOfBirth as unknown as Date | undefined;
-  const dobDisplay = dobDate instanceof Date && !isNaN(dobDate.getTime())
-    ? `${dobDate.getDate().toString().padStart(2, '0')}-${(dobDate.getMonth() + 1).toString().padStart(2, '0')}-${dobDate.getFullYear()}`
-    : null;
+  // (removed unused dobDisplay)
 
   const renderExperiencesSection = () => {
-    if (editMode) {
+  if (editingCard === 'experiences') {
       return (
         <WorkExperienceList
           experiences={form?.experiences || []}
@@ -200,7 +246,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   };
 
   const renderEducationsSection = () => {
-    if (editMode) {
+  if (editingCard === 'educations') {
       return (
         <EducationList
           educations={form?.educations || []}
@@ -226,7 +272,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   };
 
   const renderSkillsSection = () => {
-    if (editMode) {
+  if (editingCard === 'skills') {
       return (
         <SkillList
           skills={form?.skills || []}
@@ -251,11 +297,11 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     );
   };
 
-  if (loading) return <div className="card bg-base-100 shadow p-6 w-full h-fit"><div className="text-center py-8">Indlæser profil...</div></div>;
+  if (loading) return <ProfileSkeleton />;
 
   if (error || profile === null) {
     return (
-      <div className="card bg-base-100 shadow p-6 w-full h-fit">
+  <div className="card bg-base-100 shadow rounded-lg p-6 w-full h-fit">
         <div className="text-center py-8">
           Ingen profil fundet.<br />
           <button className="btn btn-primary mt-4" onClick={handleCreateProfile}>Opret profil</button>
@@ -265,237 +311,463 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   }
 
   return (
-    <div className="card bg-base-100 shadow p-6 w-full h-fit" ref={containerRef}>
-      <h2 className="card-title mb-4 flex items-center gap-2">
-        <span>Min Profil</span>
-        <button
-          type="button"
-          className="tooltip tooltip-right"
-          data-tip="Vi bruger dine informationer til at finde relevante job annoncer i bla. 'Anbefalede job'. Vi videregiver aldrig dine oplysninger til tredjeparter."
-          aria-label="Hjælp til Min Profil"
-        >
-          <QuestionMarkCircleIcon
-            className="w-5 h-5 text-base-content/60 hover:text-base-content"
-            aria-label="Hjælp"
-          />
-        </button>
-      </h2> 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div>
-          <label className="label" htmlFor="firstName">Fornavn</label>
-          {editMode ? (
-            <>
-              <input
-                className="input input-bordered validator w-full"
-                id="firstName"
-                name="firstName"
-                value={form?.basicInfo?.firstName ?? ""}
-                onChange={handleBasicInfoChange}
-                placeholder="Indtast fornavn"
-                required
-                minLength={2}
-                pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
-                title="Mindst 2 bogstaver. Brug kun bogstaver, mellemrum, bindestreg eller apostrof."
+  <div className="w-full h-fit" ref={containerRef}>
+      {/* Card 1: Basisoplysninger */}
+  <div className="card bg-base-100 shadow rounded-lg p-6 mb-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="card-title">Basisoplysninger{" "}
+            <button
+              type="button"
+              className="tooltip tooltip-left"
+              data-tip="Vi bruger dine informationer til at finde relevante job annoncer i bla. 'Anbefalede job'. Vi videregiver aldrig dine oplysninger til tredjeparter."
+              aria-label="Hjælp til Min Profil"
+            >
+              <QuestionMarkCircleIcon
+                className="w-5 h-5 text-base-content/60 hover:text-base-content"
+                aria-label="Hjælp"
               />
-              <p className="validator-hint">
-                Mindst 2 bogstaver. Tilladte tegn: bogstaver, mellemrum, bindestreg og apostrof.
-              </p>
-            </>
-          ) : (
-            <div>{profile?.basicInfo?.firstName?.trim() ? profile.basicInfo.firstName : <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
-        </div>
-        <div>
-          <label className="label" htmlFor="lastName">Efternavn</label>
-          {editMode ? (
-            <>
-              <input
-                className="input input-bordered validator w-full"
-                id="lastName"
-                name="lastName"
-                value={form?.basicInfo?.lastName ?? ""}
-                onChange={handleBasicInfoChange}
-                placeholder="Indtast efternavn"
-                required
-                minLength={2}
-                pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
-                title="Mindst 2 bogstaver. Brug kun bogstaver, mellemrum, bindestreg eller apostrof."
-              />
-              <p className="validator-hint">
-                Mindst 2 bogstaver. Tilladte tegn: bogstaver, mellemrum, bindestreg og apostrof.
-              </p>
-            </>
-          ) : (
-            <div>{profile?.basicInfo?.lastName?.trim() ? profile.basicInfo.lastName : <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
-        </div>
-        <div>
-          <label className="label" htmlFor="phoneNumber">Telefonnummer</label>
-          {editMode ? (
-            <>
-              <input
-                className="input input-bordered validator w-full"
-                id="phoneNumber"
-                name="phoneNumber"
-                type="tel"
-                value={form?.basicInfo?.phoneNumber ?? ""}
-                onChange={handleBasicInfoChange}
-                placeholder="Indtast telefonnummer"
-                pattern="^[+()0-9\s-]{6,20}$"
-                title="Indtast et gyldigt telefonnummer (6-20 tegn, tal, mellemrum, +, (), -)."
-              />
-              <p className="validator-hint">Gyldigt telefonnummer, f.eks. +45 12 34 56 78</p>
-            </>
-          ) : (
-            <div>{profile?.basicInfo?.phoneNumber?.trim() ? profile.basicInfo.phoneNumber : <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
-        </div>
-        <div>
-          <label className="label" htmlFor="location">By</label>
-          {editMode ? (
-            <LocationTypeahead
-              value={location}
-              onChange={val => {
-                setLocation(val);
-                if (form) setForm(f => f ? { ...f, basicInfo: { ...f.basicInfo, location: val } } : f);
+            </button>
+          </h3>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="tooltip tooltip-bottom"
+              data-tip="Rediger Basisoplysninger"
+              aria-label="Rediger Basisoplysninger"
+              onClick={() => {
+                // Open this card for editing, close others and reset form state from profile to avoid cross-card stale edits
+                setEditingCard(prev => prev === 'basic' ? null : 'basic');
+                if (profile) {
+                  const mapped = mapProfileDtoToProfile(profile);
+                  setForm(mapped);
+                  setLocation(profile.basicInfo?.location ?? "");
+                  const dob = profile.basicInfo?.dateOfBirth as unknown as Date | undefined;
+                  setDateOfBirthInput(dob instanceof Date && !isNaN(dob.getTime())
+                    ? `${dob.getFullYear()}-${(dob.getMonth() + 1).toString().padStart(2, '0')}-${dob.getDate().toString().padStart(2, '0')}`
+                    : "");
+                  setKeywordsInput((mapped.keywords || []).join(', '));
+                }
               }}
-              inputProps={{
-                name: "location",
-                id: "location",
-                pattern: "^[A-Za-zÀ-ÿ' .-]{2,}$",
-                title: "Brug mindst 2 tegn. Tilladte tegn: bogstaver, mellemrum, punktum, bindestreg og apostrof.",
-                className: "input validator w-full"
-              }}
-            />
-          ) : <div>{profile?.basicInfo?.location?.trim() ? profile.basicInfo.location : <span className="text-gray-400">Ikke angivet</span>}</div>}
+            >
+              {/* Pencil Icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 hover:text-warning">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <div>
-          <label className="label" htmlFor="dateOfBirth">Fødselsdato</label>
-          {editMode ? (
-            <DateInput
-              value={dateOfBirthInput}
-              onChange={setDateOfBirthInput}
-              inputRef={dateInputRef as React.RefObject<HTMLInputElement>}
-            />
-          ) : (
-            <div>{dobDisplay ?? <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
-        </div>
-        <div className="lg:col-span-2">
-          <label className="label" htmlFor="about">Om mig</label>
-          {editMode ? (
-            <>
-              <textarea
-                className="textarea textarea-bordered validator w-full"
-                id="about"
-                name="about"
-                value={form?.basicInfo?.about ?? ""}
-                onChange={handleBasicInfoChange}
-                placeholder="Kort beskrivelse"
-                rows={4}
-                maxLength={1000}
-                title="Maks 1000 tegn."
+        
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div>
+            <label className="label" htmlFor="firstName">Fornavn</label>
+            {editingCard === 'basic' ? (
+              <>
+                <input
+                  className="input input-bordered validator w-full"
+                  id="firstName"
+                  name="firstName"
+                  value={form?.basicInfo?.firstName ?? ""}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Indtast fornavn"
+                  required
+                  minLength={2}
+                  pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
+                  title="Mindst 2 bogstaver. Brug kun bogstaver, mellemrum, bindestreg eller apostrof."
+                />
+                <p className="validator-hint">
+                  Mindst 2 bogstaver. Tilladte tegn: bogstaver, mellemrum, bindestreg og apostrof.
+                </p>
+              </>
+            ) : (
+              <div>{profile?.basicInfo?.firstName?.trim() ? profile.basicInfo.firstName : <span className="text-gray-400">Ikke angivet</span>}</div>
+            )}
+          </div>
+          <div>
+            <label className="label" htmlFor="lastName">Efternavn</label>
+            {editingCard === 'basic' ? (
+              <>
+                <input
+                  className="input input-bordered validator w-full"
+                  id="lastName"
+                  name="lastName"
+                  value={form?.basicInfo?.lastName ?? ""}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Indtast efternavn"
+                  required
+                  minLength={2}
+                  pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
+                  title="Mindst 2 bogstaver. Brug kun bogstaver, mellemrum, bindestreg eller apostrof."
+                />
+                <p className="validator-hint">
+                  Mindst 2 bogstaver. Tilladte tegn: bogstaver, mellemrum, bindestreg og apostrof.
+                </p>
+              </>
+            ) : (
+              <div>{profile?.basicInfo?.lastName?.trim() ? profile.basicInfo.lastName : <span className="text-gray-400">Ikke angivet</span>}</div>
+            )}
+          </div>
+          <div>
+            <label className="label" htmlFor="location">By</label>
+            {editingCard === 'basic' ? (
+              <LocationTypeahead
+                value={location}
+                onChange={val => {
+                  setLocation(val);
+                  if (form) setForm(f => f ? { ...f, basicInfo: { ...f.basicInfo, location: val } } : f);
+                }}
+                inputProps={{
+                  name: "location",
+                  id: "location",
+                  pattern: "^[A-Za-zÀ-ÿ' .-]{2,}$",
+                  title: "Brug mindst 2 tegn. Tilladte tegn: bogstaver, mellemrum, punktum, bindestreg og apostrof.",
+                  className: "input validator w-full"
+                }}
               />
-              <div className="validator-hint">Maks 1000 tegn</div>
-            </>
-          ) : (
-            <div>{profile?.basicInfo?.about?.trim() ? profile.basicInfo.about : <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
+            ) : <div>{profile?.basicInfo?.location?.trim() ? profile.basicInfo.location : <span className="text-gray-400">Ikke angivet</span>}</div>}
+          </div>
+          <div>
+            <label className="label" htmlFor="jobTitle">Jobtitel</label>
+            {editingCard === 'basic' ? (
+              <>
+                <input
+                  className="input input-bordered validator w-full"
+                  id="jobTitle"
+                  name="jobTitle"
+                  value={form?.basicInfo?.jobTitle ?? ""}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Jobtitel"
+                  pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$"
+                  title="Mindst 2 tegn. Tilladte tegn: bogstaver, tal, mellemrum, punktum, komma, bindestreg og apostrof."
+                />
+                <div className="validator-hint">Mindst 2 tegn, fx "Softwareudvikler"</div>
+              </>
+            ) : (
+              <div>{profile?.basicInfo?.jobTitle?.trim() ? profile.basicInfo.jobTitle : <span className="text-gray-400">Ikke angivet</span>}</div>
+            )}
+          </div>
+          <div>
+            <label className="label" htmlFor="company">Virksomhed</label>
+            {editingCard === 'basic' ? (
+              <>
+                <input
+                  className="input input-bordered validator w-full"
+                  id="company"
+                  name="company"
+                  value={form?.basicInfo?.company ?? ""}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Virksomhed"
+                  pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$"
+                  title="Mindst 2 tegn. Tilladte tegn: bogstaver, tal, mellemrum, punktum, komma, bindestreg og apostrof."
+                />
+                <div className="validator-hint">Mindst 2 tegn, fx "FindJob.nu"</div>
+              </>
+            ) : (
+              <div>{profile?.basicInfo?.company?.trim() ? profile.basicInfo.company : <span className="text-gray-400">Ikke angivet</span>}</div>
+            )}
+          </div>
+          <div>
+            <label className="label" htmlFor="phoneNumber">Telefonnummer</label>
+            {editingCard === 'basic' ? (
+              <>
+                <input
+                  className="input input-bordered validator w-full"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  value={form?.basicInfo?.phoneNumber ?? ""}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Indtast telefonnummer"
+                  pattern="^[+()0-9\s-]{6,20}$"
+                  title="Indtast et gyldigt telefonnummer (6-20 tegn, tal, mellemrum, +, (), -)."
+                />
+                <p className="validator-hint">Gyldigt telefonnummer, f.eks. +45 12 34 56 78</p>
+              </>
+            ) : (
+              <div>{profile?.basicInfo?.phoneNumber?.trim() ? profile.basicInfo.phoneNumber : <span className="text-gray-400">Ikke angivet</span>}</div>
+            )}
+          </div>
+          <div>
+            <label className="label" htmlFor="openToWork">Aktivt søgende?</label>
+            {editingCard === 'basic' ? (
+              <div className="flex items-center gap-3">
+                <input
+                  id="openToWork"
+                  type="checkbox"
+                  className="toggle toggle-primary"
+                  checked={!!form?.basicInfo?.openToWork}
+                  onChange={(e) => form && setForm({ ...form, basicInfo: { ...form.basicInfo, openToWork: e.target.checked } })}
+                />
+                <span className="text-sm text-base-content/70">Vis at du er åben for nye muligheder</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <input
+                  id="openToWork"
+                  type="checkbox"
+                  className="toggle toggle-primary"
+                  checked={!!profile?.basicInfo?.openToWork}
+                  readOnly
+                  disabled
+                />
+                <span className={`text-sm ${profile?.basicInfo?.openToWork ? 'text-success' : 'text-base-content/70'}`}>
+                  {profile?.basicInfo?.openToWork ? 'Aktivt søgende.' : 'Ikke aktivt søgende.'}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-        <div>
-          <label className="label" htmlFor="company">Virksomhed</label>
-          {editMode ? (
-            <>
-              <input
-                className="input input-bordered validator w-full"
-                id="company"
-                name="company"
-                value={form?.basicInfo?.company ?? ""}
-                onChange={handleBasicInfoChange}
-                placeholder="Virksomhed"
-                pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$"
-                title="Mindst 2 tegn. Tilladte tegn: bogstaver, tal, mellemrum, punktum, komma, bindestreg og apostrof."
-              />
-              <div className="validator-hint">Mindst 2 tegn, fx "FindJob.nu"</div>
-            </>
-          ) : (
-            <div>{profile?.basicInfo?.company?.trim() ? profile.basicInfo.company : <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
-        </div>
-        <div>
-          <label className="label" htmlFor="jobTitle">Jobtitel</label>
-          {editMode ? (
-            <>
-              <input
-                className="input input-bordered validator w-full"
-                id="jobTitle"
-                name="jobTitle"
-                value={form?.basicInfo?.jobTitle ?? ""}
-                onChange={handleBasicInfoChange}
-                placeholder="Jobtitel"
-                pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$"
-                title="Mindst 2 tegn. Tilladte tegn: bogstaver, tal, mellemrum, punktum, komma, bindestreg og apostrof."
-              />
-              <div className="validator-hint">Mindst 2 tegn, fx "Softwareudvikler"</div>
-            </>
-          ) : (
-            <div>{profile?.basicInfo?.jobTitle?.trim() ? profile.basicInfo.jobTitle : <span className="text-gray-400">Ikke angivet</span>}</div>
-          )}
-        </div>
-        <div>
-          <label className="label" htmlFor="openToWork">Aktivt søgende?</label>
-          {editMode ? (
-            <div className="flex items-center gap-3">
-              <input
-                id="openToWork"
-                type="checkbox"
-                className="toggle toggle-primary"
-                checked={!!form?.basicInfo?.openToWork}
-                onChange={(e) => form && setForm({ ...form, basicInfo: { ...form.basicInfo, openToWork: e.target.checked } })}
-              />
-              <span className="text-sm text-base-content/70">Vis at du er åben for nye muligheder</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <input
-                id="openToWork"
-                type="checkbox"
-                className="toggle toggle-primary"
-                checked={!!profile?.basicInfo?.openToWork}
-                readOnly
-                disabled
-              />
-              <span className={`text-sm ${profile?.basicInfo?.openToWork ? 'text-success' : 'text-base-content/70'}`}>
-                {profile?.basicInfo?.openToWork ? 'Aktivt søgende.' : 'Ikke aktivt søgende.'}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="mt-8 grid gap-6">
-        <div>
-          <div className="label"><span className="label-text font-semibold">Erfaringer</span></div>
-          {renderExperiencesSection()}
-        </div>
-        <div>
-          <div className="label"><span className="label-text font-semibold">Uddannelser</span></div>
-          {renderEducationsSection()}
-        </div>
-        <div>
-          <div className="label"><span className="label-text font-semibold">Færdigheder</span></div>
-          {renderSkillsSection()}
-        </div>
-      </div>
-      <div className="mt-6 flex gap-2">
-        {editMode ? (
-          <>
+
+        {editingCard === 'basic' && (
+          <div className="mt-4 flex gap-2">
             <button className="btn btn-success" onClick={handleSave}>Gem</button>
-            <button className="btn btn-outline btn-error" onClick={() => { setEditMode(false); setForm(profile ? mapProfileDtoToProfile(profile) : null); setLocation(profile?.basicInfo?.location ?? ""); setDateOfBirthInput(profile?.basicInfo?.dateOfBirth ? `${profile.basicInfo.dateOfBirth.getFullYear()}-${(profile.basicInfo.dateOfBirth.getMonth() + 1).toString().padStart(2, '0')}-${profile.basicInfo.dateOfBirth.getDate().toString().padStart(2, '0')}` : ""); }}>Annuller</button>
-          </>
-        ) : (
-          <button className="btn btn-outline btn-warning" onClick={() => setEditMode(true)}>Rediger</button>
+            <button
+              className="btn btn-outline btn-error"
+              onClick={() => {
+                setEditingCard(null);
+                setForm(profile ? mapProfileDtoToProfile(profile) : null);
+                setLocation(profile?.basicInfo?.location ?? "");
+                setDateOfBirthInput(profile?.basicInfo?.dateOfBirth ? `${(profile.basicInfo.dateOfBirth as unknown as Date).getFullYear()}-${(((profile.basicInfo.dateOfBirth as unknown as Date).getMonth() + 1).toString().padStart(2, '0'))}-${((profile.basicInfo.dateOfBirth as unknown as Date).getDate().toString().padStart(2, '0'))}` : "");
+                setKeywordsInput(profile?.keywords?.join(', ') ?? "");
+              }}
+            >
+              Annuller
+            </button>
+          </div>
         )}
       </div>
+
+  {/* <div className="divider my-4" /> */}
+
+      {/* Card 2: Om mig + Nøgleord */}
+  <div className="card bg-base-100 shadow rounded-lg p-6 mb-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="card-title">Om mig & Nøgleord</h3>
+          <button
+            type="button"
+            className="tooltip tooltip-bottom"
+            data-tip="Rediger Om mig & Nøgleord"
+            aria-label="Rediger Om mig og Nøgleord"
+            onClick={() => {
+              setEditingCard(prev => prev === 'about' ? null : 'about');
+              if (profile) {
+                const mapped = mapProfileDtoToProfile(profile);
+                setForm(mapped);
+                setKeywordsInput((mapped.keywords || []).join(', '));
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 hover:text-warning">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+          </button>
+        </div>
+        <div className="grid gap-4">
+          <div>
+            <label className="label" htmlFor="about">Om mig</label>
+            {editingCard === 'about' ? (
+              <>
+                <textarea
+                  className="textarea textarea-bordered validator w-full"
+                  id="about"
+                  name="about"
+                  value={form?.basicInfo?.about ?? ""}
+                  onChange={handleBasicInfoChange}
+                  placeholder="Kort beskrivelse"
+                  rows={4}
+                  maxLength={1000}
+                  title="Maks 1000 tegn."
+                />
+                <div className="validator-hint">Maks 1000 tegn</div>
+              </>
+            ) : (
+              <div>{profile?.basicInfo?.about?.trim() ? profile.basicInfo.about : <span className="text-gray-400">Ikke angivet</span>}</div>
+            )}
+          </div>
+          <div className="divider my-1" />
+          <div>
+            <label className="label" htmlFor="keywords">Top kompetencer{" "}
+              <button
+              type="button"
+              className="tooltip tooltip-left"
+              data-tip="Dine top kompetencer anvendes i højere grad end andre informationer, når vi udsøger anbefalede job."
+              aria-label="Hjælp til Min Profil"
+            >
+              <QuestionMarkCircleIcon
+                className="w-5 h-5 text-base-content/60 hover:text-base-content"
+                aria-label="Hjælp"
+              />
+            </button>
+            </label>
+            {editingCard === 'about' ? (
+              <>
+                <input
+                  className="input input-bordered validator w-full"
+                  id="keywords"
+                  name="keywords"
+                  value={keywordsInput}
+                  onChange={(e) => setKeywordsInput(e.target.value)}
+                  placeholder="f.eks. React, TypeScript, .NET, Azure"
+                />
+                <div className="validator-hint">Adskil med komma. Eksempel: React, TypeScript, .NET</div>
+              </>
+            ) : (
+              <div>
+                {(form?.keywords && form.keywords.length > 0)
+                  ? form.keywords.join(', ')
+                  : <span className="text-gray-400">Ikke angivet</span>}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {editingCard === 'about' && (
+          <div className="mt-4 flex gap-2">
+            <button className="btn btn-success" onClick={handleSave}>Gem</button>
+            <button
+              className="btn btn-outline btn-error"
+              onClick={() => {
+                setEditingCard(null);
+                setForm(profile ? mapProfileDtoToProfile(profile) : null);
+                setKeywordsInput(profile?.keywords?.join(', ') ?? "");
+              }}
+            >
+              Annuller
+            </button>
+          </div>
+        )}
+      </div>
+
+  {/* <div className="divider my-4" /> */}
+
+      {/* Card 3a: Erfaringer */}
+  <div className="card bg-base-100 shadow rounded-lg p-6 mb-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="card-title">Erfaringer</h3>
+          <button
+            type="button"
+            className="tooltip tooltip-bottom"
+            data-tip="Rediger Erfaringer"
+            aria-label="Rediger Erfaringer"
+            onClick={() => {
+              setEditingCard(prev => prev === 'experiences' ? null : 'experiences');
+              if (profile) {
+                const mapped = mapProfileDtoToProfile(profile);
+                setForm(mapped);
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 hover:text-warning">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+          </button>
+        </div>
+        {renderExperiencesSection()}
+        {editingCard === 'experiences' && (
+          <div className="mt-4 flex gap-2">
+            <button className="btn btn-success" onClick={handleSave}>Gem</button>
+            <button
+              className="btn btn-outline btn-error"
+              onClick={() => {
+                setEditingCard(null);
+                setForm(profile ? mapProfileDtoToProfile(profile) : null);
+              }}
+            >
+              Annuller
+            </button>
+          </div>
+        )}
+      </div>
+
+  {/* <div className="divider my-4" /> */}
+
+      {/* Card 3b: Uddannelser */}
+      <div className="card bg-base-100 shadow p-6 mb-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="card-title">Uddannelser</h3>
+          <button
+            type="button"
+            className="tooltip tooltip-bottom"
+            data-tip="Rediger Uddannelser"
+            aria-label="Rediger Uddannelser"
+            onClick={() => {
+              setEditingCard(prev => prev === 'educations' ? null : 'educations');
+              if (profile) {
+                const mapped = mapProfileDtoToProfile(profile);
+                setForm(mapped);
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 hover:text-warning">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+          </button>
+        </div>
+        {renderEducationsSection()}
+        {editingCard === 'educations' && (
+          <div className="mt-4 flex gap-2">
+            <button className="btn btn-success" onClick={handleSave}>Gem</button>
+            <button
+              className="btn btn-outline btn-error"
+              onClick={() => {
+                setEditingCard(null);
+                setForm(profile ? mapProfileDtoToProfile(profile) : null);
+              }}
+            >
+              Annuller
+            </button>
+          </div>
+        )}
+      </div>
+
+  {/* <div className="divider my-4" /> */}
+
+      {/* Card 3c: Færdigheder */}
+  <div className="card bg-base-100 shadow rounded-lg p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="card-title">Færdigheder</h3>
+          <button
+            type="button"
+            className="tooltip tooltip-bottom"
+            data-tip="Rediger Færdigheder"
+            aria-label="Rediger Færdigheder"
+            onClick={() => {
+              setEditingCard(prev => prev === 'skills' ? null : 'skills');
+              if (profile) {
+                const mapped = mapProfileDtoToProfile(profile);
+                setForm(mapped);
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 hover:text-warning">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+            </svg>
+          </button>
+        </div>
+        {renderSkillsSection()}
+        {editingCard === 'skills' && (
+          <div className="mt-4 flex gap-2">
+            <button className="btn btn-success" onClick={handleSave}>Gem</button>
+            <button
+              className="btn btn-outline btn-error"
+              onClick={() => {
+                setEditingCard(null);
+                setForm(profile ? mapProfileDtoToProfile(profile) : null);
+              }}
+            >
+              Annuller
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Toast confirmation */}
+      {toast && (
+        <div className="toast toast-end z-50">
+          <div className="alert alert-success">
+            <span>{toast}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -18,12 +18,16 @@ const Profile: React.FC = () => {
 
   return (
   <div className="container max-w-7xl mx-auto px-4">
-      {/* Top section with UserProfile and Connections side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <UserProfileComponent userId={userId} />
-        <ConnectionsComponent userId={userId} accessToken={token} />
+      <div className="flex w-full mb-8 items-start">
+        <div className="flex-[4_5_0%] min-w-0 pr-6">
+          <UserProfileComponent userId={userId} />
+        </div>
+        <div className="divider divider-horizontal" />
+        <div className="flex-[4_0_0%] min-w-0 pl-6">
+          <ConnectionsComponent userId={userId} accessToken={token} />
+        </div>
       </div>
-    </div>
+  </div>
   );
 };
 
