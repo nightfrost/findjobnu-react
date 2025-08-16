@@ -131,14 +131,14 @@ const GoodCV: React.FC = () => {
                                             onChange={onFileChange}
                                             aria-label="Upload CV som PDF"
                                         />
-                                    </div>
-                                    <button
-                                        className="btn btn-primary"
+                                        <button
+                                        className="btn btn-primary ml-5"
                                         onClick={onAnalyze}
                                         disabled={!file || analyzing}
                                     >
                                         {analyzing ? "Analyserer…" : "Analyser CV"}
                                     </button>
+                                    </div>
                                 </div>
 
                                 {error && (
