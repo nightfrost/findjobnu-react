@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CvReadabilitySummary } from './CvReadabilitySummary';
+import {
+    CvReadabilitySummaryFromJSON,
+    CvReadabilitySummaryFromJSONTyped,
+    CvReadabilitySummaryToJSON,
+    CvReadabilitySummaryToJSONTyped,
+} from './CvReadabilitySummary';
+
 /**
  * 
  * @export
@@ -33,10 +41,10 @@ export interface CvReadabilityResult {
     readabilityScore?: number;
     /**
      * 
-     * @type {string}
+     * @type {CvReadabilitySummary}
      * @memberof CvReadabilityResult
      */
-    summary?: string | null;
+    summary?: CvReadabilitySummary;
 }
 
 /**
@@ -58,7 +66,7 @@ export function CvReadabilityResultFromJSONTyped(json: any, ignoreDiscriminator:
         
         'extractedText': json['extractedText'] == null ? undefined : json['extractedText'],
         'readabilityScore': json['readabilityScore'] == null ? undefined : json['readabilityScore'],
-        'summary': json['summary'] == null ? undefined : json['summary'],
+        'summary': json['summary'] == null ? undefined : CvReadabilitySummaryFromJSON(json['summary']),
     };
 }
 
@@ -75,7 +83,7 @@ export function CvReadabilityResultToJSONTyped(value?: CvReadabilityResult | nul
         
         'extractedText': value['extractedText'],
         'readabilityScore': value['readabilityScore'],
-        'summary': value['summary'],
+        'summary': CvReadabilitySummaryToJSON(value['summary']),
     };
 }
 

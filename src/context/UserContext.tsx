@@ -1,30 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
-
-export interface User {
-  userId?: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  accessToken?: string;
-  refreshToken?: string;
-  accessTokenExpiration?: string;
-  isLinkedInUser?: string;
-}
-
-interface UserContextType {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  logout: () => void;
-}
-
-const UserContext = createContext<UserContextType | undefined>(undefined);
-
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
-  return context;
-};
+import { UserContext, type User } from "./UserContext.shared";
 
 const USER_STORAGE_KEYS = [
   "userId",
@@ -35,34 +11,34 @@ const USER_STORAGE_KEYS = [
   "refreshToken",
   "accessTokenExpiration",
   "isLinkedInUser"
-];
+] as const;
 
 function getUserFromStorage(): User | null {
   const user: User = {};
   let hasAny = false;
-  USER_STORAGE_KEYS.forEach(key => {
+  for (const key of USER_STORAGE_KEYS) {
     const value = localStorage.getItem(key);
     if (value) {
-      (user as any)[key] = value;
+      user[key] = value;
       hasAny = true;
     }
-  });
+  }
   return hasAny ? user : null;
 }
 
 function setUserToStorage(user: User | null) {
   if (!user) {
-    USER_STORAGE_KEYS.forEach(key => localStorage.removeItem(key));
+    for (const key of USER_STORAGE_KEYS) localStorage.removeItem(key);
     return;
   }
-  USER_STORAGE_KEYS.forEach(key => {
-    const value = (user as any)[key];
+  for (const key of USER_STORAGE_KEYS) {
+    const value = user[key];
     if (value !== undefined && value !== null) {
       localStorage.setItem(key, value);
     } else {
       localStorage.removeItem(key);
     }
-  });
+  }
 }
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
@@ -87,3 +63,5 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     </UserContext.Provider>
   );
 };
+
+// Intentionally do not re-export hooks here to keep this file exporting only components for fast-refresh

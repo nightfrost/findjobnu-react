@@ -1,7 +1,7 @@
 
 
 import React, { useState } from "react";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 const Navbar: React.FC = () => {

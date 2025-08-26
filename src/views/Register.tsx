@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useUser } from "../context/UserContext";
-import { AuthenticationApi, Configuration as AuthConfiguration, type RegisterRequest } from "../findjobnu-auth";
-import { LinkedInAuthApi } from "../findjobnu-auth/apis/LinkedInAuthApi";
+import { useUser } from "../context/UserContext.shared";
+import { AuthenticationApi, type RegisterRequest } from "../findjobnu-auth";
 import { Link } from "react-router-dom";
 import { handleApiError } from "../helpers/ErrorHelper";
-import { ProfileApi, Configuration as UserProfileConfiguration } from "../findjobnu-api";
+import { ProfileApi } from "../findjobnu-api";
+import { createAuthClient, createApiClient } from "../helpers/ApiFactory";
 
-const api = new AuthenticationApi(new AuthConfiguration());
-const linkedInApi = new LinkedInAuthApi(new AuthConfiguration());
+const api = createAuthClient(AuthenticationApi);
 
 const Register: React.FC = () => {
   const [form, setForm] = useState<RegisterRequest>({ email: "", password: "", phone: "", firstName: "", lastName: "" });
@@ -37,6 +36,10 @@ const Register: React.FC = () => {
     if (name === "lastName" && lastNameTouched) setLastNameInvalid(!e.target.checkValidity());
     if (name === "email" && emailTouched) setEmailInvalid(!e.target.checkValidity());
     if (name === "password" && passwordTouched) setPasswordInvalid(!e.target.checkValidity());
+    if (name === "firstName") { setFirstNameTouched(true); setFirstNameInvalid(!e.target.checkValidity()); }
+    if (name === "lastName") { setLastNameTouched(true); setLastNameInvalid(!e.target.checkValidity()); }
+    if (name === "email") { setEmailTouched(true); setEmailInvalid(!e.target.checkValidity()); }
+    if (name === "password") { setPasswordTouched(true); setPasswordInvalid(!e.target.checkValidity()); }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -80,16 +83,8 @@ const Register: React.FC = () => {
         accessTokenExpiration: res.accessTokenExpiration?.toISOString() ?? "",
       });
 
-      //initialize user profile
-  const upApi = new ProfileApi(
-        new UserProfileConfiguration({
-          basePath: "https://findjob.nu",
-          accessToken: res.accessToken ?? undefined, 
-          headers: {
-            Authorization: `Bearer ${res.accessToken}`
-          }
-        })
-      );
+  //initialize user profile
+  const upApi = createApiClient(ProfileApi, res.accessToken);
       await upApi.createProfile({ profile: {
           userId: res.userId ?? "",
           basicInfo: {

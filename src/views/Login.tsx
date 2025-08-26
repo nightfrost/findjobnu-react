@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import { createAuthClient, createApiClient } from "../helpers/ApiFactory";
 import { AuthenticationApi, type LoginRequest } from "../findjobnu-auth";
 import { ProfileApi } from "../findjobnu-api";

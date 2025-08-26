@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useUser } from "../context/UserContext";
+import { useLocation } from "react-router-dom";
+import { useUser } from "../context/UserContext.shared";
 import SavedJobs from "../components/SavedJobs";
 import RecommendedJobs from "../components/RecommendedJobs";
 
@@ -9,7 +9,6 @@ type TabKey = "saved" | "recommended";
 const MyJobs: React.FC = () => {
 	const { user } = useUser();
 	const userId = user?.userId ?? "";
-	const navigate = useNavigate();
 	const location = useLocation();
 
 	const initialTab: TabKey = useMemo(() => {

@@ -1,10 +1,9 @@
-/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useState } from "react";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import Paging from "./Paging";
 import { ProfileApi } from "../findjobnu-api";
 import { handleApiError } from "../helpers/ErrorHelper";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import { createApiClient } from "../helpers/ApiFactory";
 import JobListSkeleton from "./JobListSkeleton";
 

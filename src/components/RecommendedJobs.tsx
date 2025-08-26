@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import { JobIndexPostsApi } from "../findjobnu-api";
 import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
 import JobList from "./JobList";

@@ -1,6 +1,14 @@
 import { AuthenticationApi } from "../findjobnu-auth/apis/AuthenticationApi";
+import type { User } from "../context/UserContext.shared";
 
-export async function handleApiError(error: unknown) {
+// Adapter interface to accept the UserContext without importing the hook
+export interface UserContextAdapter {
+  user: User | null;
+  setUser: (user: User | null) => void;
+  logout: () => void;
+}
+
+export async function handleApiError(error: unknown, ctx?: UserContextAdapter) {
   console.error("API Error:", error);
 
   // Helper functions for type guards
@@ -22,40 +30,81 @@ export async function handleApiError(error: unknown) {
     return typeof obj === "object" && obj !== null && "body" in obj;
   }
 
+  // Helper to coerce various date shapes to Date
+  const toDate = (d: unknown): Date | null => {
+    if (!d) return null;
+    if (d instanceof Date) return d;
+    if (typeof d === "string" || typeof d === "number") {
+      const dt = new Date(d);
+      return isNaN(dt.getTime()) ? null : dt;
+    }
+    return null;
+  };
+
   //401 Unauthorized
   if (
     (hasResponse(error) && (error as { response: { status?: number } }).response?.status === 401) ||
     (hasStatus(error) && (error as { status?: number }).status === 401) ||
     (hasMessage(error) && (error as { message: string }).message.toLowerCase().includes("unauthorized"))
   ) {
-    // Check if access token is expired
-    const accessTokenExpiration = localStorage.getItem("accessTokenExpiration");
-    const refreshToken = localStorage.getItem("refreshToken");
-    const accessToken = localStorage.getItem("accessToken");
+    // Prefer tokens from UserContext; fall back to localStorage
+    const accessTokenExpiration =
+      ctx?.user?.accessTokenExpiration ?? localStorage.getItem("accessTokenExpiration");
+    const refreshToken = ctx?.user?.refreshToken ?? localStorage.getItem("refreshToken");
+    const accessToken = ctx?.user?.accessToken ?? localStorage.getItem("accessToken");
     if (accessTokenExpiration && accessToken && refreshToken) {
-      const expirationDate = new Date(accessTokenExpiration);
-      if (expirationDate <= new Date()) {
+      const expirationDate = toDate(accessTokenExpiration);
+      if (expirationDate && expirationDate <= new Date()) {
         try {
           const api = new AuthenticationApi();
           const response = await api.refreshToken({
             tokenRefreshRequest: { refreshToken, accessToken }
           });
+          // Update context if provided, otherwise persist directly
+          const exp = response.accessTokenExpiration;
+          let expIso = "";
+          if (exp) {
+            if (exp instanceof Date) {
+              expIso = exp.toISOString();
+            } else {
+              const parsed = new Date(exp as unknown as string);
+              expIso = isNaN(parsed.getTime()) ? "" : parsed.toISOString();
+            }
+          }
 
-          localStorage.setItem("accessToken", response.accessToken ?? "");
-          localStorage.setItem("refreshToken", response.refreshToken ?? "");
-          localStorage.setItem("accessTokenExpiration", response.accessTokenExpiration?.toISOString() ?? "");
+          if (ctx) {
+            const current = ctx.user ?? {};
+            ctx.setUser({
+              ...current,
+              accessToken: response.accessToken ?? "",
+              refreshToken: response.refreshToken ?? "",
+              accessTokenExpiration: expIso,
+            });
+          } else {
+            localStorage.setItem("accessToken", response.accessToken ?? "");
+            localStorage.setItem("refreshToken", response.refreshToken ?? "");
+            localStorage.setItem("accessTokenExpiration", expIso);
+          }
           return { type: "refreshed", message: "Token fornyet." };
         } catch (refreshError) {
           console.warn("Token refresh failed:", refreshError);
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("userId");
+          if (ctx) {
+            ctx.logout();
+          } else {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("userId");
+          }
           return { type: "unauthorized", message: "Det var ikke muligt at forny din session. Log venligst ind igen." };
         }
       } else {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("userId");
+        if (ctx) {
+          ctx.logout();
+        } else {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("userId");
+        }
         return { type: "unauthorized", message: "Din session er udløbet. Log venligst ind igen." };
       }
     }

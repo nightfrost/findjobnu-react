@@ -7,50 +7,22 @@ function mapProfileDtoToProfile(dto: ProfileDto): Profile {
     createdAt: dto.createdAt,
     savedJobPosts: dto.savedJobPosts ?? [],
     keywords: dto.keywords ?? [],
-    basicInfo: dto.basicInfo as any, // Assume compatible, or add mapping if needed
-    experiences: dto.experiences as any,
-    educations: dto.educations as any,
-    interests: dto.interests as any,
-    accomplishments: dto.accomplishments as any,
-    contacts: dto.contacts as any,
-    skills: dto.skills as any,
+  basicInfo: dto.basicInfo as unknown as import("../findjobnu-api/models/BasicInfo").BasicInfo,
+  experiences: dto.experiences as unknown as import("../findjobnu-api/models/Experience").Experience[],
+  educations: dto.educations as unknown as import("../findjobnu-api/models/Education").Education[],
+  interests: dto.interests as unknown as import("../findjobnu-api/models/Interest").Interest[],
+  accomplishments: dto.accomplishments as unknown as import("../findjobnu-api/models/Accomplishment").Accomplishment[],
+  contacts: dto.contacts as unknown as import("../findjobnu-api/models/Contact").Contact[],
+  skills: dto.skills as unknown as import("../findjobnu-api/models/Skill").Skill[],
   };
 }
-/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useEffect, useRef, useState } from "react";
 import ProfileSkeleton from "./ProfileSkeleton";
-
-// Add DateInput component for better validation UX
-const DateInput: React.FC<{ value: string; onChange: (v: string) => void; inputRef?: React.RefObject<HTMLInputElement> }> = ({ value, onChange, inputRef }) => {
-  const [touched, setTouched] = useState(false);
-  const isValid = /^\d{4}-\d{2}-\d{2}$/.test(value);
-  return (
-    <>
-      <input
-        className={`input input-bordered validator w-full${touched && !isValid ? " input-error" : ""}`}
-        id="dateOfBirth"
-        name="dateOfBirth"
-        type="text"
-        ref={inputRef}
-        value={value}
-        onChange={e => { onChange(e.target.value); if (!touched) setTouched(true); }}
-        onBlur={() => setTouched(true)}
-        placeholder="Vælg fødselsdato"
-        autoComplete="off"
-        pattern="^\\d{4}-\\d{2}-\\d{2}$"
-        title="Brug formatet ÅÅÅÅ-MM-DD (f.eks. 1990-05-21)."
-      />
-      {touched && !isValid && (
-        <div className="text-error text-xs mt-1">Brug formatet ÅÅÅÅ-MM-DD (f.eks. 1990-05-21).</div>
-      )}
-    </>
-  );
-};
 import LocationTypeahead from "./LocationTypeahead";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import { ProfileApi } from "../findjobnu-api";
 import type { Profile } from "../findjobnu-api/models/Profile";
 import type { ProfileDto } from "../findjobnu-api/models/ProfileDto";

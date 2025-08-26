@@ -8,10 +8,11 @@ import Footer from "./components/Footer";
 import Profile from "./views/Profile";
 import LinkedInAuthHandler from "./views/LinkedInAuthHandler";
 import { checkAndClearExpiredToken } from "./helpers/AuthHelper";
-import { useUser, UserProvider } from "./context/UserContext";
+import { useUser } from "./context/UserContext.shared";
+import { UserProvider } from "./context/UserContext";
 import JobSearch from "./views/JobSearch";
 import MyJobs from "./views/MyJobs";
-import GoodCV from "./views/GoodCV";
+import GoodCv from "./views/GoodCv";
 
 const App: React.FC = () => {
   return (
@@ -47,7 +48,7 @@ const AppWithAuthCheck: React.FC = () => {
             <Route path="/contact" element={<div>Contact Page</div>} />
             <Route path="/jobsearch" element={<JobSearch />}></Route>
             <Route path="/myjobs" element={<MyJobs />} />
-            <Route path="/cv" element={<GoodCV />} />
+            <Route path="/cv" element={<GoodCv />} />
           </Routes>
         </div>
         <Footer />

@@ -1,6 +1,6 @@
 // Legacy WorkProfile route retained to avoid broken links. Work profile data is now part of unified UserProfile.
 import React from "react";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import UserProfileComponent from "../components/UserProfile";
 
 const WorkProfile: React.FC = () => {

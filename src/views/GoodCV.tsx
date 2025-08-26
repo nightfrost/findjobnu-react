@@ -5,9 +5,10 @@ import illuCertification from "../assets/illustrations/undraw_certification_i2m0
 import { CVApi } from "../findjobnu-api";
 import type { CvReadabilityResult } from "../findjobnu-api/models/CvReadabilityResult";
 import { createApiClient } from "../helpers/ApiFactory";
-import { useUser } from "../context/UserContext";
+import { useUser } from "../context/UserContext.shared";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import MetricCard from "../components/MetricCard";
 
 type Section = {
     title: string;
@@ -60,7 +61,7 @@ const sections: Section[] = [
     },
 ];
 
-const GoodCV: React.FC = () => {
+const GoodCv: React.FC = () => {
     const { user } = useUser();
     const token = user?.accessToken ?? null;
     const [file, setFile] = useState<File | null>(null);
@@ -107,7 +108,8 @@ const GoodCV: React.FC = () => {
 
                         <div className="mt-6 text-left">
                             <div className="rounded-box border border-base-200 p-4">
-                                <h2 className="text-lg font-semibold">Tjek læsbarheden af dit CV (PDF)
+                                <h2 className="text-lg font-semibold flex items-center gap-1">
+                                    <span>Tjek læsbarheden af dit CV (PDF)</span>
                                     <button
                                         type="button"
                                         className="tooltip tooltip-left"
@@ -124,7 +126,7 @@ const GoodCV: React.FC = () => {
                                     <div className="form-control w-full md:w-auto">
                                         <span className="text-sm font-medium mb-1 block">Upload CV som PDF</span>
                                         <input
-                                            id="cvFileInput"
+                                            id="goodCvFileInput"
                                             type="file"
                                             accept="application/pdf"
                                             className="file-input file-input-bordered w-full md:w-auto"
@@ -167,7 +169,69 @@ const GoodCV: React.FC = () => {
                                         {result.summary && (
                                             <div>
                                                 <div className="font-medium">Opsummering</div>
-                                                <p className="text-base-content/80">{result.summary}</p>
+                                                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                    {typeof result.summary.totalWords === 'number' && (
+                                                        <MetricCard
+                                                            label="Ord i alt"
+                                                            tooltip="Antal ord udtrukket fra PDF'en."
+                                                            value={result.summary.totalWords}
+                                                            ok={(result.summary.totalWords ?? 0) >= 150}
+                                                        />
+                                                    )}
+                                                    {typeof result.summary.totalChars === 'number' && (
+                                                        <MetricCard
+                                                            label="Tegn i alt"
+                                                            tooltip="Antal tegn inkl. mellemrum."
+                                                            value={result.summary.totalChars}
+                                                            ok={true}
+                                                        />
+                                                    )}
+                                                    {typeof result.summary.totalLines === 'number' && (
+                                                        <MetricCard
+                                                            label="Linjer i alt"
+                                                            tooltip="Antal linjer i dokumentet."
+                                                            value={result.summary.totalLines}
+                                                            ok={true}
+                                                        />
+                                                    )}
+                                                    {typeof result.summary.bulletCount === 'number' && (
+                                                        <MetricCard
+                                                            label="Punkter (bullets)"
+                                                            tooltip="Antal punktopstillinger (• eller -)."
+                                                            value={result.summary.bulletCount}
+                                                            ok={(result.summary.bulletCount ?? 0) >= 5}
+                                                        />
+                                                    )}
+                                                    {typeof result.summary.matchedSections === 'number' && (
+                                                        <MetricCard
+                                                            label="Matchede sektioner"
+                                                            tooltip="Antal genkendte CV-sektioner (fx Profil, Erfaring, Uddannelse)."
+                                                            value={result.summary.matchedSections}
+                                                            ok={(result.summary.matchedSections ?? 0) >= 3}
+                                                        />
+                                                    )}
+                                                    {typeof result.summary.hasEmail === 'boolean' && (
+                                                        <MetricCard
+                                                            label="Har e-mail"
+                                                            tooltip="Om der blev fundet en gyldig e-mailadresse."
+                                                            value={result.summary.hasEmail ? 'Ja' : 'Nej'}
+                                                            ok={!!result.summary.hasEmail}
+                                                        />
+                                                    )}
+                                                    {typeof result.summary.hasPhone === 'boolean' && (
+                                                        <MetricCard
+                                                            label="Har telefon"
+                                                            tooltip="Om der blev fundet et telefonnummer."
+                                                            value={result.summary.hasPhone ? 'Ja' : 'Nej'}
+                                                            ok={!!result.summary.hasPhone}
+                                                        />
+                                                    )}
+                                                </div>
+                                                {result.summary.note && (
+                                                    <p className="mt-3 text-sm text-base-content/70">
+                                                        {result.summary.note}
+                                                    </p>
+                                                )}
                                             </div>
                                         )}
                                         {result.extractedText && (
@@ -284,4 +348,4 @@ const GoodCV: React.FC = () => {
     );
 };
 
-export default GoodCV;
+export default GoodCv;
