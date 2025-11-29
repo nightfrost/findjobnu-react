@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "serve:compressed": "node server.js",
-    "generate-api": "openapi-generator-cli generate -i http://localhost:5001/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-api",
+    "generate-api": "openapi-generator-cli generate -i https://api.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-api",
     "generate-auth": "openapi-generator-cli generate -i https://auth.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-auth"
   },
   "dependencies": {

@@ -2,7 +2,7 @@ import { Configuration as ApiConfiguration } from "../findjobnu-api";
 import { Configuration as AuthConfiguration, AuthenticationApi } from "../findjobnu-auth";
 
 // Central places to configure base URLs; override via Vite env vars if needed
-const DEFAULT_API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://findjob.nu";
+const DEFAULT_API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://api.findjob.nu/";
 const DEFAULT_AUTH_BASE = import.meta.env.VITE_AUTH_API_BASE_URL ?? "https://auth.findjob.nu";
 
 // Shared refresh promise to prevent parallel refreshes
