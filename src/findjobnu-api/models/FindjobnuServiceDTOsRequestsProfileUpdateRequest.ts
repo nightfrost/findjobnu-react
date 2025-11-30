@@ -13,6 +13,49 @@
  */
 
 import { mapValues } from '../runtime';
+import type { FindjobnuServiceDTOsRequestsSkillUpdate } from './FindjobnuServiceDTOsRequestsSkillUpdate';
+import {
+    FindjobnuServiceDTOsRequestsSkillUpdateFromJSON,
+    FindjobnuServiceDTOsRequestsSkillUpdateFromJSONTyped,
+    FindjobnuServiceDTOsRequestsSkillUpdateToJSON,
+    FindjobnuServiceDTOsRequestsSkillUpdateToJSONTyped,
+} from './FindjobnuServiceDTOsRequestsSkillUpdate';
+import type { FindjobnuServiceDTOsRequestsInterestUpdate } from './FindjobnuServiceDTOsRequestsInterestUpdate';
+import {
+    FindjobnuServiceDTOsRequestsInterestUpdateFromJSON,
+    FindjobnuServiceDTOsRequestsInterestUpdateFromJSONTyped,
+    FindjobnuServiceDTOsRequestsInterestUpdateToJSON,
+    FindjobnuServiceDTOsRequestsInterestUpdateToJSONTyped,
+} from './FindjobnuServiceDTOsRequestsInterestUpdate';
+import type { FindjobnuServiceDTOsRequestsExperienceUpdate } from './FindjobnuServiceDTOsRequestsExperienceUpdate';
+import {
+    FindjobnuServiceDTOsRequestsExperienceUpdateFromJSON,
+    FindjobnuServiceDTOsRequestsExperienceUpdateFromJSONTyped,
+    FindjobnuServiceDTOsRequestsExperienceUpdateToJSON,
+    FindjobnuServiceDTOsRequestsExperienceUpdateToJSONTyped,
+} from './FindjobnuServiceDTOsRequestsExperienceUpdate';
+import type { FindjobnuServiceDTOsRequestsContactUpdate } from './FindjobnuServiceDTOsRequestsContactUpdate';
+import {
+    FindjobnuServiceDTOsRequestsContactUpdateFromJSON,
+    FindjobnuServiceDTOsRequestsContactUpdateFromJSONTyped,
+    FindjobnuServiceDTOsRequestsContactUpdateToJSON,
+    FindjobnuServiceDTOsRequestsContactUpdateToJSONTyped,
+} from './FindjobnuServiceDTOsRequestsContactUpdate';
+import type { FindjobnuServiceDTOsRequestsEducationUpdate } from './FindjobnuServiceDTOsRequestsEducationUpdate';
+import {
+    FindjobnuServiceDTOsRequestsEducationUpdateFromJSON,
+    FindjobnuServiceDTOsRequestsEducationUpdateFromJSONTyped,
+    FindjobnuServiceDTOsRequestsEducationUpdateToJSON,
+    FindjobnuServiceDTOsRequestsEducationUpdateToJSONTyped,
+} from './FindjobnuServiceDTOsRequestsEducationUpdate';
+import type { FindjobnuServiceDTOsRequestsAccomplishmentUpdate } from './FindjobnuServiceDTOsRequestsAccomplishmentUpdate';
+import {
+    FindjobnuServiceDTOsRequestsAccomplishmentUpdateFromJSON,
+    FindjobnuServiceDTOsRequestsAccomplishmentUpdateFromJSONTyped,
+    FindjobnuServiceDTOsRequestsAccomplishmentUpdateToJSON,
+    FindjobnuServiceDTOsRequestsAccomplishmentUpdateToJSONTyped,
+} from './FindjobnuServiceDTOsRequestsAccomplishmentUpdate';
+
 /**
  * 
  * @export
@@ -30,25 +73,109 @@ export interface FindjobnuServiceDTOsRequestsProfileUpdateRequest {
      * @type {string}
      * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
      */
-    fullName?: string | null;
+    firstName: string;
     /**
      * 
      * @type {string}
      * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
      */
-    email?: string | null;
+    lastName: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    dateOfBirth?: Date | null;
     /**
      * 
      * @type {string}
      * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
      */
-    phone?: string | null;
+    phoneNumber?: string | null;
     /**
      * 
      * @type {string}
      * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
      */
-    summary?: string | null;
+    about?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    location?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    company?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    jobTitle?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    linkedinUrl?: string | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    openToWork?: boolean;
+    /**
+     * 
+     * @type {Array<FindjobnuServiceDTOsRequestsExperienceUpdate>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    experiences?: Array<FindjobnuServiceDTOsRequestsExperienceUpdate> | null;
+    /**
+     * 
+     * @type {Array<FindjobnuServiceDTOsRequestsEducationUpdate>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    educations?: Array<FindjobnuServiceDTOsRequestsEducationUpdate> | null;
+    /**
+     * 
+     * @type {Array<FindjobnuServiceDTOsRequestsInterestUpdate>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    interests?: Array<FindjobnuServiceDTOsRequestsInterestUpdate> | null;
+    /**
+     * 
+     * @type {Array<FindjobnuServiceDTOsRequestsAccomplishmentUpdate>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    accomplishments?: Array<FindjobnuServiceDTOsRequestsAccomplishmentUpdate> | null;
+    /**
+     * 
+     * @type {Array<FindjobnuServiceDTOsRequestsContactUpdate>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    contacts?: Array<FindjobnuServiceDTOsRequestsContactUpdate> | null;
+    /**
+     * 
+     * @type {Array<FindjobnuServiceDTOsRequestsSkillUpdate>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    skills?: Array<FindjobnuServiceDTOsRequestsSkillUpdate> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    keywords?: Array<string> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof FindjobnuServiceDTOsRequestsProfileUpdateRequest
+     */
+    savedJobPosts?: Array<string> | null;
 }
 
 /**
@@ -56,6 +183,8 @@ export interface FindjobnuServiceDTOsRequestsProfileUpdateRequest {
  */
 export function instanceOfFindjobnuServiceDTOsRequestsProfileUpdateRequest(value: object): value is FindjobnuServiceDTOsRequestsProfileUpdateRequest {
     if (!('userId' in value) || value['userId'] === undefined) return false;
+    if (!('firstName' in value) || value['firstName'] === undefined) return false;
+    if (!('lastName' in value) || value['lastName'] === undefined) return false;
     return true;
 }
 
@@ -70,10 +199,24 @@ export function FindjobnuServiceDTOsRequestsProfileUpdateRequestFromJSONTyped(js
     return {
         
         'userId': json['userId'],
-        'fullName': json['fullName'] == null ? undefined : json['fullName'],
-        'email': json['email'] == null ? undefined : json['email'],
-        'phone': json['phone'] == null ? undefined : json['phone'],
-        'summary': json['summary'] == null ? undefined : json['summary'],
+        'firstName': json['firstName'],
+        'lastName': json['lastName'],
+        'dateOfBirth': json['dateOfBirth'] == null ? undefined : (new Date(json['dateOfBirth'])),
+        'phoneNumber': json['phoneNumber'] == null ? undefined : json['phoneNumber'],
+        'about': json['about'] == null ? undefined : json['about'],
+        'location': json['location'] == null ? undefined : json['location'],
+        'company': json['company'] == null ? undefined : json['company'],
+        'jobTitle': json['jobTitle'] == null ? undefined : json['jobTitle'],
+        'linkedinUrl': json['linkedinUrl'] == null ? undefined : json['linkedinUrl'],
+        'openToWork': json['openToWork'] == null ? undefined : json['openToWork'],
+        'experiences': json['experiences'] == null ? undefined : ((json['experiences'] as Array<any>).map(FindjobnuServiceDTOsRequestsExperienceUpdateFromJSON)),
+        'educations': json['educations'] == null ? undefined : ((json['educations'] as Array<any>).map(FindjobnuServiceDTOsRequestsEducationUpdateFromJSON)),
+        'interests': json['interests'] == null ? undefined : ((json['interests'] as Array<any>).map(FindjobnuServiceDTOsRequestsInterestUpdateFromJSON)),
+        'accomplishments': json['accomplishments'] == null ? undefined : ((json['accomplishments'] as Array<any>).map(FindjobnuServiceDTOsRequestsAccomplishmentUpdateFromJSON)),
+        'contacts': json['contacts'] == null ? undefined : ((json['contacts'] as Array<any>).map(FindjobnuServiceDTOsRequestsContactUpdateFromJSON)),
+        'skills': json['skills'] == null ? undefined : ((json['skills'] as Array<any>).map(FindjobnuServiceDTOsRequestsSkillUpdateFromJSON)),
+        'keywords': json['keywords'] == null ? undefined : json['keywords'],
+        'savedJobPosts': json['savedJobPosts'] == null ? undefined : json['savedJobPosts'],
     };
 }
 
@@ -89,10 +232,24 @@ export function FindjobnuServiceDTOsRequestsProfileUpdateRequestToJSONTyped(valu
     return {
         
         'userId': value['userId'],
-        'fullName': value['fullName'],
-        'email': value['email'],
-        'phone': value['phone'],
-        'summary': value['summary'],
+        'firstName': value['firstName'],
+        'lastName': value['lastName'],
+        'dateOfBirth': value['dateOfBirth'] == null ? undefined : ((value['dateOfBirth'] as any).toISOString()),
+        'phoneNumber': value['phoneNumber'],
+        'about': value['about'],
+        'location': value['location'],
+        'company': value['company'],
+        'jobTitle': value['jobTitle'],
+        'linkedinUrl': value['linkedinUrl'],
+        'openToWork': value['openToWork'],
+        'experiences': value['experiences'] == null ? undefined : ((value['experiences'] as Array<any>).map(FindjobnuServiceDTOsRequestsExperienceUpdateToJSON)),
+        'educations': value['educations'] == null ? undefined : ((value['educations'] as Array<any>).map(FindjobnuServiceDTOsRequestsEducationUpdateToJSON)),
+        'interests': value['interests'] == null ? undefined : ((value['interests'] as Array<any>).map(FindjobnuServiceDTOsRequestsInterestUpdateToJSON)),
+        'accomplishments': value['accomplishments'] == null ? undefined : ((value['accomplishments'] as Array<any>).map(FindjobnuServiceDTOsRequestsAccomplishmentUpdateToJSON)),
+        'contacts': value['contacts'] == null ? undefined : ((value['contacts'] as Array<any>).map(FindjobnuServiceDTOsRequestsContactUpdateToJSON)),
+        'skills': value['skills'] == null ? undefined : ((value['skills'] as Array<any>).map(FindjobnuServiceDTOsRequestsSkillUpdateToJSON)),
+        'keywords': value['keywords'],
+        'savedJobPosts': value['savedJobPosts'],
     };
 }
 

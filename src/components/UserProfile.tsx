@@ -164,14 +164,49 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         })),
         basicInfo: { ...form.basicInfo, dateOfBirth: dateOfBirthInput ? new Date(dateOfBirthInput) : null, location }
       }; // Profile is used for saving
+
+      // Map to new comprehensive UpdateRequest DTO
       await api.updateProfile({
         id: form.id,
         findjobnuServiceDTOsRequestsProfileUpdateRequest: {
           userId: form.userId,
-          fullName: `${form.basicInfo?.firstName ?? ""} ${form.basicInfo?.lastName ?? ""}`.trim() || undefined,
-          email: undefined,
-          phone: form.basicInfo?.phoneNumber ?? undefined,
-          summary: form.basicInfo?.about ?? undefined,
+          firstName: form.basicInfo?.firstName ?? "",
+          lastName: form.basicInfo?.lastName ?? "",
+          dateOfBirth: toSave.basicInfo?.dateOfBirth ?? undefined,
+          phoneNumber: toSave.basicInfo?.phoneNumber ?? undefined,
+          about: toSave.basicInfo?.about ?? undefined,
+          location: toSave.basicInfo?.location ?? undefined,
+          company: toSave.basicInfo?.company ?? undefined,
+          jobTitle: toSave.basicInfo?.jobTitle ?? undefined,
+          linkedinUrl: toSave.basicInfo?.linkedinUrl ?? undefined,
+          openToWork: toSave.basicInfo?.openToWork ?? undefined,
+          experiences: (toSave.experiences || []).map(e => ({
+            positionTitle: e.positionTitle ?? undefined,
+            company: e.company ?? undefined,
+            fromDate: e.fromDate ?? undefined,
+            toDate: e.toDate ?? undefined,
+            duration: e.duration ?? undefined,
+            location: e.location ?? undefined,
+            description: e.description ?? undefined,
+            linkedinUrl: e.linkedinUrl ?? undefined,
+          })),
+          educations: (toSave.educations || []).map(ed => ({
+            institution: ed.institution ?? undefined,
+            degree: ed.degree ?? undefined,
+            fromDate: ed.fromDate ?? undefined,
+            toDate: ed.toDate ?? undefined,
+            description: ed.description ?? undefined,
+            linkedinUrl: ed.linkedinUrl ?? undefined,
+          })),
+          interests: ((toSave.interests || []).map(i => ({ name: (i as any).name ?? undefined })) as unknown) as any,
+          accomplishments: ((toSave.accomplishments || []).map(a => ({ title: (a as any).title ?? undefined, description: (a as any).description ?? undefined })) as unknown) as any,
+          contacts: ((toSave.contacts || []).map(c => ({ type: (c as any).type ?? undefined, value: (c as any).value ?? undefined })) as unknown) as any,
+          skills: ((toSave.skills || []).map(s => ({
+            name: s.name ?? "",
+            proficiency: { value: Number(s.proficiency ?? 0) }
+          })) as unknown) as any,
+          keywords: toSave.keywords ?? [],
+          savedJobPosts: toSave.savedJobPosts ?? [],
         }
       });
       const refreshed = await api.getProfileByUserId({ userId });

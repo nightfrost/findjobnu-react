@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import type { FindjobnuServiceDTOsResponsesJobIndexPostResponse } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesJobIndexPostResponse";
 import Paging from "./Paging";
 import { ProfileApi, JobIndexPostsApi } from "../findjobnu-api";
@@ -27,36 +27,29 @@ const JobList: React.FC<Props> = ({
   const [openJobIds, setOpenJobIds] = useState<Set<number>>(new Set());
   const [savingJobIds, setSavingJobIds] = useState<Set<number>>(new Set());
   const [savedJobIds, setSavedJobIds] = useState<Set<number>>(new Set());
+  const [detailsMap, setDetailsMap] = useState<Map<number, FindjobnuServiceDTOsResponsesJobIndexPostResponse>>(new Map());
   const { user } = useUser();
 
   const handleSaveJob = async (jobId: number) => {
     const userId = user?.userId;
     const accessToken = user?.accessToken;
     const savedJobsArray = localStorage.getItem("savedJobsArray");
-
     if (!userId || !jobId || !accessToken) return;
-
     const api = createApiClient(ProfileApi, accessToken);
-
     if (savedJobsArray) {
       const savedJobs = new Set(savedJobsArray.split(",").map(Number));
-      if (savedJobs.has(jobId)) {
-        return; // Already saved, no need to proceed
-      }
+      if (savedJobs.has(jobId)) return;
     }
-
     setSavingJobIds(prev => new Set(prev).add(jobId));
     try {
       await api.saveJobForUser({ userId: String(userId), jobId: String(jobId) });
       setSavedJobIds(prev => new Set(prev).add(jobId));
-
-      // Also update localStorage immediately
       const currentSavedJobs = localStorage.getItem("savedJobsArray");
       if (currentSavedJobs) {
-        const savedJobsArray = currentSavedJobs.split(",");
-        if (!savedJobsArray.includes(String(jobId))) {
-          savedJobsArray.push(String(jobId));
-          localStorage.setItem("savedJobsArray", savedJobsArray.join(","));
+        const arr = currentSavedJobs.split(",");
+        if (!arr.includes(String(jobId))) {
+          arr.push(String(jobId));
+          localStorage.setItem("savedJobsArray", arr.join(","));
         }
       } else {
         localStorage.setItem("savedJobsArray", String(jobId));
@@ -68,12 +61,9 @@ const JobList: React.FC<Props> = ({
       });
     } finally {
       setSavingJobIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(jobId);
-        return newSet;
+        const next = new Set(prev); next.delete(jobId); return next;
       });
       try {
-        // Attempt to refresh saved jobs after saving
         const savedJobsResponse = await api.getSavedJobsByUserId({ userId: userId ?? "" });
         localStorage.setItem(
           "savedJobsArray",
@@ -91,26 +81,16 @@ const JobList: React.FC<Props> = ({
   const handleRemoveSavedJob = async (jobId: number) => {
     const userId = user?.userId;
     const accessToken = user?.accessToken;
-
     if (!userId || !jobId || !accessToken) return;
-
     const api = createApiClient(ProfileApi, accessToken);
-
     setSavingJobIds(prev => new Set(prev).add(jobId));
     try {
       await api.removeSavedJobForUser({ userId: String(userId), jobId: String(jobId) });
-      setSavedJobIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(jobId);
-        return newSet;
-      });
-
-      // Also update localStorage immediately
+      setSavedJobIds(prev => { const next = new Set(prev); next.delete(jobId); return next; });
       const currentSavedJobs = localStorage.getItem("savedJobsArray");
       if (currentSavedJobs) {
-        const savedJobsArray = currentSavedJobs.split(",").map(Number);
-        const updatedSavedJobs = savedJobsArray.filter(id => id !== jobId);
-        localStorage.setItem("savedJobsArray", updatedSavedJobs.join(","));
+        const updated = currentSavedJobs.split(",").map(Number).filter(id => id !== jobId);
+        localStorage.setItem("savedJobsArray", updated.join(","));
       }
     } catch (e) {
       handleApiError(e).then(error => {
@@ -118,13 +98,8 @@ const JobList: React.FC<Props> = ({
         globalThis.location.reload();
       });
     } finally {
-      setSavingJobIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(jobId);
-        return newSet;
-      });
+      setSavingJobIds(prev => { const next = new Set(prev); next.delete(jobId); return next; });
       try {
-        // Attempt to refresh saved jobs after removing
         const savedJobsResponse = await api.getSavedJobsByUserId({ userId: userId ?? "" });
         localStorage.setItem(
           "savedJobsArray",
@@ -139,20 +114,16 @@ const JobList: React.FC<Props> = ({
     }
   };
 
-
-
-  // Per-job fetched details (always freshly fetched when opening)
-  const [detailsMap, setDetailsMap] = useState<Map<number, FindjobnuServiceDTOsResponsesJobIndexPostResponse>>(new Map());
+  const truncateWords = (text: string, limit: number) => {
+    const words = text.trim().split(/\s+/);
+    if (words.length <= limit) return { snippet: text.trim(), truncated: false };
+    return { snippet: words.slice(0, limit).join(" ") + "…", truncated: true };
+  };
 
   const handleToggleDescription = async (jobID?: number | null) => {
     if (jobID == null) return;
     const willOpen = !openJobIds.has(jobID);
-    setOpenJobIds(prev => {
-      const next = new Set(prev);
-      next.has(jobID) ? next.delete(jobID) : next.add(jobID);
-      return next;
-    });
-    // Fetch fresh details every time we open (no caching reuse)
+    setOpenJobIds(prev => { const next = new Set(prev); next.has(jobID) ? next.delete(jobID) : next.add(jobID); return next; });
     if (willOpen) {
       try {
         const jobApi = createApiClient(JobIndexPostsApi);
@@ -164,133 +135,127 @@ const JobList: React.FC<Props> = ({
     }
   };
 
+  useEffect(() => {
+    const saved = localStorage.getItem("savedJobsArray");
+    if (saved) {
+      const ids = saved.split(",").map(Number).filter(n => !Number.isNaN(n));
+      setSavedJobIds(new Set(ids));
+    }
+  }, []);
+
+  const renderJobCard = (job: FindjobnuServiceDTOsResponsesJobIndexPostResponse, idx: number) => {
+    const jobId = job.id;
+    const hasValidId = typeof jobId === "number";
+    const isOpen = hasValidId && openJobIds.has(jobId);
+    const isSaving = hasValidId && savingJobIds.has(jobId);
+    const isSaved = hasValidId && savedJobIds.has(jobId);
+    const freshDetails = hasValidId ? detailsMap.get(jobId) : undefined;
+    const descriptionSource = freshDetails?.description ?? job.description ?? null;
+    const canSave = Boolean(user?.userId && user?.accessToken && hasValidId);
+
+    let descriptionBlock: React.ReactNode;
+    if (!descriptionSource || descriptionSource.trim() === "") {
+      descriptionBlock = <p className="text-sm italic text-gray-600">Ingen beskrivelse tilgængelig.</p>;
+    } else if (isOpen) {
+      descriptionBlock = (
+        <>
+          <p className="text-sm text-gray-800 whitespace-pre-line">{descriptionSource}</p>
+          <button type="button" onClick={() => handleToggleDescription(job.id)} className="mt-2 text-blue-600 hover:underline text-sm">
+            Vis mindre
+          </button>
+        </>
+      );
+    } else {
+      const { snippet, truncated } = truncateWords(descriptionSource, 100);
+      descriptionBlock = (
+        <>
+          <p className="text-sm text-gray-800 whitespace-pre-line">{snippet}</p>
+          {truncated && (
+            <button type="button" onClick={() => handleToggleDescription(job.id)} className="mt-2 text-blue-600 hover:underline text-sm">
+              Læs mere
+            </button>
+          )}
+        </>
+      );
+    }
+
+    return (
+      <div key={jobId ?? idx} className="p-4 rounded border bg-white shadow-sm space-y-2" data-testid="job-card">
+        <div className="flex justify-between items-start gap-4">
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-gray-900 leading-snug">{job.title ?? "(Ingen titel)"}</h2>
+            {(job.company || job.location) ? (
+              <p className="mt-1 text-sm text-gray-700">
+                {job.company && <span className="font-medium">{job.company}</span>}
+                {job.company && job.location && <span> · </span>}
+                {job.location && <span>{job.location}</span>}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm italic text-gray-500">Ingen virksomhedsoplysninger.</p>
+            )}
+          </div>
+          <div className="text-right min-w-[120px]">
+            {job.postedDate && <p className="text-xs text-gray-500">Publiceret {new Date(job.postedDate).toLocaleDateString()}</p>}
+            {job.category && <p className="text-xs text-gray-600 mt-1">{job.category}</p>}
+          </div>
+        </div>
+        <div>{descriptionBlock}</div>
+        <div className="flex flex-wrap gap-3 pt-2">
+          {job.jobUrl && (
+            <a href={job.jobUrl} target="_blank" rel="noopener noreferrer" className="text-sm px-3 py-1 rounded border border-blue-600 text-blue-600 hover:bg-blue-50">
+              Gå til opslag
+            </a>
+          )}
+          {canSave && !isSaved && jobId && (
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={() => handleSaveJob(jobId)}
+              className="text-sm px-3 py-1 rounded border border-green-600 text-green-700 hover:bg-green-50 disabled:opacity-50"
+            >
+              {isSaving ? "Gemmer…" : "Gem job"}
+            </button>
+          )}
+          {canSave && isSaved && hasValidId && (
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={() => handleRemoveSavedJob(jobId)}
+              className="text-sm px-3 py-1 rounded border border-red-600 text-red-700 hover:bg-red-50 disabled:opacity-50"
+            >
+              {isSaving ? "Fjerner…" : "Fjern gemt"}
+            </button>
+          )}
+          {!canSave && (
+            <button
+              type="button"
+              disabled
+              className="text-sm px-3 py-1 rounded border border-gray-300 text-gray-400 cursor-not-allowed"
+              title="Log ind for at gemme job"
+            >
+              Gem job
+            </button>
+          )}
+          {descriptionSource && descriptionSource.trim() !== "" && !isOpen && (
+            <button type="button" onClick={() => handleToggleDescription(job.id)} className="text-sm px-3 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-100">
+              Læs mere
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) return <JobListSkeleton count={pageSize} />;
   if (!jobs.length) return <div className="text-center py-8">Ingen job fundet.</div>;
-
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <>
       <div className="grid gap-3">
-        {jobs.map((job, idx) => {
-          const isOpen = typeof job.id === "number" && openJobIds.has(job.id);
-          const isSaving = typeof job.id === "number" && savingJobIds.has(job.id);
-          const isSaved = typeof job.id === "number" && savedJobIds.has(job.id);
-          const isLoggedIn = user?.userId != null && user?.accessToken != null;
-          const isAlreadySaved = typeof job.id === "number" && localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.id));
-          const isJobSaved = isSaved || isAlreadySaved;
-          const freshDetails = typeof job.id === "number" ? detailsMap.get(job.id) : undefined;
-          // Format published date (if present) using Danish locale; fallback to ISO date if locale unsupported
-          let publishedLabel: string | null = null;
-          if (job.postedDate) {
-            const dateObj = job.postedDate instanceof Date ? job.postedDate : new Date(job.postedDate as any);
-            publishedLabel = dateObj.toLocaleDateString('da-DK', { year: 'numeric', month: 'short', day: '2-digit' });
-          }
-          // Derive button label without nested ternaries
-          let saveButtonText = 'Gem';
-          if (isJobSaved) {
-            saveButtonText = 'Fjern';
-          } else if (isSaving) {
-            saveButtonText = 'Gemmer...';
-          }
-
-          return (
-            <React.Fragment key={job.id ?? idx}>
-              <div className="card bg-base-100 shadow rounded-lg p-4">
-                <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="card-title ">
-                    <span>{job.title}</span>
-                  </h2>
-                  {publishedLabel && (
-                    <span className="text-sm text-gray-500 text-right ml-auto">
-                      Publiceret: {publishedLabel}
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-sm text-gray-500">
-                  {job.company} &middot; {job.location}
-                </p>
-
-                <div className="mt-4">
-                  <p className="mb-2">
-                    <i>Klik på 'Ansøg' for at læse mere om stillingen...</i>
-                  </p>
-                  <button
-                    className="btn btn-xs btn-outline mt-1"
-                    onClick={() => handleToggleDescription(job.id as number)}
-                  >
-                    {isOpen ? "Luk" : "Læs mere"}
-                  </button>
-                  {isOpen && (
-                    <div className="mt-3 border-t pt-3 text-sm space-y-1">
-                      <p><span className="font-semibold">Titel:</span> {job.title || "-"}</p>
-                      <p><span className="font-semibold">Virksomhed:</span> {job.company || "-"}</p>
-                      <p><span className="font-semibold">Lokation:</span> {job.location || "-"}</p>
-                      {freshDetails?.category && (
-                        <p><span className="font-semibold">Kategori:</span> {freshDetails.category}</p>
-                      )}
-                      {freshDetails?.description && freshDetails.description.trim().length > 0 && (
-                        <div>
-                          <p className="font-semibold">Beskrivelse:</p>
-                          <p className="whitespace-pre-line">{freshDetails.description}</p>
-                        </div>
-                      )}
-                      {publishedLabel && (
-                        <p><span className="font-semibold">Publiceret:</span> {publishedLabel}</p>
-                      )}
-                      {job.jobUrl && (
-                        <p><span className="font-semibold">Link:</span> <a className="link link-primary" href={job.jobUrl} target="_blank" rel="noopener noreferrer">Ansøg / Se opslag</a></p>
-                      )}
-                      {!freshDetails?.category && !publishedLabel && !job.jobUrl && (
-                        <p className="italic text-gray-500">Ingen yderligere detaljer tilgængelige.</p>
-                      )}
-                      {!freshDetails?.description && (
-                        <p className="italic text-gray-500">Ingen jobbeskrivelse tilgængelig.</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-between items-center mt-4">
-                  <a
-                    href={job.jobUrl ?? undefined}
-                    className="btn btn-s btn-success"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Ansøg
-                  </a>
-                  <button
-                    className="btn btn-outline btn-s btn-error"
-                    disabled={isSaving || !isLoggedIn}
-                    onClick={isJobSaved ? () => handleRemoveSavedJob(job.id as number) : () => handleSaveJob(job.id as number)}
-                  >
-                    {isJobSaved ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m3 3 1.664 1.664M21 21l-1.5-1.5m-5.485-1.242L12 17.25 4.5 21V8.742m.164-4.078a2.15 2.15 0 0 1 1.743-1.342 48.507 48.507 0 0 1 11.186 0c1.1.128 1.907 1.077 1.907 2.185V19.5M4.664 4.664 19.5 19.5" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-                      </svg>
-                    )}
-                    {saveButtonText}
-                  </button>
-                </div>
-              </div>
-              </div>
-              {idx < jobs.length - 1 && <div className="" />}
-            </React.Fragment>
-          );
-        })}
+        {jobs.map((job, idx) => renderJobCard(job, idx))}
       </div>
-      <Paging
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-      />
+      <Paging currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
     </>
   );
 };
