@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import type { JobIndexPosts } from "../findjobnu-api/models/JobIndexPosts";
+import type { FindjobnuServiceDTOsResponsesJobIndexPostResponse } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesJobIndexPostResponse";
 import Paging from "./Paging";
-import { ProfileApi } from "../findjobnu-api";
+import { ProfileApi, JobIndexPostsApi } from "../findjobnu-api";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { useUser } from "../context/UserContext.shared";
 import { createApiClient } from "../helpers/ApiFactory";
 import JobListSkeleton from "./JobListSkeleton";
 
 interface Props {
-  jobs: JobIndexPosts[];
+  jobs: FindjobnuServiceDTOsResponsesJobIndexPostResponse[];
   loading: boolean;
   currentPage: number;
   pageSize: number;
@@ -64,7 +64,7 @@ const JobList: React.FC<Props> = ({
     } catch (e) {
       handleApiError(e).then(error => {
         console.error("Error saving job:", error.message);
-        window.location.reload();
+        globalThis.location.reload();
       });
     } finally {
       setSavingJobIds(prev => {
@@ -75,7 +75,13 @@ const JobList: React.FC<Props> = ({
       try {
         // Attempt to refresh saved jobs after saving
         const savedJobsResponse = await api.getSavedJobsByUserId({ userId: userId ?? "" });
-        localStorage.setItem("savedJobsArray", savedJobsResponse.items?.map(item => item.jobID?.toString()).join(",") ?? "");
+        localStorage.setItem(
+          "savedJobsArray",
+          savedJobsResponse.items
+            ?.map(item => (typeof item.jobID === "number" ? String(item.jobID) : undefined))
+            .filter(Boolean)
+            .join(",") ?? ""
+        );
       } catch (e) {
         console.error("Error fetching saved jobs after saving:", e);
       }
@@ -109,7 +115,7 @@ const JobList: React.FC<Props> = ({
     } catch (e) {
       handleApiError(e).then(error => {
         console.error("Error removing saved job:", error.message);
-        window.location.reload();
+        globalThis.location.reload();
       });
     } finally {
       setSavingJobIds(prev => {
@@ -120,7 +126,13 @@ const JobList: React.FC<Props> = ({
       try {
         // Attempt to refresh saved jobs after removing
         const savedJobsResponse = await api.getSavedJobsByUserId({ userId: userId ?? "" });
-        localStorage.setItem("savedJobsArray", savedJobsResponse.items?.map(item => item.jobID?.toString()).join(",") ?? "");
+        localStorage.setItem(
+          "savedJobsArray",
+          savedJobsResponse.items
+            ?.map(item => (typeof item.jobID === "number" ? String(item.jobID) : undefined))
+            .filter(Boolean)
+            .join(",") ?? ""
+        );
       } catch (e) {
         console.error("Error fetching saved jobs after removing:", e);
       }
@@ -129,17 +141,27 @@ const JobList: React.FC<Props> = ({
 
 
 
-  const handleToggleDescription = (jobID?: number | null) => {
+  // Per-job fetched details (always freshly fetched when opening)
+  const [detailsMap, setDetailsMap] = useState<Map<number, FindjobnuServiceDTOsResponsesJobIndexPostResponse>>(new Map());
+
+  const handleToggleDescription = async (jobID?: number | null) => {
     if (jobID == null) return;
+    const willOpen = !openJobIds.has(jobID);
     setOpenJobIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(jobID)) {
-        newSet.delete(jobID);
-      } else {
-        newSet.add(jobID);
-      }
-      return newSet;
+      const next = new Set(prev);
+      next.has(jobID) ? next.delete(jobID) : next.add(jobID);
+      return next;
     });
+    // Fetch fresh details every time we open (no caching reuse)
+    if (willOpen) {
+      try {
+        const jobApi = createApiClient(JobIndexPostsApi);
+        const fresh = await jobApi.getJobPostsById({ id: jobID });
+        if (fresh) setDetailsMap(prev => new Map(prev).set(jobID, fresh));
+      } catch (e) {
+        console.warn("Failed to fetch job details", e);
+      }
+    }
   };
 
   if (loading) return <JobListSkeleton count={pageSize} />;
@@ -151,16 +173,17 @@ const JobList: React.FC<Props> = ({
     <>
       <div className="grid gap-3">
         {jobs.map((job, idx) => {
-          const isOpen = job.jobID != null && openJobIds.has(job.jobID);
-          const isSaving = job.jobID != null && savingJobIds.has(job.jobID);
-          const isSaved = job.jobID != null && savedJobIds.has(job.jobID);
+          const isOpen = typeof job.id === "number" && openJobIds.has(job.id);
+          const isSaving = typeof job.id === "number" && savingJobIds.has(job.id);
+          const isSaved = typeof job.id === "number" && savedJobIds.has(job.id);
           const isLoggedIn = user?.userId != null && user?.accessToken != null;
-          const isAlreadySaved = localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.jobID));
+          const isAlreadySaved = typeof job.id === "number" && localStorage.getItem("savedJobsArray")?.split(",").includes(String(job.id));
           const isJobSaved = isSaved || isAlreadySaved;
+          const freshDetails = typeof job.id === "number" ? detailsMap.get(job.id) : undefined;
           // Format published date (if present) using Danish locale; fallback to ISO date if locale unsupported
           let publishedLabel: string | null = null;
-          if (job.published) {
-            const dateObj = job.published instanceof Date ? job.published : new Date(job.published);
+          if (job.postedDate) {
+            const dateObj = job.postedDate instanceof Date ? job.postedDate : new Date(job.postedDate as any);
             publishedLabel = dateObj.toLocaleDateString('da-DK', { year: 'numeric', month: 'short', day: '2-digit' });
           }
           // Derive button label without nested ternaries
@@ -172,12 +195,12 @@ const JobList: React.FC<Props> = ({
           }
 
           return (
-            <React.Fragment key={job.jobID ?? idx}>
+            <React.Fragment key={job.id ?? idx}>
               <div className="card bg-base-100 shadow rounded-lg p-4">
                 <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="card-title ">
-                    <span>{job.jobTitle}</span>
+                    <span>{job.title}</span>
                   </h2>
                   {publishedLabel && (
                     <span className="text-sm text-gray-500 text-right ml-auto">
@@ -187,63 +210,46 @@ const JobList: React.FC<Props> = ({
                 </div>
 
                 <p className="text-sm text-gray-500">
-                  {job.companyName} &middot; {job.jobLocation}
+                  {job.company} &middot; {job.location}
                 </p>
-                {job.bannerPicture && (
-                  <div className="w-full max-w-3xl mx-auto my-2 rounded overflow-hidden">
-                    <img
-                      src={`data:image/jpeg;base64,${job.bannerPicture}`}
-                      alt=""
-                      width={1200}
-                      height={400}
-                      className="w-full h-auto object-cover block"
-                      loading="lazy"
-                    />
-                  </div>
-                )}
 
                 <div className="mt-4">
-                  {!isOpen ? (
-                    <>
-                      <p>
-                        {job.jobDescription && job.jobDescription.trim() !== ""
-                          ? <>
-                            {job.jobDescription.slice(0, 350)}
-                            {job.jobDescription.length > 350 && "..."}
-                          </>
-                          : <i>Klik på 'Ansøg' for at læse mere om stillingen...</i>}
-                      </p>
-                      {job.jobDescription && job.jobDescription.trim() !== "" && (
-                        <button
-                          className="btn btn-xs btn-outline mt-2"
-                          onClick={() => handleToggleDescription(job.jobID)}
-                        >
-                          Vis mere
-                        </button>
+                  <p className="mb-2">
+                    <i>Klik på 'Ansøg' for at læse mere om stillingen...</i>
+                  </p>
+                  <button
+                    className="btn btn-xs btn-outline mt-1"
+                    onClick={() => handleToggleDescription(job.id as number)}
+                  >
+                    {isOpen ? "Luk" : "Læs mere"}
+                  </button>
+                  {isOpen && (
+                    <div className="mt-3 border-t pt-3 text-sm space-y-1">
+                      <p><span className="font-semibold">Titel:</span> {job.title || "-"}</p>
+                      <p><span className="font-semibold">Virksomhed:</span> {job.company || "-"}</p>
+                      <p><span className="font-semibold">Lokation:</span> {job.location || "-"}</p>
+                      {freshDetails?.category && (
+                        <p><span className="font-semibold">Kategori:</span> {freshDetails.category}</p>
                       )}
-                    </>
-                  ) : (
-                    <>
-                      <p className="mb-2 whitespace-pre-line">{job.jobDescription}</p>
-                      {job.footerPicture && (
-                        <div className="w-full max-w-3xl mx-auto my-2 rounded overflow-hidden">
-                          <img
-                            src={`data:image/jpeg;base64,${job.footerPicture}`}
-                            alt=""
-                            width={1200}
-                            height={400}
-                            className="w-full h-auto object-cover block"
-                            loading="lazy"
-                          />
+                      {freshDetails?.description && freshDetails.description.trim().length > 0 && (
+                        <div>
+                          <p className="font-semibold">Beskrivelse:</p>
+                          <p className="whitespace-pre-line">{freshDetails.description}</p>
                         </div>
                       )}
-                      <button
-                        className="btn btn-xs btn-outline mt-2"
-                        onClick={() => handleToggleDescription(job.jobID)}
-                      >
-                        Skjul beskrivelse
-                      </button>
-                    </>
+                      {publishedLabel && (
+                        <p><span className="font-semibold">Publiceret:</span> {publishedLabel}</p>
+                      )}
+                      {job.jobUrl && (
+                        <p><span className="font-semibold">Link:</span> <a className="link link-primary" href={job.jobUrl} target="_blank" rel="noopener noreferrer">Ansøg / Se opslag</a></p>
+                      )}
+                      {!freshDetails?.category && !publishedLabel && !job.jobUrl && (
+                        <p className="italic text-gray-500">Ingen yderligere detaljer tilgængelige.</p>
+                      )}
+                      {!freshDetails?.description && (
+                        <p className="italic text-gray-500">Ingen jobbeskrivelse tilgængelig.</p>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -259,7 +265,7 @@ const JobList: React.FC<Props> = ({
                   <button
                     className="btn btn-outline btn-s btn-error"
                     disabled={isSaving || !isLoggedIn}
-                    onClick={isJobSaved ? () => handleRemoveSavedJob(job.jobID!) : () => handleSaveJob(job.jobID!)}
+                    onClick={isJobSaved ? () => handleRemoveSavedJob(job.id as number) : () => handleSaveJob(job.id as number)}
                   >
                     {isJobSaved ? (
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">

@@ -16,6 +16,9 @@
 import * as runtime from '../runtime';
 import type {
   AuthResponse,
+  ChangeEmailRequest,
+  ChangePasswordRequest,
+  DisableAccountRequest,
   LoginRequest,
   RegisterRequest,
   TokenRefreshRequest,
@@ -24,6 +27,12 @@ import type {
 import {
     AuthResponseFromJSON,
     AuthResponseToJSON,
+    ChangeEmailRequestFromJSON,
+    ChangeEmailRequestToJSON,
+    ChangePasswordRequestFromJSON,
+    ChangePasswordRequestToJSON,
+    DisableAccountRequestFromJSON,
+    DisableAccountRequestToJSON,
     LoginRequestFromJSON,
     LoginRequestToJSON,
     RegisterRequestFromJSON,
@@ -34,9 +43,31 @@ import {
     UserInformationResultToJSON,
 } from '../models/index';
 
+export interface ChangeEmailOperationRequest {
+    changeEmailRequest: ChangeEmailRequest;
+}
+
+export interface ChangePasswordOperationRequest {
+    changePasswordRequest: ChangePasswordRequest;
+}
+
+export interface ConfirmChangeEmailRequest {
+    userId: string;
+    newEmail: string;
+    token: string;
+}
+
 export interface ConfirmEmailRequest {
     userId: string;
     token: string;
+}
+
+export interface DisableAccountOperationRequest {
+    disableAccountRequest: DisableAccountRequest;
+}
+
+export interface LockoutUserRequest {
+    body: string;
 }
 
 export interface LoginOperationRequest {
@@ -63,6 +94,162 @@ export interface VerifyLinkedInConnectionRequest {
  * 
  */
 export class AuthenticationApi extends runtime.BaseAPI {
+
+    /**
+     * Sends a confirmation link to the new email. Requires current password.
+     * Initiates an email change.
+     */
+    async changeEmailRaw(requestParameters: ChangeEmailOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['changeEmailRequest'] == null) {
+            throw new runtime.RequiredError(
+                'changeEmailRequest',
+                'Required parameter "changeEmailRequest" was null or undefined when calling changeEmail().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/change-email`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ChangeEmailRequestToJSON(requestParameters['changeEmailRequest']),
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Sends a confirmation link to the new email. Requires current password.
+     * Initiates an email change.
+     */
+    async changeEmail(requestParameters: ChangeEmailOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.changeEmailRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Changes the user\'s password. Requires the current password and new password. Returns success message on success, or appropriate error messages on failure.
+     * Changes the user\'s password.
+     */
+    async changePasswordRaw(requestParameters: ChangePasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['changePasswordRequest'] == null) {
+            throw new runtime.RequiredError(
+                'changePasswordRequest',
+                'Required parameter "changePasswordRequest" was null or undefined when calling changePassword().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/change-password`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ChangePasswordRequestToJSON(requestParameters['changePasswordRequest']),
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Changes the user\'s password. Requires the current password and new password. Returns success message on success, or appropriate error messages on failure.
+     * Changes the user\'s password.
+     */
+    async changePassword(requestParameters: ChangePasswordOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.changePasswordRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Confirms the user\'s email change using the provided token and updates username.
+     * Confirms a user\'s email change.
+     */
+    async confirmChangeEmailRaw(requestParameters: ConfirmChangeEmailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['userId'] == null) {
+            throw new runtime.RequiredError(
+                'userId',
+                'Required parameter "userId" was null or undefined when calling confirmChangeEmail().'
+            );
+        }
+
+        if (requestParameters['newEmail'] == null) {
+            throw new runtime.RequiredError(
+                'newEmail',
+                'Required parameter "newEmail" was null or undefined when calling confirmChangeEmail().'
+            );
+        }
+
+        if (requestParameters['token'] == null) {
+            throw new runtime.RequiredError(
+                'token',
+                'Required parameter "token" was null or undefined when calling confirmChangeEmail().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['userId'] != null) {
+            queryParameters['userId'] = requestParameters['userId'];
+        }
+
+        if (requestParameters['newEmail'] != null) {
+            queryParameters['newEmail'] = requestParameters['newEmail'];
+        }
+
+        if (requestParameters['token'] != null) {
+            queryParameters['token'] = requestParameters['token'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/confirm-change-email`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Confirms the user\'s email change using the provided token and updates username.
+     * Confirms a user\'s email change.
+     */
+    async confirmChangeEmail(requestParameters: ConfirmChangeEmailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.confirmChangeEmailRaw(requestParameters, initOverrides);
+    }
 
     /**
      * Confirms the user\'s email using the provided userId and token, then redirects to https://findjob.nu on success.
@@ -115,6 +302,52 @@ export class AuthenticationApi extends runtime.BaseAPI {
      */
     async confirmEmail(requestParameters: ConfirmEmailRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.confirmEmailRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Locks out the user indefinitely and revokes all refresh tokens.
+     * Disables the current user account.
+     */
+    async disableAccountRaw(requestParameters: DisableAccountOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        if (requestParameters['disableAccountRequest'] == null) {
+            throw new runtime.RequiredError(
+                'disableAccountRequest',
+                'Required parameter "disableAccountRequest" was null or undefined when calling disableAccount().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/disable-account`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: DisableAccountRequestToJSON(requestParameters['disableAccountRequest']),
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Locks out the user indefinitely and revokes all refresh tokens.
+     * Disables the current user account.
+     */
+    async disableAccount(requestParameters: DisableAccountOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.disableAccountRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -183,6 +416,47 @@ export class AuthenticationApi extends runtime.BaseAPI {
     async getUserInformation(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<UserInformationResult> {
         const response = await this.getUserInformationRaw(initOverrides);
         return await response.value();
+    }
+
+    /**
+     * Locks out the specified user by userId. Requires authorization.
+     * Locks out a user account.
+     */
+    async lockoutUserRaw(requestParameters: LockoutUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['body'] == null) {
+            throw new runtime.RequiredError(
+                'body',
+                'Required parameter "body" was null or undefined when calling lockoutUser().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.apiKey) {
+            headerParameters["Authorization"] = await this.configuration.apiKey("Authorization"); // Bearer authentication
+        }
+
+        const response = await this.request({
+            path: `/api/auth/lockout`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters['body'] as any,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Locks out the specified user by userId. Requires authorization.
+     * Locks out a user account.
+     */
+    async lockoutUser(requestParameters: LockoutUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.lockoutUserRaw(requestParameters, initOverrides);
     }
 
     /**

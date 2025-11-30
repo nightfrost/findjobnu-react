@@ -1,5 +1,6 @@
 // Helper to convert ProfileDto to Profile (for editing/updating)
-function mapProfileDtoToProfile(dto: ProfileDto): Profile {
+import type { FindjobnuServiceDTOsProfileDto } from "../findjobnu-api/models/FindjobnuServiceDTOsProfileDto";
+function mapProfileDtoToProfile(dto: FindjobnuServiceDTOsProfileDto): Profile {
   return {
     id: dto.id,
     userId: dto.userId ?? '',
@@ -25,7 +26,7 @@ import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { useUser } from "../context/UserContext.shared";
 import { ProfileApi } from "../findjobnu-api";
 import type { Profile } from "../findjobnu-api/models/Profile";
-import type { ProfileDto } from "../findjobnu-api/models/ProfileDto";
+// using new DTO type for fetched profile
 import type { Experience } from "../findjobnu-api/models/Experience";
 import type { Education } from "../findjobnu-api/models/Education";
 import type { Skill } from "../findjobnu-api/models/Skill";
@@ -33,14 +34,14 @@ import WorkExperienceList from "./WorkExperienceList";
 import EducationList from "./EducationList";
 import SkillList from "./SkillList";
 import { handleApiError } from "../helpers/ErrorHelper";
-import { createApiClient } from "../helpers/ApiFactory";
+import { createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 
 interface Props { userId: string; }
 
 type EditingCard = 'basic' | 'about' | 'experiences' | 'educations' | 'skills' | null;
 
 const UserProfileComponent: React.FC<Props> = ({ userId }) => {
-  const [profile, setProfile] = useState<ProfileDto | null>(null);
+  const [profile, setProfile] = useState<FindjobnuServiceDTOsProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateOfBirthInput, setDateOfBirthInput] = useState<string>("");
   // Which card is currently being edited (null = none)
@@ -56,10 +57,10 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const showToast = (message: string) => {
     setToast(message);
     if (toastTimerRef.current) {
-      window.clearTimeout(toastTimerRef.current);
+      globalThis.clearTimeout(toastTimerRef.current);
       toastTimerRef.current = null;
     }
-    toastTimerRef.current = window.setTimeout(() => setToast(null), 3000);
+    toastTimerRef.current = globalThis.setTimeout(() => setToast(null), 3000);
   };
   // LocationTypeahead handles suggestions
   const dateInputRef = useRef<HTMLInputElement | null>(null);
@@ -92,11 +93,11 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     (async () => {
       setLoading(true); setError(null);
       try {
-        const data: ProfileDto = await api.getProfileByUserId({ userId });
+        const data: FindjobnuServiceDTOsProfileDto = await api.getProfileByUserId({ userId });
         if (cancelled) return;
         const mapped = mapProfileDtoToProfile(data);
         setProfile(data); setForm(mapped);
-        if (data.basicInfo?.dateOfBirth instanceof Date && !isNaN(data.basicInfo.dateOfBirth.getTime())) {
+        if (data.basicInfo?.dateOfBirth instanceof Date && !Number.isNaN(data.basicInfo.dateOfBirth.getTime())) {
           const d = data.basicInfo.dateOfBirth;
           setDateOfBirthInput(`${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`);
         }
@@ -163,8 +164,18 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         })),
         basicInfo: { ...form.basicInfo, dateOfBirth: dateOfBirthInput ? new Date(dateOfBirthInput) : null, location }
       }; // Profile is used for saving
-      await api.updateProfile({ id: form.id, profile: toSave });
-      setProfile(toSave as unknown as ProfileDto);
+      await api.updateProfile({
+        id: form.id,
+        findjobnuServiceDTOsRequestsProfileUpdateRequest: {
+          userId: form.userId,
+          fullName: `${form.basicInfo?.firstName ?? ""} ${form.basicInfo?.lastName ?? ""}`.trim() || undefined,
+          email: undefined,
+          phone: form.basicInfo?.phoneNumber ?? undefined,
+          summary: form.basicInfo?.about ?? undefined,
+        }
+      });
+      const refreshed = await api.getProfileByUserId({ userId });
+      setProfile(refreshed);
       setForm(toSave);
       setEditingCard(null);
   showToast('Profil gemt');
@@ -181,8 +192,17 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         basicInfo: { firstName: "", lastName: "", phoneNumber: "", dateOfBirth: null, location: "" },
         savedJobPosts: [], keywords: [], experiences: [], educations: [], interests: [], accomplishments: [], contacts: [], skills: []
       } as Profile;
-  const created = await api.createProfile({ profile: newProfile });
-  setProfile(created); setForm(created); setEditingCard('basic');
+  await createProfileSimple(api, {
+    userId,
+    fullName: `${newProfile.basicInfo?.firstName ?? ""} ${newProfile.basicInfo?.lastName ?? ""}`.trim(),
+    email: undefined,
+    phone: newProfile.basicInfo?.phoneNumber ?? undefined,
+    summary: newProfile.basicInfo?.about ?? undefined,
+  });
+  const fresh = await api.getProfileByUserId({ userId });
+  setProfile(fresh);
+  setForm(mapProfileDtoToProfile(fresh));
+  setEditingCard('basic');
   setKeywordsInput("");
   showToast('Profil oprettet');
     } catch (e) { const err = await handleApiError(e); setError(err.message); }
@@ -314,7 +334,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
                   setForm(mapped);
                   setLocation(profile.basicInfo?.location ?? "");
                   const dob = profile.basicInfo?.dateOfBirth as unknown as Date | undefined;
-                  setDateOfBirthInput(dob instanceof Date && !isNaN(dob.getTime())
+                  setDateOfBirthInput(dob instanceof Date && !Number.isNaN(dob.getTime())
                     ? `${dob.getFullYear()}-${(dob.getMonth() + 1).toString().padStart(2, '0')}-${dob.getDate().toString().padStart(2, '0')}`
                     : "");
                   setKeywordsInput((mapped.keywords || []).join(', '));

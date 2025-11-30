@@ -43,7 +43,7 @@ const Login: React.FC = () => {
 
   const handleLinkedInLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    window.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
+    globalThis.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
   };
 
   const { setUser } = useUser();
@@ -80,7 +80,7 @@ const Login: React.FC = () => {
       } catch (e) {
         console.error("Error fetching saved jobs:", e);
       }
-      window.location.href = "/";
+      globalThis.location.href = "/";
     } catch (err: unknown) {
       setError("Login fejlede. Tjek dine oplysninger.");
       console.log("Login error:", err);

@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    window.location.href = "/";
+    globalThis.location.href = "/";
   };
 
   return (

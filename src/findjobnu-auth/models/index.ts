@@ -1,6 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AuthResponse';
+export * from './ChangeEmailRequest';
+export * from './ChangePasswordRequest';
+export * from './DisableAccountRequest';
 export * from './LoginRequest';
 export * from './RegisterRequest';
 export * from './TokenRefreshRequest';

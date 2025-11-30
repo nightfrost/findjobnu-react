@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { CitiesApi, type Cities } from "../findjobnu-api/";
+import { CitiesApi } from "../findjobnu-api/";
+import type { FindjobnuServiceDTOsResponsesCityResponse as City } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesCityResponse";
 import { createApiClient } from "../helpers/ApiFactory";
 
 type SearchParams = {
@@ -21,7 +22,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
-  const [citySuggestions, setCitySuggestions] = useState<Cities[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [categorySuggestions, setCategorySuggestions] = useState<string[]>([]);
   const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
@@ -59,7 +60,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   }, [queryCategory, categories, category]);
 
   const handleLocationFocus = async () => {
-    if (!location) {
+    if (location === "") {
       try {
         const results = await citiesApi.getAllCities();
   setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
@@ -104,7 +105,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     }
   };
 
-  const handleSuggestionClick = (city: Cities) => {
+  const handleSuggestionClick = (city: City) => {
     setLocation(city.cityName ?? "");
     setShowSuggestions(false);
   setActiveCityIndex(-1);
@@ -123,7 +124,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   };
 
   const handleCategoryFocus = () => {
-    if (!category) {
+    if (category === "") {
       openAllCategories();
     } else {
       setShowCategorySuggestions(true);

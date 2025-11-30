@@ -1,11 +1,12 @@
 import React, { useState, useRef } from "react";
-import { CitiesApi, type Cities } from "../findjobnu-api/";
+import { CitiesApi } from "../findjobnu-api/";
+import type { FindjobnuServiceDTOsResponsesCityResponse as City } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesCityResponse";
 import { createApiClient } from "../helpers/ApiFactory";
 
 interface LocationTypeaheadProps {
   value: string;
   onChange: (value: string) => void;
-  onSelect?: (city: Cities) => void;
+  onSelect?: (city: City) => void;
   placeholder?: string;
   className?: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
@@ -21,7 +22,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   className = "",
   inputProps = {},
 }) => {
-  const [citySuggestions, setCitySuggestions] = useState<Cities[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeCityIndex, setActiveCityIndex] = useState(-1);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -44,7 +45,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   };
 
   const handleFocus = async () => {
-    if (!value) {
+    if (value === "") {
       try {
         const results = await citiesApi.getAllCities();
         setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
@@ -87,7 +88,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
     }
   };
 
-  const handleSuggestionClick = (city: Cities) => {
+  const handleSuggestionClick = (city: City) => {
     onChange(city.cityName ?? "");
     if (onSelect) onSelect(city);
     setShowSuggestions(false);

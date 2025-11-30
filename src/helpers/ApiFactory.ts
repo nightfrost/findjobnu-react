@@ -1,5 +1,6 @@
-import { Configuration as ApiConfiguration } from "../findjobnu-api";
+import { Configuration as ApiConfiguration, ProfileApi } from "../findjobnu-api";
 import { Configuration as AuthConfiguration, AuthenticationApi } from "../findjobnu-auth";
+import type { FindjobnuServiceDTOsRequestsProfileCreateRequest } from "../findjobnu-api/models/FindjobnuServiceDTOsRequestsProfileCreateRequest";
 
 // Central places to configure base URLs; override via Vite env vars if needed
 const DEFAULT_API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://api.findjob.nu/";
@@ -11,7 +12,7 @@ let refreshInFlight: Promise<string | null> | null = null;
 function isExpired(expIso: string | null): boolean {
   if (!expIso) return true;
   const d = new Date(expIso);
-  return isNaN(d.getTime()) || new Date() >= d;
+  return Number.isNaN(d.getTime()) || new Date() >= d;
 }
 
 async function refreshAccessTokenUsingAuthApi(): Promise<string | null> {
@@ -84,8 +85,8 @@ function buildAuthRetryMiddleware(baseUrl: string) {
 }
 
 // Generic factory for main API clients with auto Authorization
-export function createApiClient<T>(Ctor: new (config?: ApiConfiguration) => T, accessToken?: string | null): T {
-  const bootstrap = accessToken ?? null;
+export function createApiClient<T>(Ctor: new (config?: ApiConfiguration) => T, accessToken: string | null = null): T {
+  const bootstrap = accessToken;
   return new Ctor(
     new ApiConfiguration({
       basePath: DEFAULT_API_BASE,
@@ -102,8 +103,8 @@ export function createApiClient<T>(Ctor: new (config?: ApiConfiguration) => T, a
 }
 
 // Factory for auth API clients (separate host)
-export function createAuthClient<T>(Ctor: new (config?: AuthConfiguration) => T, accessToken?: string | null): T {
-  const bootstrap = accessToken ?? null;
+export function createAuthClient<T>(Ctor: new (config?: AuthConfiguration) => T, accessToken: string | null = null): T {
+  const bootstrap = accessToken;
   return new Ctor(
     new AuthConfiguration({
       basePath: DEFAULT_AUTH_BASE,
@@ -120,3 +121,8 @@ export function createAuthClient<T>(Ctor: new (config?: AuthConfiguration) => T,
 // Convenience helpers (optional wrappers)
 export const getApiBaseUrl = () => DEFAULT_API_BASE;
 export const getAuthBaseUrl = () => DEFAULT_AUTH_BASE;
+
+// Convenience wrapper for creating a profile without repeating the verbose request property name
+export async function createProfileSimple(api: ProfileApi, data: FindjobnuServiceDTOsRequestsProfileCreateRequest) {
+  return api.createProfile({ findjobnuServiceDTOsRequestsProfileCreateRequest: data });
+}

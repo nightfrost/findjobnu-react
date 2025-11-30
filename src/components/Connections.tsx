@@ -70,7 +70,7 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
   }, [userId, accessToken]);
 
   const handleLinkedInLogin = () => {
-    window.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
+    globalThis.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
   };
 
   const handleConnect = async (connectionId: string) => {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { JobIndexPostsApi, type JobIndexPosts } from "../findjobnu-api/";
+import { JobIndexPostsApi } from "../findjobnu-api/";
+import type { FindjobnuServiceDTOsResponsesJobIndexPostResponse } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesJobIndexPostResponse";
 import { createApiClient } from "../helpers/ApiFactory";
 import SearchForm from "../components/SearchForm";
 import JobList from "../components/JobList";
@@ -9,7 +10,7 @@ import JobList from "../components/JobList";
 const api = createApiClient(JobIndexPostsApi);
 
 const JobSearch: React.FC = () => {
-  const [jobs, setJobs] = useState<JobIndexPosts[]>([]);
+  const [jobs, setJobs] = useState<FindjobnuServiceDTOsResponsesJobIndexPostResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);

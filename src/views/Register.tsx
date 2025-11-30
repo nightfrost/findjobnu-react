@@ -4,7 +4,7 @@ import { AuthenticationApi, type RegisterRequest } from "../findjobnu-auth";
 import { Link } from "react-router-dom";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { ProfileApi } from "../findjobnu-api";
-import { createAuthClient, createApiClient } from "../helpers/ApiFactory";
+import { createAuthClient, createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 
 const api = createAuthClient(AuthenticationApi);
 
@@ -52,7 +52,7 @@ const Register: React.FC = () => {
 
   const handleLinkedInLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    window.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
+    globalThis.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
   };
 
   const { setUser } = useUser();
@@ -85,14 +85,13 @@ const Register: React.FC = () => {
 
   //initialize user profile
   const upApi = createApiClient(ProfileApi, res.accessToken);
-      await upApi.createProfile({ profile: {
-          userId: res.userId ?? "",
-          basicInfo: {
-            firstName: form.firstName ?? "",
-            lastName: form.lastName ?? "",
-            phoneNumber: form.phone ?? "",
-          }
-        }});
+      await createProfileSimple(upApi, {
+        userId: res.userId ?? "",
+        fullName: `${form.firstName ?? ""} ${form.lastName ?? ""}`.trim(),
+        email: form.email ?? undefined,
+        phone: form.phone ?? undefined,
+        summary: undefined,
+      });
 
       setSuccess(true);
     } catch (err: unknown) {
@@ -106,7 +105,7 @@ const Register: React.FC = () => {
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
-        window.location.replace("/profile");
+        globalThis.location.replace("/profile");
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -207,7 +206,7 @@ const Register: React.FC = () => {
           <div className="text-success text-center flex flex-col items-center gap-2">
             <span>
               Bruger oprettet! Tjek din E-mail for at bekræfte din konto. Du kan allerede nu editere din{" "}
-              <Link to="/profile" className="link link-primary" onClick={() => window.location.replace("/profile")}>profil</Link>.
+              <Link to="/profile" className="link link-primary" onClick={() => globalThis.location.replace("/profile")}>profil</Link>.
             </span>
             <span className="flex items-center gap-2 mt-2">
               <span className="loading loading-spinner loading-md"></span>
