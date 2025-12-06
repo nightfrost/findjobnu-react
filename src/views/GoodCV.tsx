@@ -3,7 +3,7 @@ import illuFileSearch from "../assets/illustrations/undraw_file-search_cbur.svg"
 import illuPersonalInformation from '../assets/illustrations/undraw_personal-information_h7kf.svg';
 import illuCertification from "../assets/illustrations/undraw_certification_i2m0.svg";
 import { CVApi } from "../findjobnu-api";
-import type { FindjobnuServiceDTOsCvReadabilityResult } from "../findjobnu-api/models/FindjobnuServiceDTOsCvReadabilityResult";
+import type { CvReadabilityResult } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 import { useUser } from "../context/UserContext.shared";
 import { handleApiError } from "../helpers/ErrorHelper";
@@ -66,7 +66,7 @@ const GoodCv: React.FC = () => {
     const token = user?.accessToken ?? null;
     const [file, setFile] = useState<File | null>(null);
     const [analyzing, setAnalyzing] = useState(false);
-    const [result, setResult] = useState<FindjobnuServiceDTOsCvReadabilityResult | null>(null);
+    const [result, setResult] = useState<CvReadabilityResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const onFileChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {

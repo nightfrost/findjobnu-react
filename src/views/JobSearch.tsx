@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { JobIndexPostsApi } from "../findjobnu-api/";
-import type { FindjobnuServiceDTOsResponsesJobIndexPostResponse } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesJobIndexPostResponse";
+import type { JobIndexPostResponse } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 import SearchForm from "../components/SearchForm";
 import JobList from "../components/JobList";
@@ -10,7 +10,7 @@ import JobList from "../components/JobList";
 const api = createApiClient(JobIndexPostsApi);
 
 const JobSearch: React.FC = () => {
-  const [jobs, setJobs] = useState<FindjobnuServiceDTOsResponsesJobIndexPostResponse[]>([]);
+  const [jobs, setJobs] = useState<JobIndexPostResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,23 +98,34 @@ const JobSearch: React.FC = () => {
 
   return (
     <div className="container max-w-7xl mx-auto px-4">
-      <SearchForm
-        onSearch={(params) => {
-          setCurrentPage(1);
-          setLastSearchParams(params);
-          handleSearch(params, 1);
-        }}
-  categories={categories}
-  queryCategory={searchParams.get("category") ?? undefined}
-      />
-      <JobList
-        jobs={jobs}
-        loading={loading}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        totalCount={totalCount}
-        onPageChange={handlePageChange}
-      />
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="order-2 lg:order-1 flex-1 min-w-0">
+          <JobList
+            jobs={jobs}
+            loading={loading}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalCount={totalCount}
+            onPageChange={handlePageChange}
+          />
+        </div>
+
+        <div className="order-1 lg:order-2 shrink-0">
+          <div className="rounded border bg-white shadow-sm lg:sticky lg:top-24 w-full lg:w-fit">
+            <div className="p-4">
+              <SearchForm
+                onSearch={(params) => {
+                  setCurrentPage(1);
+                  setLastSearchParams(params);
+                  handleSearch(params, 1);
+                }}
+                categories={categories}
+                queryCategory={searchParams.get("category") ?? undefined}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext.shared";
 import { JobIndexPostsApi } from "../findjobnu-api";
-import type { FindjobnuServiceDTOsResponsesJobIndexPostResponse } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesJobIndexPostResponse";
+import type { JobIndexPostResponse } from "../findjobnu-api/models";
 import JobList from "./JobList";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { createApiClient } from "../helpers/ApiFactory";
@@ -13,7 +13,7 @@ interface Props {
 const PAGE_SIZE = 10;
 
 const RecommendedJobs: React.FC<Props> = ({ userId }) => {
-  const [jobs, setJobs] = useState<FindjobnuServiceDTOsResponsesJobIndexPostResponse[]>([]);
+  const [jobs, setJobs] = useState<JobIndexPostResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);

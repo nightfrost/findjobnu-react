@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import type { FindjobnuServiceDTOsResponsesJobIndexPostResponse } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesJobIndexPostResponse";
+import type { JobIndexPostResponse } from "../findjobnu-api/models";
 import Paging from "./Paging";
 import { ProfileApi, JobIndexPostsApi } from "../findjobnu-api";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { useUser } from "../context/UserContext.shared";
-import { createApiClient } from "../helpers/ApiFactory";
+import { createApiClient, getApiBaseUrl } from "../helpers/ApiFactory";
 import JobListSkeleton from "./JobListSkeleton";
 
 interface Props {
-  jobs: FindjobnuServiceDTOsResponsesJobIndexPostResponse[];
+  jobs: JobIndexPostResponse[];
   loading: boolean;
   currentPage: number;
   pageSize: number;
@@ -27,7 +27,7 @@ const JobList: React.FC<Props> = ({
   const [openJobIds, setOpenJobIds] = useState<Set<number>>(new Set());
   const [savingJobIds, setSavingJobIds] = useState<Set<number>>(new Set());
   const [savedJobIds, setSavedJobIds] = useState<Set<number>>(new Set());
-  const [detailsMap, setDetailsMap] = useState<Map<number, FindjobnuServiceDTOsResponsesJobIndexPostResponse>>(new Map());
+  const [detailsMap, setDetailsMap] = useState<Map<number, JobIndexPostResponse>>(new Map());
   const { user } = useUser();
 
   const handleSaveJob = async (jobId: number) => {
@@ -143,13 +143,45 @@ const JobList: React.FC<Props> = ({
     }
   }, []);
 
-  const renderJobCard = (job: FindjobnuServiceDTOsResponsesJobIndexPostResponse, idx: number) => {
+  const resolvePictureSource = (raw?: string | null): string | null => {
+    if (!raw) return null;
+    const trimmed = raw.trim();
+    if (trimmed.length === 0) return null;
+    if (/^(https?:)?\/\//i.test(trimmed) || trimmed.startsWith("data:") || trimmed.startsWith("blob:")) {
+      return trimmed;
+    }
+
+    const compact = trimmed.split(/\s+/).join("");
+    const looksBase64 = compact.length > 48 && compact.length % 4 === 0 && /^[A-Za-z0-9+/=]+$/.test(compact);
+    if (looksBase64) {
+      let mime = "image/jpeg";
+      if (compact.startsWith("iVBOR")) mime = "image/png";
+      else if (compact.startsWith("R0lGOD")) mime = "image/gif";
+      else if (compact.startsWith("Qk")) mime = "image/bmp";
+
+      return `data:${mime};base64,${compact}`;
+    }
+
+    if (trimmed.startsWith("/")) {
+      try {
+        return new URL(trimmed, getApiBaseUrl()).toString();
+      } catch {
+        return trimmed;
+      }
+    }
+
+    return trimmed;
+  };
+
+  const renderJobCard = (job: JobIndexPostResponse, idx: number) => {
     const jobId = job.id;
     const hasValidId = typeof jobId === "number";
     const isOpen = hasValidId && openJobIds.has(jobId);
     const isSaving = hasValidId && savingJobIds.has(jobId);
     const isSaved = hasValidId && savedJobIds.has(jobId);
     const freshDetails = hasValidId ? detailsMap.get(jobId) : undefined;
+    const bannerPicture = resolvePictureSource(freshDetails?.bannerPicture ?? job.bannerPicture ?? null);
+    const footerPicture = resolvePictureSource(freshDetails?.footerPicture ?? job.footerPicture ?? null);
     const descriptionSource = freshDetails?.description ?? job.description ?? null;
     const canSave = Boolean(user?.userId && user?.accessToken && hasValidId);
 
@@ -180,7 +212,7 @@ const JobList: React.FC<Props> = ({
     }
 
     return (
-      <div key={jobId ?? idx} className="p-4 rounded border bg-white shadow-sm space-y-2" data-testid="job-card">
+      <div key={jobId ?? idx} className="p-4 rounded border bg-white shadow-sm space-y-3" data-testid="job-card">
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900 leading-snug">{job.title ?? "(Ingen titel)"}</h2>
@@ -199,7 +231,30 @@ const JobList: React.FC<Props> = ({
             {job.category && <p className="text-xs text-gray-600 mt-1">{job.category}</p>}
           </div>
         </div>
+
+        {bannerPicture && (
+          <div className="flex justify-center">
+            <img
+              src={bannerPicture}
+              alt="Banner for jobopslag"
+              className="max-w-full h-auto max-h-64 rounded-md border border-base-200"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         <div>{descriptionBlock}</div>
+        {footerPicture && (
+          <div className="flex justify-center">
+            <img
+              src={footerPicture}
+              alt="Footer grafik for jobopslag"
+              className="max-w-full h-auto max-h-48 rounded-md border border-base-200"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-3 pt-2">
           {job.jobUrl && (
             <a href={job.jobUrl} target="_blank" rel="noopener noreferrer" className="text-sm px-3 py-1 rounded border border-blue-600 text-blue-600 hover:bg-blue-50">

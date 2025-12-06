@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { CitiesApi } from "../findjobnu-api/";
-import type { FindjobnuServiceDTOsResponsesCityResponse as City } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesCityResponse";
+import type { CityResponse as City } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 
 type SearchParams = {
@@ -189,18 +189,20 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     }
   };
 
+  const inputWidthClass = "w-full lg:w-64";
+
   return (
-    <form className="flex flex-col md:flex-row gap-2 mb-5 relative" onSubmit={handleSubmit}>
-      <div className="relative flex-1">
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+      <div className={`relative ${inputWidthClass}`}>
         <input
-        className="input input-bordered shadow w-full flex-1"
+        className="input input-bordered shadow w-full"
         placeholder="Søgeord"
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
       />
       </div>
       <fieldset
-        className="relative flex-1 border-0 p-0 m-0"
+        className={`relative border-0 p-0 m-0 ${inputWidthClass}`}
         onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
       >
         <legend className="sr-only">Lokation</legend>
@@ -232,7 +234,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
         )}
   </fieldset>
       <fieldset
-        className="relative flex-1 border-0 p-0 m-0"
+        className={`relative border-0 p-0 m-0 ${inputWidthClass}`}
         onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 100)}
       >
         <legend className="sr-only">Kategori</legend>
@@ -263,8 +265,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
           </ul>
         )}
       </fieldset>
-      
-      <button className="btn btn-primary shadow" type="submit">
+      <button className={`btn btn-primary shadow ${inputWidthClass}`} type="submit">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
         Søg
       </button>

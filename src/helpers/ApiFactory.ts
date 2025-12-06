@@ -1,6 +1,6 @@
 import { Configuration as ApiConfiguration, ProfileApi } from "../findjobnu-api";
 import { Configuration as AuthConfiguration, AuthenticationApi } from "../findjobnu-auth";
-import type { FindjobnuServiceDTOsRequestsProfileCreateRequest } from "../findjobnu-api/models/FindjobnuServiceDTOsRequestsProfileCreateRequest";
+import type { ProfileCreateRequest } from "../findjobnu-api/models/ProfileCreateRequest";
 
 // Central places to configure base URLs; override via Vite env vars if needed
 const DEFAULT_API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://api.findjob.nu/";
@@ -87,6 +87,8 @@ function buildAuthRetryMiddleware(baseUrl: string) {
 // Generic factory for main API clients with auto Authorization
 export function createApiClient<T>(Ctor: new (config?: ApiConfiguration) => T, accessToken: string | null = null): T {
   const bootstrap = accessToken;
+  const defaultHeaders: Record<string, string> = { "Accept-Encoding": "gzip, deflate, br" };
+  if (bootstrap) defaultHeaders["Authorization"] = `Bearer ${bootstrap}`;
   return new Ctor(
     new ApiConfiguration({
       basePath: DEFAULT_API_BASE,
@@ -96,8 +98,8 @@ export function createApiClient<T>(Ctor: new (config?: ApiConfiguration) => T, a
         return token ? `Bearer ${token}` : "";
       },
       // Also set static header if caller passed a token (first request bootstrap)
-  headers: bootstrap ? { Authorization: `Bearer ${bootstrap}` } : undefined,
-  middleware: buildAuthRetryMiddleware(DEFAULT_AUTH_BASE) as unknown as ApiConfiguration["middleware"],
+      headers: defaultHeaders,
+      middleware: buildAuthRetryMiddleware(DEFAULT_AUTH_BASE) as unknown as ApiConfiguration["middleware"],
     })
   );
 }
@@ -105,6 +107,8 @@ export function createApiClient<T>(Ctor: new (config?: ApiConfiguration) => T, a
 // Factory for auth API clients (separate host)
 export function createAuthClient<T>(Ctor: new (config?: AuthConfiguration) => T, accessToken: string | null = null): T {
   const bootstrap = accessToken;
+  const defaultHeaders: Record<string, string> = { "Accept-Encoding": "gzip, deflate, br" };
+  if (bootstrap) defaultHeaders["Authorization"] = `Bearer ${bootstrap}`;
   return new Ctor(
     new AuthConfiguration({
       basePath: DEFAULT_AUTH_BASE,
@@ -112,8 +116,8 @@ export function createAuthClient<T>(Ctor: new (config?: AuthConfiguration) => T,
         const token = await getOrRefreshToken(bootstrap);
         return token ? `Bearer ${token}` : "";
       },
-  headers: bootstrap ? { Authorization: `Bearer ${bootstrap}` } : undefined,
-  middleware: buildAuthRetryMiddleware(DEFAULT_AUTH_BASE) as unknown as AuthConfiguration["middleware"],
+      headers: defaultHeaders,
+      middleware: buildAuthRetryMiddleware(DEFAULT_AUTH_BASE) as unknown as AuthConfiguration["middleware"],
     })
   );
 }
@@ -123,6 +127,6 @@ export const getApiBaseUrl = () => DEFAULT_API_BASE;
 export const getAuthBaseUrl = () => DEFAULT_AUTH_BASE;
 
 // Convenience wrapper for creating a profile without repeating the verbose request property name
-export async function createProfileSimple(api: ProfileApi, data: FindjobnuServiceDTOsRequestsProfileCreateRequest) {
-  return api.createProfile({ findjobnuServiceDTOsRequestsProfileCreateRequest: data });
+export async function createProfileSimple(api: ProfileApi, data: ProfileCreateRequest) {
+  return api.createProfile({ profileCreateRequest: data });
 }

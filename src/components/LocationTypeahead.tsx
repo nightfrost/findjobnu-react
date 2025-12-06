@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { CitiesApi } from "../findjobnu-api/";
-import type { FindjobnuServiceDTOsResponsesCityResponse as City } from "../findjobnu-api/models/FindjobnuServiceDTOsResponsesCityResponse";
+import type { CityResponse as City } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 
 interface LocationTypeaheadProps {
