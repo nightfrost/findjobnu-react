@@ -20,7 +20,8 @@
     "strict": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["vite/client", "vitest"]
   },
   "include": ["src"],
   "exclude": ["src/findjobnu-api/*", "src/findjobnu-auth/*"]

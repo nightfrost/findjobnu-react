@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import viteCompression from "vite-plugin-compression";
@@ -21,4 +21,14 @@ export default defineConfig({
       threshold: 1024,
     }),
   ],
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: "./src/test/setupTests.ts",
+    css: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+    },
+  },
 });

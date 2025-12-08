@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "serve:compressed": "node server.js",
     "generate-api": "openapi-generator-cli generate -i https://api.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-api",
-    "generate-auth": "openapi-generator-cli generate -i https://auth.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-auth"
+    "generate-auth": "openapi-generator-cli generate -i https://auth.findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./src/findjobnu-auth",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -27,22 +30,28 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@openapitools/openapi-generator-cli": "^2.20.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/pikaday": "^1.7.9",
     "@types/react": "^19.1.2",
     "@types/react-day-picker": "^5.2.1",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react-swc": "^3.9.0",
+    "@vitest/coverage-v8": "^4.0.15",
     "compression": "^1.7.5",
     "eslint": "^9.25.0",
-  "eslint-plugin-unicorn": "^55.0.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "eslint-plugin-unicorn": "^55.0.0",
     "express": "^4.19.2",
     "globals": "^16.0.0",
+    "jsdom": "^27.2.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5",
-    "vite-plugin-compression": "^0.5.1"
+    "vite-plugin-compression": "^0.5.1",
+    "vitest": "^4.0.15"
   },
   "engines": {
     "node": ">=18"
