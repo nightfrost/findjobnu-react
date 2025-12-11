@@ -143,7 +143,60 @@ const JobList: React.FC<Props> = ({
     }
   }, []);
 
-  const resolvePictureSource = (raw?: string | null): string | null => {
+  const normalizeFormat = (fmt?: string | null): string | undefined => {
+    if (!fmt) return undefined;
+    const cleaned = fmt.trim().replace(/^\./, "").toLowerCase();
+    return cleaned.length > 0 ? cleaned : undefined;
+  };
+
+  const mimeFromFormat = (fmt?: string | null): string | undefined => {
+    switch (normalizeFormat(fmt)) {
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "png":
+        return "image/png";
+      case "gif":
+        return "image/gif";
+      case "bmp":
+        return "image/bmp";
+      case "webp":
+        return "image/webp";
+      case "svg":
+      case "svg+xml":
+        return "image/svg+xml";
+      default:
+        return undefined;
+    }
+  };
+
+  const inferMimeFromContent = (compact: string): string => {
+    if (compact.startsWith("iVBOR")) return "image/png";
+    if (compact.startsWith("R0lGOD")) return "image/gif";
+    if (compact.startsWith("Qk")) return "image/bmp";
+    if (compact.startsWith("UklGR")) return "image/webp";
+    return "image/jpeg";
+  };
+
+  const composeDataUri = (compact: string, mimeType?: string | null, format?: string | null): string => {
+    const declared = mimeType?.trim();
+    if (declared) {
+      return `data:${declared};base64,${compact}`;
+    }
+
+    const formatMime = mimeFromFormat(format);
+    if (formatMime) {
+      return `data:${formatMime};base64,${compact}`;
+    }
+
+    return `data:${inferMimeFromContent(compact)};base64,${compact}`;
+  };
+
+  const resolvePictureSource = (
+    raw?: string | null,
+    mimeType?: string | null,
+    format?: string | null
+  ): string | null => {
     if (!raw) return null;
     const trimmed = raw.trim();
     if (trimmed.length === 0) return null;
@@ -154,12 +207,7 @@ const JobList: React.FC<Props> = ({
     const compact = trimmed.split(/\s+/).join("");
     const looksBase64 = compact.length > 48 && compact.length % 4 === 0 && /^[A-Za-z0-9+/=]+$/.test(compact);
     if (looksBase64) {
-      let mime = "image/jpeg";
-      if (compact.startsWith("iVBOR")) mime = "image/png";
-      else if (compact.startsWith("R0lGOD")) mime = "image/gif";
-      else if (compact.startsWith("Qk")) mime = "image/bmp";
-
-      return `data:${mime};base64,${compact}`;
+      return composeDataUri(compact, mimeType, format);
     }
 
     if (trimmed.startsWith("/")) {
@@ -180,8 +228,16 @@ const JobList: React.FC<Props> = ({
     const isSaving = hasValidId && savingJobIds.has(jobId);
     const isSaved = hasValidId && savedJobIds.has(jobId);
     const freshDetails = hasValidId ? detailsMap.get(jobId) : undefined;
-    const bannerPicture = resolvePictureSource(freshDetails?.bannerPicture ?? job.bannerPicture ?? null);
-    const footerPicture = resolvePictureSource(freshDetails?.footerPicture ?? job.footerPicture ?? null);
+    const bannerPicture = resolvePictureSource(
+      freshDetails?.bannerPicture ?? job.bannerPicture ?? null,
+      freshDetails?.bannerMimeType ?? job.bannerMimeType ?? null,
+      freshDetails?.bannerFormat ?? job.bannerFormat ?? null
+    );
+    const footerPicture = resolvePictureSource(
+      freshDetails?.footerPicture ?? job.footerPicture ?? null,
+      freshDetails?.footerMimeType ?? job.footerMimeType ?? null,
+      freshDetails?.footerFormat ?? job.footerFormat ?? null
+    );
     const descriptionSource = freshDetails?.description ?? job.description ?? null;
     const canSave = Boolean(user?.userId && user?.accessToken && hasValidId);
 
@@ -212,7 +268,7 @@ const JobList: React.FC<Props> = ({
     }
 
     return (
-      <div key={jobId ?? idx} className="p-4 rounded border bg-white shadow-sm space-y-3" data-testid="job-card">
+      <div key={jobId ?? idx} className="card bg-white shadow-sm space-y-3 p-4" data-testid="job-card">
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900 leading-snug">{job.title ?? "(Ingen titel)"}</h2>

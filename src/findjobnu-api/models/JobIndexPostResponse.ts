@@ -91,6 +91,30 @@ export interface JobIndexPostResponse {
      * @memberof JobIndexPostResponse
      */
     keywords?: Array<string> | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobIndexPostResponse
+     */
+    bannerFormat?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobIndexPostResponse
+     */
+    footerFormat?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobIndexPostResponse
+     */
+    bannerMimeType?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobIndexPostResponse
+     */
+    footerMimeType?: string | null;
 }
 
 /**
@@ -122,6 +146,10 @@ export function JobIndexPostResponseFromJSONTyped(json: any, ignoreDiscriminator
         'bannerPicture': json['bannerPicture'] == null ? undefined : json['bannerPicture'],
         'footerPicture': json['footerPicture'] == null ? undefined : json['footerPicture'],
         'keywords': json['keywords'] == null ? undefined : json['keywords'],
+        'bannerFormat': json['bannerFormat'] == null ? undefined : json['bannerFormat'],
+        'footerFormat': json['footerFormat'] == null ? undefined : json['footerFormat'],
+        'bannerMimeType': json['bannerMimeType'] == null ? undefined : json['bannerMimeType'],
+        'footerMimeType': json['footerMimeType'] == null ? undefined : json['footerMimeType'],
     };
 }
 
@@ -148,6 +176,10 @@ export function JobIndexPostResponseToJSONTyped(value?: JobIndexPostResponse | n
         'bannerPicture': value['bannerPicture'],
         'footerPicture': value['footerPicture'],
         'keywords': value['keywords'],
+        'bannerFormat': value['bannerFormat'],
+        'footerFormat': value['footerFormat'],
+        'bannerMimeType': value['bannerMimeType'],
+        'footerMimeType': value['footerMimeType'],
     };
 }
 

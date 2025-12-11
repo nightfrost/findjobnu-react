@@ -2,3 +2,15 @@
 @plugin "daisyui" {
    themes: corporate --default;
 }
+
+@layer components {
+   .card {
+      @apply border border-black;
+   }
+
+   .rounded-box.border,
+   .rounded-box.border-base-200,
+   .rounded-box.border-base-300 {
+      @apply border-black;
+   }
+}

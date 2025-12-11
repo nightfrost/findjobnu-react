@@ -42,4 +42,42 @@ describe("JobList", () => {
     expect(banner).toHaveAttribute("src", expect.stringMatching(/^data:image\/(jpeg|png);base64,/));
     expect(footer).toHaveAttribute("src", expect.stringMatching(/^data:image\/(jpeg|png);base64,/));
   });
+
+  it("uses provided mime types for base64 images", () => {
+    const job = {
+      id: 2,
+      title: "Fullstack Developer",
+      bannerPicture: base64Image,
+      bannerMimeType: "image/webp",
+      footerPicture: base64Image,
+      footerMimeType: "image/webp",
+      description: "Beskrivelse",
+      company: "Tech Corp",
+      location: "Aarhus",
+      postedDate: new Date("2024-02-01"),
+      category: "Engineering",
+    };
+
+    renderWithProviders(
+      <JobList
+        jobs={[job]}
+        loading={false}
+        currentPage={1}
+        pageSize={10}
+        totalCount={1}
+        onPageChange={() => {}}
+      />,
+      {
+        userContext: {
+          user: { userId: "user-1", accessToken: "token" },
+        },
+      }
+    );
+
+    const banner = screen.getByAltText("Banner for jobopslag");
+    const footer = screen.getByAltText("Footer grafik for jobopslag");
+
+    expect(banner).toHaveAttribute("src", expect.stringMatching(/^data:image\/webp;base64,/));
+    expect(footer).toHaveAttribute("src", expect.stringMatching(/^data:image\/webp;base64,/));
+  });
 });
