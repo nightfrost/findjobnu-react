@@ -24,7 +24,7 @@ describe("SearchForm", () => {
     expect(onSearch).toHaveBeenCalledWith({
       searchTerm: "Frontend",
       location: "",
-      category: "Engineering (3)",
+      category: "Engineering",
     });
   });
 });

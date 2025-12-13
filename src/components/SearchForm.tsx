@@ -33,6 +33,8 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
 
   const MAX_SUGGESTIONS = 8;
 
+  const normalizeCategoryValue = (value: string) => value.replace(/\s+\(\d+\)\s*$/, "").trim();
+
   const highlightMatch = (text: string | undefined | null, query: string) => {
     if (!text) return null;
     if (!query) return text;
@@ -113,7 +115,13 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({ searchTerm, location, category });
+    const normalizedCategory = normalizeCategoryValue(category);
+    const categoryParam = normalizedCategory.length > 0 ? normalizedCategory : undefined;
+    onSearch({
+      searchTerm,
+      location,
+      category: categoryParam,
+    });
     setShowSuggestions(false);
     setShowCategorySuggestions(false);
   };

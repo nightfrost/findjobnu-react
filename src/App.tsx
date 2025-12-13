@@ -13,6 +13,8 @@ import { UserProvider } from "./context/UserContext";
 import JobSearch from "./views/JobSearch";
 import MyJobs from "./views/MyJobs";
 import GoodCv from "./views/GoodCv";
+import About from "./views/About";
+import Contact from "./views/Contact";
 
 const App: React.FC = () => {
   return (
@@ -44,8 +46,8 @@ const AppWithAuthCheck: React.FC = () => {
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/linkedin-auth" element={<LinkedInAuthHandler />} />
             <Route path="/settings" element={<div>Settings Page</div>} />
-            <Route path="/about" element={<div>About Page</div>} />
-            <Route path="/contact" element={<div>Contact Page</div>} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/jobsearch" element={<JobSearch />}></Route>
             <Route path="/myjobs" element={<MyJobs />} />
             <Route path="/cv" element={<GoodCv />} />
