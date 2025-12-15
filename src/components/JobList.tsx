@@ -124,7 +124,15 @@ const JobList: React.FC<Props> = ({
   const handleToggleDescription = async (jobID?: number | null) => {
     if (jobID == null) return;
     const willOpen = !openJobIds.has(jobID);
-    setOpenJobIds(prev => { const next = new Set(prev); next.has(jobID) ? next.delete(jobID) : next.add(jobID); return next; });
+    setOpenJobIds(prev => {
+      const next = new Set(prev);
+      if (next.has(jobID)) {
+        next.delete(jobID);
+      } else {
+        next.add(jobID);
+      }
+      return next;
+    });
     if (willOpen) {
       try {
         const jobApi = createApiClient(JobIndexPostsApi);
@@ -225,10 +233,11 @@ const JobList: React.FC<Props> = ({
   const renderJobCard = (job: JobIndexPostResponse, idx: number) => {
     const jobId = job.id;
     const hasValidId = typeof jobId === "number";
-    const isOpen = hasValidId && openJobIds.has(jobId);
-    const isSaving = hasValidId && savingJobIds.has(jobId);
-    const isSaved = hasValidId && savedJobIds.has(jobId);
-    const freshDetails = hasValidId ? detailsMap.get(jobId) : undefined;
+    const safeJobId = hasValidId ? jobId : undefined;
+    const isOpen = safeJobId != null && openJobIds.has(safeJobId);
+    const isSaving = safeJobId != null && savingJobIds.has(safeJobId);
+    const isSaved = safeJobId != null && savedJobIds.has(safeJobId);
+    const freshDetails = safeJobId != null ? detailsMap.get(safeJobId) : undefined;
     const bannerPicture = resolvePictureSource(
       freshDetails?.bannerPicture ?? job.bannerPicture ?? null,
       freshDetails?.bannerMimeType ?? job.bannerMimeType ?? null,
@@ -240,7 +249,7 @@ const JobList: React.FC<Props> = ({
       freshDetails?.footerFormat ?? job.footerFormat ?? null
     );
     const descriptionSource = freshDetails?.description ?? job.description ?? null;
-    const canSave = Boolean(user?.userId && user?.accessToken && hasValidId);
+    const canSave = Boolean(user?.userId && user?.accessToken && safeJobId != null);
 
     let descriptionBlock: React.ReactNode;
     if (!descriptionSource || descriptionSource.trim() === "") {
@@ -249,7 +258,7 @@ const JobList: React.FC<Props> = ({
       descriptionBlock = (
         <>
           <p className="text-sm text-gray-800 whitespace-pre-line">{descriptionSource}</p>
-          <button type="button" onClick={() => handleToggleDescription(job.id)} className="mt-2 text-blue-600 hover:underline text-sm">
+          <button type="button" onClick={() => handleToggleDescription(safeJobId)} className="mt-2 text-blue-600 hover:underline text-sm">
             Vis mindre
           </button>
         </>
@@ -260,7 +269,7 @@ const JobList: React.FC<Props> = ({
         <>
           <p className="text-sm text-gray-800 whitespace-pre-line">{snippet}</p>
           {truncated && (
-            <button type="button" onClick={() => handleToggleDescription(job.id)} className="mt-2 text-blue-600 hover:underline text-sm">
+            <button type="button" onClick={() => handleToggleDescription(safeJobId)} className="mt-2 text-blue-600 hover:underline text-sm">
               Læs mere
             </button>
           )}
@@ -271,7 +280,7 @@ const JobList: React.FC<Props> = ({
     const safeJobUrl = sanitizeExternalUrl(job.jobUrl ?? undefined);
 
     return (
-      <div key={jobId ?? idx} className="card bg-white shadow-sm space-y-3 p-4" data-testid="job-card">
+      <div key={safeJobId ?? idx} className="card bg-white shadow-sm space-y-3 p-4" data-testid="job-card">
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900 leading-snug">{job.title ?? "(Ingen titel)"}</h2>
@@ -320,21 +329,21 @@ const JobList: React.FC<Props> = ({
               Gå til opslag
             </a>
           )}
-          {canSave && !isSaved && jobId && (
+          {canSave && !isSaved && safeJobId != null && (
             <button
               type="button"
               disabled={isSaving}
-              onClick={() => handleSaveJob(jobId)}
+              onClick={() => handleSaveJob(safeJobId)}
               className="text-sm px-3 py-1 rounded border border-green-600 text-green-700 hover:bg-green-50 disabled:opacity-50"
             >
               {isSaving ? "Gemmer…" : "Gem job"}
             </button>
           )}
-          {canSave && isSaved && hasValidId && (
+          {canSave && isSaved && safeJobId != null && (
             <button
               type="button"
               disabled={isSaving}
-              onClick={() => handleRemoveSavedJob(jobId)}
+              onClick={() => handleRemoveSavedJob(safeJobId)}
               className="text-sm px-3 py-1 rounded border border-red-600 text-red-700 hover:bg-red-50 disabled:opacity-50"
             >
               {isSaving ? "Fjerner…" : "Fjern gemt"}
@@ -351,7 +360,7 @@ const JobList: React.FC<Props> = ({
             </button>
           )}
           {descriptionSource && descriptionSource.trim() !== "" && !isOpen && (
-            <button type="button" onClick={() => handleToggleDescription(job.id)} className="text-sm px-3 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-100">
+            <button type="button" onClick={() => handleToggleDescription(safeJobId)} className="text-sm px-3 py-1 rounded border border-gray-400 text-gray-700 hover:bg-gray-100">
               Læs mere
             </button>
           )}

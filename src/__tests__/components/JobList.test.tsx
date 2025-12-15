@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import JobList from "../../components/JobList";
-import { renderWithProviders, screen } from "../../test/test-utils";
+import { renderWithProviders, screen } from "../../test/testUtils";
 
 const base64Image =
   "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAAKAAoDAREAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAUGB//EABgQAQADAQAAAAAAAAAAAAAAAAABAgME/8QAFQEBAQAAAAAAAAAAAAAAAAAABgf/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwB4o+KP/9k=";

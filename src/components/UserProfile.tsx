@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
 import { useUser } from "../context/UserContext.shared";
@@ -52,14 +52,32 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const { user } = useUser();
   const token = user?.accessToken;
 
-  const formatDateForInput = (value?: Date | null) => {
+  const formatDateForInput = useCallback((value?: Date | null) => {
     if (!value) return "";
     if (!(value instanceof Date) || Number.isNaN(value.getTime())) return "";
     const year = value.getFullYear();
     const month = String(value.getMonth() + 1).padStart(2, "0");
     const day = String(value.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
-  };
+  }, []);
+
+  const applyProfileState = useCallback((dto: ProfileDto | null) => {
+    if (!dto) {
+      setProfile(null);
+      setForm(null);
+      setDateOfBirthInput("");
+      setLocation("");
+      setKeywordsInput("");
+      return;
+    }
+
+    const mapped = mapProfileDtoToProfile(dto);
+    setProfile(dto);
+    setForm(mapped);
+    setDateOfBirthInput(formatDateForInput(mapped.basicInfo.dateOfBirth));
+    setLocation(mapped.basicInfo.location ?? "");
+    setKeywordsInput((mapped.keywords ?? []).join(", "));
+  }, [formatDateForInput]);
 
   // Date picker setup
   useEffect(() => {
@@ -95,7 +113,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       } finally { if (!cancelled) setLoading(false); }
     })();
     return () => { cancelled = true; };
-  }, [userId, token]);
+  }, [userId, token, applyProfileState]);
 
   const handleBasicInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!form) return;
@@ -186,24 +204,6 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     } catch (e) { const err = await handleApiError(e); setError(err.message); }
     finally { setLoading(false); }
   };
-
-  function applyProfileState(dto: ProfileDto | null) {
-    if (!dto) {
-      setProfile(null);
-      setForm(null);
-      setDateOfBirthInput("");
-      setLocation("");
-      setKeywordsInput("");
-      return;
-    }
-
-    const mapped = mapProfileDtoToProfile(dto);
-    setProfile(dto);
-    setForm(mapped);
-    setDateOfBirthInput(formatDateForInput(mapped.basicInfo.dateOfBirth));
-    setLocation(mapped.basicInfo.location ?? "");
-    setKeywordsInput((mapped.keywords ?? []).join(", "));
-  }
 
   const populateFormFromExistingProfile = (card: NonNullable<EditingCard>) => {
     if (!profile) return;

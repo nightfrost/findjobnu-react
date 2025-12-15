@@ -1,9 +1,10 @@
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import type { Configuration as ApiConfiguration } from "../../findjobnu-api";
 import type { JobIndexPostResponse } from "../../findjobnu-api/models";
 import { JobIndexPostsApi, ProfileApi } from "../../findjobnu-api";
 import JobList from "../../components/JobList";
-import { renderWithProviders, screen, waitFor } from "../../test/test-utils";
+import { renderWithProviders, screen, waitFor } from "../../test/testUtils";
 
 const mockProfileApi = {
   saveJobForUser: vi.fn(),
@@ -15,15 +16,18 @@ const mockJobApi = {
   getJobPostsById: vi.fn(),
 };
 
+type ApiConstructor<T> = new (config?: ApiConfiguration) => T;
+
 vi.mock("../../helpers/ApiFactory", async () => {
   const actual = await vi.importActual<typeof import("../../helpers/ApiFactory")>("../../helpers/ApiFactory");
+  function createApiClientMock<T>(Ctor: ApiConstructor<T>, accessToken: string | null = null): T {
+    if (Ctor === ProfileApi) return mockProfileApi as T;
+    if (Ctor === JobIndexPostsApi) return mockJobApi as T;
+    return actual.createApiClient(Ctor, accessToken);
+  }
   return {
     ...actual,
-    createApiClient: vi.fn((Ctor: new (...args: any[]) => any) => {
-      if (Ctor === ProfileApi) return mockProfileApi;
-      if (Ctor === JobIndexPostsApi) return mockJobApi;
-      return {};
-    }),
+    createApiClient: vi.fn(createApiClientMock),
   };
 });
 

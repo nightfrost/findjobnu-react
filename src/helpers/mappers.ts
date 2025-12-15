@@ -176,19 +176,11 @@ export function mapProfileToUpdateRequest(profile: Profile): ProfileUpdateReques
   const accomplishments = filterEmpty((profile.accomplishments ?? []).map(mapAccomplishmentToUpdate));
   const contacts = filterEmpty((profile.contacts ?? []).map(mapContactToUpdate));
   const skills = filterEmpty((profile.skills ?? []).map(mapSkillToUpdate));
+  const basicInfo = mapBasicInfoToUpdate(profile.basicInfo);
 
   return {
     userId: profile.userId,
-    firstName: profile.basicInfo.firstName ?? "",
-    lastName: profile.basicInfo.lastName ?? "",
-    dateOfBirth: profile.basicInfo.dateOfBirth ?? undefined,
-    phoneNumber: normalizeString(profile.basicInfo.phoneNumber ?? null),
-    about: normalizeString(profile.basicInfo.about ?? null),
-    location: normalizeString(profile.basicInfo.location ?? null),
-    company: normalizeString(profile.basicInfo.company ?? null),
-    jobTitle: normalizeString(profile.basicInfo.jobTitle ?? null),
-    linkedinUrl: normalizeString(profile.basicInfo.linkedinUrl ?? null),
-    openToWork: profile.basicInfo.openToWork ?? undefined,
+    ...basicInfo,
     experiences: experiences.length ? experiences : undefined,
     educations: educations.length ? educations : undefined,
     interests: interests.length ? interests : undefined,

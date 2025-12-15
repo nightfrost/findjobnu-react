@@ -6,7 +6,7 @@ import unicorn from 'eslint-plugin-unicorn'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'src/findjobnu-api/*', 'src/findjobnu-auth/*'] },
+  { ignores: ['dist', 'src/findjobnu-api/*', 'src/findjobnu-auth/*', 'coverage/**'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -34,6 +34,12 @@ export default tseslint.config(
     files: ['src/vite-env.d.ts'],
     rules: {
       'unicorn/filename-case': 'off',
+    },
+  },
+  {
+    files: ['src/__tests__/**/*.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 )

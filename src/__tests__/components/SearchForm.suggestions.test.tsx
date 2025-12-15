@@ -2,7 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CityResponse } from "../../findjobnu-api/models";
 import SearchForm from "../../components/SearchForm";
-import { renderWithProviders, screen, waitFor } from "../../test/test-utils";
+import { renderWithProviders, screen, waitFor } from "../../test/testUtils";
 
 const mockCitiesApi = vi.hoisted(() => ({
   getAllCities: vi.fn(),

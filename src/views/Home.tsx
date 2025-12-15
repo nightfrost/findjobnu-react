@@ -1,6 +1,5 @@
 import React from "react";
 import JobSearch from "./JobSearch";
-import PopularCategories from "../components/PopularCategories";
 
 // Home now shows quick category buttons above the search view
 const Home: React.FC = () => (

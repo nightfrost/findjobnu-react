@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { vi, describe, it, expect } from "vitest";
 import SearchForm from "../../components/SearchForm";
-import { renderWithProviders, screen } from "../../test/test-utils";
+import { renderWithProviders, screen } from "../../test/testUtils";
 
 describe("SearchForm", () => {
   it("submits the entered values", async () => {
