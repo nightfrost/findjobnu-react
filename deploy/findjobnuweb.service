@@ -1,0 +1,21 @@
+[Unit]
+Description=Findjobnu web service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/findjobnu/web/current
+ExecStart=/usr/bin/env node server.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=PORT=4173
+User=findjobnusystem
+Group=www-data
+StandardOutput=append:/var/log/findjobnuweb.log
+StandardError=append:/var/log/findjobnuweb.error.log
+KillSignal=SIGINT
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
