@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Configuration as AuthConfiguration, AuthenticationApi, LinkedInAuthApi } from "../findjobnu-auth";
+import { prepareLinkedInLogin } from "../helpers/oauth";
+import { sanitizeExternalUrl } from "../helpers/url";
 
 interface Props {
   userId: string;
@@ -69,8 +71,13 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
     fetchUserProfile();
   }, [userId, accessToken]);
 
+  const linkedInLoginUrl = useMemo(() => (
+    import.meta.env.VITE_LINKEDIN_LOGIN_URL ?? "https://auth.findjob.nu/api/auth/linkedin/login"
+  ), []);
+
   const handleLinkedInLogin = () => {
-    globalThis.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
+    const redirect = prepareLinkedInLogin(linkedInLoginUrl);
+    globalThis.location.href = redirect;
   };
 
   const handleConnect = async (connectionId: string) => {
@@ -144,8 +151,10 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
     <div className="card bg-base-100 shadow rounded-lg p-6 w-full h-fit">
       <h2 className="card-title mb-4">Tilslutninger</h2>
       <div className="space-y-4">
-        {connections.map((connection) => (
-          <div key={connection.id} className="border border-base-300 rounded-lg p-4">
+        {connections.map((connection) => {
+          const safeProfileUrl = sanitizeExternalUrl(connection.profileUrl);
+          return (
+            <div key={connection.id} className="border border-base-300 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {getPlatformIcon(connection.platform)}
@@ -166,9 +175,9 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
               <div className="flex flex-col gap-2">
                 {connection.isConnected ? (
                   <>
-                    {connection.profileUrl && (
+                    {safeProfileUrl && (
                       <a
-                        href={connection.profileUrl}
+                        href={safeProfileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-sm btn-primary"
@@ -201,8 +210,9 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
                 <span className="text-sm text-green-600">Aktiv forbindelse</span>
               </div>
             )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
       <div className="mt-6">
         <p className="text-sm text-gray-500">

@@ -1,8 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useUser } from "../context/UserContext.shared";
 import { createAuthClient, createApiClient } from "../helpers/ApiFactory";
 import { AuthenticationApi, type LoginRequest } from "../findjobnu-auth";
 import { ProfileApi } from "../findjobnu-api";
+import { prepareLinkedInLogin } from "../helpers/oauth";
 
 const api = createAuthClient(AuthenticationApi);
 
@@ -41,9 +42,14 @@ const Login: React.FC = () => {
     }
   };
 
+  const linkedInLoginUrl = useMemo(() => (
+    import.meta.env.VITE_LINKEDIN_LOGIN_URL ?? "https://auth.findjob.nu/api/auth/linkedin/login"
+  ), []);
+
   const handleLinkedInLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    globalThis.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
+    const redirect = prepareLinkedInLogin(linkedInLoginUrl);
+    globalThis.location.href = redirect;
   };
 
   const { setUser } = useUser();

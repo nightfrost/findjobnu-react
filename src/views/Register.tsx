@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useUser } from "../context/UserContext.shared";
 import { AuthenticationApi, type RegisterRequest } from "../findjobnu-auth";
 import { Link } from "react-router-dom";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { ProfileApi } from "../findjobnu-api";
 import { createAuthClient, createApiClient, createProfileSimple } from "../helpers/ApiFactory";
+import { prepareLinkedInLogin } from "../helpers/oauth";
 
 const api = createAuthClient(AuthenticationApi);
 
@@ -50,9 +51,14 @@ const Register: React.FC = () => {
     if (name === "password") { setPasswordTouched(true); setPasswordInvalid(!e.target.checkValidity()); }
   };
 
+  const linkedInLoginUrl = useMemo(() => (
+    import.meta.env.VITE_LINKEDIN_LOGIN_URL ?? "https://auth.findjob.nu/api/auth/linkedin/login"
+  ), []);
+
   const handleLinkedInLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    globalThis.location.href = "https://auth.findjob.nu/api/auth/linkedin/login";
+    const redirect = prepareLinkedInLogin(linkedInLoginUrl);
+    globalThis.location.href = redirect;
   };
 
   const { setUser } = useUser();

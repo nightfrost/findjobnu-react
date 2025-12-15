@@ -5,6 +5,7 @@ import { ProfileApi, JobIndexPostsApi } from "../findjobnu-api";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { useUser } from "../context/UserContext.shared";
 import { createApiClient, getApiBaseUrl } from "../helpers/ApiFactory";
+import { sanitizeExternalUrl } from "../helpers/url";
 import JobListSkeleton from "./JobListSkeleton";
 
 interface Props {
@@ -267,6 +268,8 @@ const JobList: React.FC<Props> = ({
       );
     }
 
+    const safeJobUrl = sanitizeExternalUrl(job.jobUrl ?? undefined);
+
     return (
       <div key={jobId ?? idx} className="card bg-white shadow-sm space-y-3 p-4" data-testid="job-card">
         <div className="flex justify-between items-start gap-4">
@@ -312,8 +315,8 @@ const JobList: React.FC<Props> = ({
         )}
 
         <div className="flex flex-wrap gap-3 pt-2">
-          {job.jobUrl && (
-            <a href={job.jobUrl} target="_blank" rel="noopener noreferrer" className="text-sm px-3 py-1 rounded border border-blue-600 text-blue-600 hover:bg-blue-50">
+          {safeJobUrl && (
+            <a href={safeJobUrl} target="_blank" rel="noopener noreferrer" className="text-sm px-3 py-1 rounded border border-blue-600 text-blue-600 hover:bg-blue-50">
               Gå til opslag
             </a>
           )}
