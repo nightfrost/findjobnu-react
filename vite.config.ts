@@ -4,6 +4,9 @@ import react from "@vitejs/plugin-react-swc";
 import viteCompression from "vite-plugin-compression";
 
 export default defineConfig({
+  build: {
+    manifest: true,
+  },
   plugins: [
     tailwindcss(),
     react(),
