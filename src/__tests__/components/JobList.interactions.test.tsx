@@ -16,14 +16,14 @@ const mockJobApi = {
   getJobPostsById: vi.fn(),
 };
 
-type ApiConstructor<T> = new (config?: ApiConfiguration) => T;
+type ApiConstructor = new (config?: ApiConfiguration) => unknown;
 
 vi.mock("../../helpers/ApiFactory", async () => {
   const actual = await vi.importActual<typeof import("../../helpers/ApiFactory")>("../../helpers/ApiFactory");
-  function createApiClientMock<T>(Ctor: ApiConstructor<T>, accessToken: string | null = null): T {
+  function createApiClientMock<T>(Ctor: ApiConstructor, accessToken: string | null = null): T {
     if (Ctor === ProfileApi) return mockProfileApi as T;
     if (Ctor === JobIndexPostsApi) return mockJobApi as T;
-    return actual.createApiClient(Ctor, accessToken);
+    return actual.createApiClient(Ctor as new (config?: ApiConfiguration) => T, accessToken);
   }
   return {
     ...actual,
