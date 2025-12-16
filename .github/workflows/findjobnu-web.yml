@@ -92,7 +92,7 @@ jobs:
             mkdir -p "$TMP_DIR" "$RELEASES_DIR" "$CURRENT_DIR"
             NEW_RELEASE="$RELEASES_DIR/$TIMESTAMP"
             mkdir -p "$NEW_RELEASE"
-            tar -xzf "$TMP_DIR/findjobnu-web.tar.gz" -C "$NEW_RELEASE"
+            tar -xzf "$TMP_DIR/web-dist/findjobnu-web.tar.gz" -C "$NEW_RELEASE"
             rm "$TMP_DIR/web-dist/findjobnu-web.tar.gz"
             cd "$NEW_RELEASE"
             npm ci --omit=dev
