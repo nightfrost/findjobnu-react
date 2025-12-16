@@ -71,6 +71,7 @@ jobs:
           host: ${{ vars.SERVER_NAME }}
           username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SERVER_ROOT_CERTIFICATE }}
+          passphrase: ${{ secrets.SERVER_ROOT_CERTIFICATE_PASSWORD }}
           source: "./web-dist/findjobnu-web.tar.gz"
           target: "/var/www/findjobnu/web/tmp/"
 
