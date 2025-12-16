@@ -18,7 +18,10 @@ const Navbar: React.FC = () => {
       <div className="max-w-[1400px] w-full mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Left: Logo now at the start */}
         <div className="flex items-center gap-2">
-          <a href="/" className="btn btn-ghost text-xl normal-case px-2">FindJob.nu</a>
+          <a href="/" className="btn btn-ghost text-xl normal-case px-2 flex items-center gap-2">
+            <img src="/findjobnu-logo.svg" alt="FindJob.nu logo" className="h-8 w-8" />
+            <span>FindJob.nu</span>
+          </a>
         </div>
 
         {/* Desktop navigation */}
