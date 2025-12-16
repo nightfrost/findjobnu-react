@@ -48,12 +48,14 @@ async function main() {
 
   await mkdir(path.dirname(path.join(distDir, jsAlias)), { recursive: true });
   await cp(path.join(distDir, entry.file), path.join(distDir, jsAlias), { force: true });
+  await copyCompressedVariants(entry.file, jsAlias);
 
   const cssFiles = Array.isArray(entry.css) ? entry.css : [];
   for (const [index, cssFile] of cssFiles.entries()) {
     const alias = index === 0 ? "assets/app.css" : `assets/app-${index + 1}.css`;
     aliasMappings.push({ source: cssFile, target: alias });
     await cp(path.join(distDir, cssFile), path.join(distDir, alias), { force: true });
+    await copyCompressedVariants(cssFile, alias);
   }
 
   const htmlPath = path.join(distDir, "index.html");
@@ -66,6 +68,22 @@ async function main() {
 
   await writeFile(htmlPath, html);
   process.stdout.write(`Linked dist entry point to stable aliases (js -> ${jsAlias}).\n`);
+}
+
+async function copyCompressedVariants(sourceRelativePath, targetRelativePath) {
+  const sourceBase = path.join(distDir, sourceRelativePath);
+  const targetBase = path.join(distDir, targetRelativePath);
+  for (const ext of [".gz", ".br"]) {
+    const source = `${sourceBase}${ext}`;
+    try {
+      await access(source, fsConstants.F_OK);
+    } catch {
+      continue;
+    }
+    const target = `${targetBase}${ext}`;
+    await mkdir(path.dirname(target), { recursive: true });
+    await cp(source, target, { force: true });
+  }
 }
 
 main().catch((error) => {

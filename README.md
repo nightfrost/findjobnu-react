@@ -41,6 +41,8 @@ To build for production:
 npm run build
 ```
 
+This generates pre-compressed assets and stable aliases under `dist/` so the production Node server can serve files without hard-coded hashes.
+
 ### Lint
 
 To run ESLint:
@@ -49,13 +51,15 @@ To run ESLint:
 npm run lint
 ```
 
-## API Client
+### Production Preview
 
-The API client is generated using [OpenAPI Generator](https://openapi-generator.tech/):
+Run the same server that powers the live deployment:
 
 ```sh
-npx @openapitools/openapi-generator-cli generate -i https://findjob.nu/swagger/v1/swagger.json -g typescript-fetch -o ./findjobnu-api
+npm run start
 ```
+
+The app will be available at [http://localhost:4173](http://localhost:4173).
 
 ## Project Structure
 
