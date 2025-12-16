@@ -87,16 +87,19 @@ jobs:
             WEB_ROOT=/var/www/findjobnu/web
             TMP_DIR="$WEB_ROOT/tmp"
             RELEASES_DIR="$WEB_ROOT/releases"
-            CURRENT_DIR="$WEB_ROOT/current"
+            CURRENT_LINK="$WEB_ROOT/current"
             TIMESTAMP=$(date +%Y%m%d%H%M%S)
-            mkdir -p "$TMP_DIR" "$RELEASES_DIR" "$CURRENT_DIR"
+            mkdir -p "$TMP_DIR" "$RELEASES_DIR"
             NEW_RELEASE="$RELEASES_DIR/$TIMESTAMP"
             mkdir -p "$NEW_RELEASE"
-            tar -xzf "$TMP_DIR/web-dist/findjobnu-web.tar.gz" -C "$NEW_RELEASE"
-            rm "$TMP_DIR/web-dist/findjobnu-web.tar.gz"
+            tar -xzf "$TMP_DIR/findjobnu-web.tar.gz" -C "$NEW_RELEASE"
+            rm "$TMP_DIR/findjobnu-web.tar.gz"
             cd "$NEW_RELEASE"
             npm ci --omit=dev
-            ln -sfn "$NEW_RELEASE" "$CURRENT_DIR"
+            if [ -e "$CURRENT_LINK" ] || [ -L "$CURRENT_LINK" ]; then
+              rm -rf "$CURRENT_LINK"
+            fi
+            ln -s "$NEW_RELEASE" "$CURRENT_LINK"
             sudo chown -R findjobnusystem:findjobnusystem /var/www/findjobnu/web
             if command -v sudo >/dev/null 2>&1; then
               sudo systemctl reload nginx || true
