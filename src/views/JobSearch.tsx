@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { JobIndexPostsApi } from "../findjobnu-api/";
 import type { JobIndexPostResponse } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
-import SearchForm from "../components/SearchForm";
+import SearchForm, { type CategoryOption } from "../components/SearchForm";
 import JobList from "../components/JobList";
 
 // Reuse the API client instantiation
@@ -12,22 +12,13 @@ const api = createApiClient(JobIndexPostsApi);
 const normalizeLocation = (value?: string | null) => {
   if (!value) return undefined;
   const trimmed = value.trim();
-  if (!trimmed) return undefined;
-
-  // Basic transliteration for Danish characters before stripping diacritics
-  const transliterated = trimmed
-    .replace(/æ/gi, match => match === match.toUpperCase() ? "AE" : "ae")
-    .replace(/ø/gi, match => match === match.toUpperCase() ? "OE" : "oe")
-    .replace(/å/gi, match => match === match.toUpperCase() ? "AA" : "aa");
-
-  const withoutDiacritics = transliterated.normalize("NFD").replace(/\p{Diacritic}/gu, "");
-  return withoutDiacritics.toLowerCase();
+  return trimmed || undefined;
 };
 
 const JobSearch: React.FC = () => {
   const [jobs, setJobs] = useState<JobIndexPostResponse[]>([]);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -35,7 +26,9 @@ const JobSearch: React.FC = () => {
     searchTerm?: string;
     location?: string;
     locationSlug?: string;
-    category?: string;
+    categoryId?: number;
+    postedAfter?: string;
+    postedBefore?: string;
   } | null>(null);
   const [searchParams] = useSearchParams();
 
@@ -59,36 +52,43 @@ const JobSearch: React.FC = () => {
         ?? [];
       const list = (Array.isArray(rawList) ? rawList : [])
         .map((c: any) => {
+          const id = typeof c?.id === "number" ? c.id : undefined;
           const name = c?.name ?? c?.category ?? c?.categoryName ?? "";
           const count = c?.numberOfJobs ?? c?.jobCount ?? c?.count ?? 0;
-          return name ? `${name} (${count})` : null;
-        })
-        .filter((v): v is string => Boolean(v));
-      setCategories(list);
+          if (!id || !name) return null;
+          return {
+            id,
+            name,
+            label: `${name} (${count})`,
+            count,
+          } satisfies CategoryOption;
+        }) as Array<CategoryOption | null>;
+
+      const filtered = list.filter((v): v is CategoryOption => v !== null);
+      setCategories(filtered);
     } catch {
       setCategories([]);
     }
   };
 
   const handleSearch = async (
-    params: { searchTerm?: string; location?: string; locationSlug?: string; category?: string },
+    params: { searchTerm?: string; location?: string; locationSlug?: string; categoryId?: number; postedAfter?: string; postedBefore?: string },
     page = 1
   ) => {
     setLoading(true);
     try {
-      let category = params.category;
-      if (category) {
-        category = category.replace(/ \(\d+\)$/i, "");
-      }
-      const locationFromSlug = params.locationSlug?.trim();
       const locationFromInput = params.location?.trim();
-      const locationNormalized = normalizeLocation(locationFromSlug || locationFromInput);
+      const locationNormalized = normalizeLocation(locationFromInput);
+      const postedAfter = params.postedAfter ? new Date(params.postedAfter) : undefined;
+      const postedBefore = params.postedBefore ? new Date(params.postedBefore) : undefined;
       const data = await api.getJobPostsBySearch({
         ...params,
-        category,
+        category: params.categoryId != null ? String(params.categoryId) : undefined,
         page,
         location: locationNormalized,
         pageSize,
+        postedAfter,
+        postedBefore,
       });
       setJobs(data?.items ?? []);
       setTotalCount(data?.totalCount ?? 0);
@@ -117,7 +117,9 @@ const JobSearch: React.FC = () => {
   useEffect(() => {
     const categoryParam = searchParams.get("category");
     if (categoryParam && !lastSearchParams) {
-      handleSearch({ category: categoryParam }, 1);
+      const asNumber = Number(categoryParam);
+      const categoryId = Number.isFinite(asNumber) ? asNumber : undefined;
+      handleSearch({ categoryId }, 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

@@ -3,11 +3,7 @@ import { JobIndexPostsApi } from "../findjobnu-api";
 import { createApiClient } from "../helpers/ApiFactory";
 import { useNavigate } from "react-router-dom";
 import SkeletonChips from "./SkeletonChips";
-
-interface CategoryEntry {
-  name: string;
-  count: number;
-}
+import type { CategoryOption } from "./SearchForm";
 
 interface Props {
   // Max number of category buttons to show (default 10)
@@ -18,7 +14,7 @@ interface Props {
 const api = createApiClient(JobIndexPostsApi);
 
 const PopularCategories: React.FC<Props> = ({ limit = 10, className = "" }) => {
-  const [categories, setCategories] = useState<CategoryEntry[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -30,10 +26,17 @@ const PopularCategories: React.FC<Props> = ({ limit = 10, className = "" }) => {
       setError(null);
       try {
         const res = await api.getJobCategories();
-        const list: CategoryEntry[] = (res?.categories ?? [])
-          .map(c => ({ name: c.name ?? "", count: c.numberOfJobs ?? 0 }))
-          .filter(c => c.name)
-          .sort((a, b) => b.count - a.count)
+        const raw = res?.categories ?? [];
+        const list: CategoryOption[] = raw
+          .map(c => {
+            const id = c.id;
+            const name = c.name ?? "";
+            const count = c.numberOfJobs ?? 0;
+            if (!id || !name) return null;
+            return { id, name, label: `${name} (${count})`, count } as CategoryOption;
+          })
+          .filter((v): v is CategoryOption => v !== null)
+          .sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
           .slice(0, limit);
         if (isMounted) setCategories(list);
       } catch {
@@ -48,8 +51,8 @@ const PopularCategories: React.FC<Props> = ({ limit = 10, className = "" }) => {
     };
   }, [limit]);
 
-  const handleClick = (category: string) => {
-    navigate(`/jobsearch?category=${encodeURIComponent(category)}`);
+  const handleClick = (category: CategoryOption) => {
+    navigate(`/jobsearch?category=${encodeURIComponent(String(category.id))}`);
   };
 
   return (
@@ -68,14 +71,14 @@ const PopularCategories: React.FC<Props> = ({ limit = 10, className = "" }) => {
           <>
             {categories.map(cat => (
               <button
-                key={cat.name}
+                key={cat.id}
                 type="button"
-                onClick={() => handleClick(cat.name)}
+                onClick={() => handleClick(cat)}
                 className="btn btn-sm btn-outline"
                 aria-label={`Søg på kategorien ${cat.name}`}
               >
                 <span className="truncate max-w-40">{cat.name}</span>
-                <span className="badge badge-secondary ml-1">{cat.count}</span>
+                <span className="badge badge-secondary ml-1">{cat.count ?? 0}</span>
               </button>
             ))}
             {categories.length === 0 && (
