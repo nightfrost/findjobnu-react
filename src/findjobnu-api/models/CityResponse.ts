@@ -30,7 +30,19 @@ export interface CityResponse {
      * @type {string}
      * @memberof CityResponse
      */
-    cityName?: string | null;
+    externalId?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CityResponse
+     */
+    name?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof CityResponse
+     */
+    slug?: string | null;
 }
 
 /**
@@ -51,7 +63,9 @@ export function CityResponseFromJSONTyped(json: any, ignoreDiscriminator: boolea
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
-        'cityName': json['cityName'] == null ? undefined : json['cityName'],
+        'externalId': json['externalId'] == null ? undefined : json['externalId'],
+        'name': json['name'] == null ? undefined : json['name'],
+        'slug': json['slug'] == null ? undefined : json['slug'],
     };
 }
 
@@ -67,7 +81,9 @@ export function CityResponseToJSONTyped(value?: CityResponse | null, ignoreDiscr
     return {
         
         'id': value['id'],
-        'cityName': value['cityName'],
+        'externalId': value['externalId'],
+        'name': value['name'],
+        'slug': value['slug'],
     };
 }
 

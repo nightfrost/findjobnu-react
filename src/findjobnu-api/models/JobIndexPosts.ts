@@ -93,12 +93,6 @@ export interface JobIndexPosts {
      * @memberof JobIndexPosts
      */
     footerPicture?: string | null;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof JobIndexPosts
-     */
-    keywords?: Array<string> | null;
 }
 
 /**
@@ -129,7 +123,6 @@ export function JobIndexPostsFromJSONTyped(json: any, ignoreDiscriminator: boole
         'categories': json['categories'] == null ? undefined : ((json['categories'] as Array<any>).map(CategoryFromJSON)),
         'bannerPicture': json['bannerPicture'] == null ? undefined : json['bannerPicture'],
         'footerPicture': json['footerPicture'] == null ? undefined : json['footerPicture'],
-        'keywords': json['keywords'] == null ? undefined : json['keywords'],
     };
 }
 
@@ -155,7 +148,6 @@ export function JobIndexPostsToJSONTyped(value?: JobIndexPosts | null, ignoreDis
         'categories': value['categories'] == null ? undefined : ((value['categories'] as Array<any>).map(CategoryToJSON)),
         'bannerPicture': value['bannerPicture'],
         'footerPicture': value['footerPicture'],
-        'keywords': value['keywords'],
     };
 }
 

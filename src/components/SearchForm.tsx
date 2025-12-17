@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { CitiesApi } from "../findjobnu-api/";
+import { CityApi } from "../findjobnu-api/";
 import type { CityResponse as City } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 
@@ -16,7 +16,7 @@ interface Props {
   queryCategory?: string;
 }
 
-const citiesApi = createApiClient(CitiesApi);
+const citiesApi = createApiClient(CityApi);
 
 const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -108,7 +108,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   };
 
   const handleSuggestionClick = (city: City) => {
-    setLocation(city.cityName ?? "");
+    setLocation(city.name ?? "");
     setShowSuggestions(false);
   setActiveCityIndex(-1);
   };
@@ -232,9 +232,9 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
                   type="button"
                   className={`menu-item text px-3 py-2 w-full text-left ${idx === activeCityIndex ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
                   onClick={() => handleSuggestionClick(city)}
-                  aria-label={`Vælg ${city.cityName}`}
+                  aria-label={`Vælg ${city.name ?? ""}`}
                 >
-                  {highlightMatch(city.cityName, location)}
+                  {highlightMatch(city.name, location)}
                 </button>
               </li>
             ))}

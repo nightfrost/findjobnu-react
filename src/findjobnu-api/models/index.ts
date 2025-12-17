@@ -7,6 +7,7 @@ export * from './BasicInfo';
 export * from './BasicInfoDto';
 export * from './CategoriesResponse';
 export * from './Category';
+export * from './CategoryJobCountResponse';
 export * from './CityResponse';
 export * from './Contact';
 export * from './ContactDto';

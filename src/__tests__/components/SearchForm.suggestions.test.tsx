@@ -20,12 +20,12 @@ vi.mock("../../helpers/ApiFactory", async () => {
 describe("SearchForm suggestions", () => {
   beforeEach(() => {
     mockCitiesApi.getAllCities.mockResolvedValue([
-      { id: 1, cityName: "Aalborg" } as CityResponse,
-      { id: 2, cityName: "Aarhus" } as CityResponse,
+      { id: 1, name: "Aalborg" } as CityResponse,
+      { id: 2, name: "Aarhus" } as CityResponse,
     ]);
     mockCitiesApi.getCitiesByQuery.mockResolvedValue([
-      { id: 3, cityName: "Aarhus" } as CityResponse,
-      { id: 4, cityName: "Aabenraa" } as CityResponse,
+      { id: 3, name: "Aarhus" } as CityResponse,
+      { id: 4, name: "Aabenraa" } as CityResponse,
     ]);
   });
 

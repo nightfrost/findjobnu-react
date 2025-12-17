@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { CitiesApi } from "../findjobnu-api/";
+import { CityApi } from "../findjobnu-api/";
 import type { CityResponse as City } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 
@@ -26,7 +26,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeCityIndex, setActiveCityIndex] = useState(-1);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const citiesApi = createApiClient(CitiesApi);
+  const citiesApi = createApiClient(CityApi);
 
   const highlightMatch = (text: string | undefined | null, query: string) => {
     if (!text) return null;
@@ -89,7 +89,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   };
 
   const handleSuggestionClick = (city: City) => {
-    onChange(city.cityName ?? "");
+    onChange(city.name ?? "");
     if (onSelect) onSelect(city);
     setShowSuggestions(false);
     setActiveCityIndex(-1);
@@ -134,9 +134,9 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
                 type="button"
                 className={`w-full text-left px-3 py-2 rounded-none border-0 bg-base-100 ${idx === activeCityIndex ? "bg-primary text-primary-content" : "hover:bg-base-200"}`}
                 onClick={() => handleSuggestionClick(city)}
-                aria-label={`Vælg ${city.cityName}`}
+                aria-label={`Vælg ${city.name ?? ""}`}
               >
-                {highlightMatch(city.cityName, value)}
+                {highlightMatch(city.name, value)}
               </button>
             </li>
           ))}

@@ -87,12 +87,6 @@ export interface JobIndexPostResponse {
     footerPicture?: string | null;
     /**
      * 
-     * @type {Array<string>}
-     * @memberof JobIndexPostResponse
-     */
-    keywords?: Array<string> | null;
-    /**
-     * 
      * @type {string}
      * @memberof JobIndexPostResponse
      */
@@ -145,7 +139,6 @@ export function JobIndexPostResponseFromJSONTyped(json: any, ignoreDiscriminator
         'companyUrl': json['companyUrl'] == null ? undefined : json['companyUrl'],
         'bannerPicture': json['bannerPicture'] == null ? undefined : json['bannerPicture'],
         'footerPicture': json['footerPicture'] == null ? undefined : json['footerPicture'],
-        'keywords': json['keywords'] == null ? undefined : json['keywords'],
         'bannerFormat': json['bannerFormat'] == null ? undefined : json['bannerFormat'],
         'footerFormat': json['footerFormat'] == null ? undefined : json['footerFormat'],
         'bannerMimeType': json['bannerMimeType'] == null ? undefined : json['bannerMimeType'],
@@ -175,7 +168,6 @@ export function JobIndexPostResponseToJSONTyped(value?: JobIndexPostResponse | n
         'companyUrl': value['companyUrl'],
         'bannerPicture': value['bannerPicture'],
         'footerPicture': value['footerPicture'],
-        'keywords': value['keywords'],
         'bannerFormat': value['bannerFormat'],
         'footerFormat': value['footerFormat'],
         'bannerMimeType': value['bannerMimeType'],

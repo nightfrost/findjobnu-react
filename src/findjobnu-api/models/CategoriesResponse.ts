@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { CategoryJobCountResponse } from './CategoryJobCountResponse';
+import {
+    CategoryJobCountResponseFromJSON,
+    CategoryJobCountResponseFromJSONTyped,
+    CategoryJobCountResponseToJSON,
+    CategoryJobCountResponseToJSONTyped,
+} from './CategoryJobCountResponse';
+
 /**
  * 
  * @export
@@ -33,10 +41,10 @@ export interface CategoriesResponse {
     errorMessage?: string | null;
     /**
      * 
-     * @type {{ [key: string]: number; }}
+     * @type {Array<CategoryJobCountResponse>}
      * @memberof CategoriesResponse
      */
-    categoryAndAmountOfJobs?: { [key: string]: number; } | null;
+    categories?: Array<CategoryJobCountResponse> | null;
 }
 
 /**
@@ -58,7 +66,7 @@ export function CategoriesResponseFromJSONTyped(json: any, ignoreDiscriminator: 
         
         'success': json['success'] == null ? undefined : json['success'],
         'errorMessage': json['errorMessage'] == null ? undefined : json['errorMessage'],
-        'categoryAndAmountOfJobs': json['categoryAndAmountOfJobs'] == null ? undefined : json['categoryAndAmountOfJobs'],
+        'categories': json['categories'] == null ? undefined : ((json['categories'] as Array<any>).map(CategoryJobCountResponseFromJSON)),
     };
 }
 
@@ -75,7 +83,7 @@ export function CategoriesResponseToJSONTyped(value?: CategoriesResponse | null,
         
         'success': value['success'],
         'errorMessage': value['errorMessage'],
-        'categoryAndAmountOfJobs': value['categoryAndAmountOfJobs'],
+        'categories': value['categories'] == null ? undefined : ((value['categories'] as Array<any>).map(CategoryJobCountResponseToJSON)),
     };
 }
 

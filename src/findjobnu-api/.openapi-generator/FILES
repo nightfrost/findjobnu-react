@@ -1,5 +1,5 @@
 apis/CVApi.ts
-apis/CitiesApi.ts
+apis/CityApi.ts
 apis/JobAgentApi.ts
 apis/JobIndexPostsApi.ts
 apis/ProfileApi.ts
@@ -12,6 +12,7 @@ models/BasicInfo.ts
 models/BasicInfoDto.ts
 models/CategoriesResponse.ts
 models/Category.ts
+models/CategoryJobCountResponse.ts
 models/CityResponse.ts
 models/Contact.ts
 models/ContactDto.ts

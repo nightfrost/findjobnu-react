@@ -37,15 +37,14 @@ const JobSearch: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const cats = await api.getJobCategories();
-      const mapping = cats?.categoryAndAmountOfJobs;
-      if (mapping) {
-        const formattedCategories = Object.entries(mapping).map(
-          ([category, amount]) => `${category} (${amount})`
-        );
-        setCategories(formattedCategories);
-      } else {
-        setCategories([]);
-      }
+      const list = (cats?.categories ?? [])
+        .map(c => {
+          const name = c.name ?? "";
+          const count = c.numberOfJobs ?? 0;
+          return name ? `${name} (${count})` : null;
+        })
+        .filter((v): v is string => Boolean(v));
+      setCategories(list);
     } catch {
       setCategories([]);
     }

@@ -30,9 +30,9 @@ const PopularCategories: React.FC<Props> = ({ limit = 10, className = "" }) => {
       setError(null);
       try {
         const res = await api.getJobCategories();
-        const mapping = res?.categoryAndAmountOfJobs || {};
-        const list: CategoryEntry[] = Object.entries(mapping)
-          .map(([name, count]) => ({ name, count }))
+        const list: CategoryEntry[] = (res?.categories ?? [])
+          .map(c => ({ name: c.name ?? "", count: c.numberOfJobs ?? 0 }))
+          .filter(c => c.name)
           .sort((a, b) => b.count - a.count)
           .slice(0, limit);
         if (isMounted) setCategories(list);
