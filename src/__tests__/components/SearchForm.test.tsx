@@ -23,8 +23,10 @@ describe("SearchForm", () => {
     expect(onSearch).toHaveBeenCalledTimes(1);
     expect(onSearch).toHaveBeenCalledWith({
       searchTerm: "Frontend",
-      location: "",
-      category: "Engineering",
+      location: undefined,
+      categoryId: undefined,
+      postedAfter: undefined,
+      postedBefore: undefined,
     });
   });
 });

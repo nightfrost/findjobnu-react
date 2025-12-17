@@ -78,8 +78,8 @@ describe("SearchForm suggestions", () => {
     const categoryInput = screen.getByPlaceholderText("Kategori");
     await user.type(categoryInput, "Mar");
 
-    await waitFor(() => expect(screen.queryByRole("button", { name: "Vælg kategori Engineering (3)" })).not.toBeInTheDocument());
-    await waitFor(() => expect(screen.getByRole("button", { name: "Vælg kategori Marketing (2)" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Vælg kategori Engineering" })).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Vælg kategori Marketing" })).toBeInTheDocument());
 
     await user.keyboard("{ArrowDown}{Enter}");
 
