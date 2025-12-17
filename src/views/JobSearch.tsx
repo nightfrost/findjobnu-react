@@ -150,7 +150,7 @@ const JobSearch: React.FC = () => {
         </div>
 
         <div className="order-1 lg:order-2 shrink-0">
-          <div className="rounded border bg-white shadow-sm lg:sticky lg:top-24 w-full lg:w-fit">
+              <div className="rounded-box border bg-base-100 shadow-sm lg:sticky lg:top-24 w-full lg:w-fit">
             <div className="p-4">
               <SearchForm
                 onSearch={(params) => {

@@ -93,7 +93,7 @@ const GoodCv: React.FC = () => {
     };
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
-            <div className="hero bg-base-100 rounded-box border border-base-200 shadow-sm mb-10">
+            <div className="hero bg-base-100 rounded-box border shadow-xl mb-10">
                 <div className="hero-content text-center">
                     <div className="max-w-2xl">
                         <h1 className="text-3xl md:text-4xl font-bold">Det gode CV</h1>
@@ -107,7 +107,7 @@ const GoodCv: React.FC = () => {
                         </div>
 
                         <div className="mt-6 text-left">
-                            <div className="rounded-box border border-base-200 p-4">
+                            <div className="rounded-box border p-4">
                                 <h2 className="text-lg font-semibold flex items-center gap-1">
                                     <span>Tjek læsbarheden af dit CV (PDF)</span>
                                     <button
@@ -251,13 +251,13 @@ const GoodCv: React.FC = () => {
             </div>
 
             <div className="card bg-base-100 shadow-xl">
-                <div className="card-body p-6 md:p-8 space-y-10">
+                <div className="card-body p-6 md:p-8 gap-10">
                     {sections.map((s, i) => (
                         <React.Fragment key={s.title}>
                             <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                                 {i % 2 === 0 ? (
                                     <>
-                                        <div className="rounded-box border border-base-200 p-6 h-full flex flex-col">
+                                        <div className="rounded-box border p-6 h-full flex flex-col">
                                             <h2 className="text-2xl font-semibold">{s.title}</h2>
                                             <p className="text-base-content/80">{s.text}</p>
                                             <ul className="list-disc ml-5 mt-2 space-y-1 text-base-content/80">
@@ -271,7 +271,7 @@ const GoodCv: React.FC = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                        <figure className="rounded-box border border-base-200 p-6 h-full flex items-center justify-center">
+                                        <figure className="p-6 h-full flex items-center justify-center">
                                             <img
                                                 src={s.image}
                                                 alt={s.imageAlt}
@@ -282,7 +282,7 @@ const GoodCv: React.FC = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <figure className="rounded-box border border-base-200 p-6 h-full flex items-center justify-center">
+                                        <figure className="p-6 h-full flex items-center justify-center">
                                             <img
                                                 src={s.image}
                                                 alt={s.imageAlt}
@@ -290,7 +290,7 @@ const GoodCv: React.FC = () => {
                                                 loading="lazy"
                                             />
                                         </figure>
-                                        <div className="rounded-box border border-base-200 p-6 h-full flex flex-col">
+                                        <div className="rounded-box border p-6 h-full flex flex-col">
                                             <h2 className="text-2xl font-semibold">{s.title}</h2>
                                             <p className="text-base-content/80">{s.text}</p>
                                             <ul className="list-disc ml-5 mt-2 space-y-1 text-base-content/80">
@@ -307,7 +307,7 @@ const GoodCv: React.FC = () => {
                                     </>
                                 )}
                             </section>
-                            {i < sections.length - 1 && <div className="divider my-0" />}
+                            {i < sections.length - 1 && <div className="divider" />}
                         </React.Fragment>
                     ))}
                 </div>

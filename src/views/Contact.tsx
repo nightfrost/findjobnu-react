@@ -46,7 +46,7 @@ const Contact: React.FC = () => {
 
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
-            <div className="hero bg-base-100 rounded-box border border-base-200 shadow-sm mb-10">
+            <div className="hero bg-base-100 rounded-box border shadow-sm mb-10">
                 <div className="hero-content text-center">
                     <div className="max-w-2xl">
                         <h1 className="text-3xl md:text-4xl font-bold">Kontakt Findjobnu</h1>
@@ -64,7 +64,7 @@ const Contact: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                 {contactMethods.map((method) => (
-                    <div key={method.title} className="card bg-base-100 shadow-lg border border-base-200">
+                    <div key={method.title} className="card bg-base-100 shadow-lg">
                         <div className="card-body">
                             <h2 className="card-title text-2xl">{method.title}</h2>
                             <p className="text-base-content/70">{method.description}</p>
@@ -79,7 +79,7 @@ const Contact: React.FC = () => {
 
             <div className="card bg-base-100 shadow-xl mb-10">
                 <div className="card-body p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <figure className="rounded-box border border-base-200 p-6 flex items-center justify-center">
+                    <figure className="p-6 flex items-center justify-center">
                         <img
                             src={illuPersonal}
                             alt="Illustration af kontakt"
@@ -87,7 +87,7 @@ const Contact: React.FC = () => {
                             loading="lazy"
                         />
                     </figure>
-                    <div className="rounded-box border border-base-200 p-6 h-full bg-base-200/30">
+                    <div className="rounded-box border p-6 h-full bg-base-200/30">
                         <h2 className="text-2xl font-semibold">Send os en besked</h2>
                         <p className="text-base-content/70 mt-2">
                             Brug formularen, hvis du vil dele feedback, fejl eller idéer. Vi læser alt og svarer hurtigst muligt.
@@ -128,7 +128,7 @@ const Contact: React.FC = () => {
             <div className="card bg-base-100 shadow-xl">
                 <div className="card-body p-6 md:p-8 space-y-8">
                     <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                        <div className="rounded-box border border-base-200 p-6">
+                        <div className="rounded-box border p-6">
                             <h3 className="text-xl font-semibold">Hold dig opdateret</h3>
                             <p className="text-base-content/70 mt-2">
                                 Vi deler hver måned et kort overblik over nye funktioner, workshops og indsigter fra jobmarkedet. Tilmeld dig direkte i appen under indstillinger.
@@ -139,7 +139,7 @@ const Contact: React.FC = () => {
                                 <li>Tips til at få mest muligt ud af Findjobnu</li>
                             </ul>
                         </div>
-                        <figure className="rounded-box border border-base-200 p-6 flex items-center justify-center">
+                        <figure className="p-6 flex items-center justify-center">
                             <img
                                 src={illuFileSearch}
                                 alt="Illustration af nyheder"
@@ -155,7 +155,7 @@ const Contact: React.FC = () => {
                         <h3 className="text-xl font-semibold mb-3">Ofte stillede spørgsmål</h3>
                         <div className="space-y-2">
                             {faqs.map((faq) => (
-                                <details key={faq.question} className="collapse collapse-arrow border border-base-200 bg-base-100">
+                                <details key={faq.question} className="collapse collapse-arrow border bg-base-100">
                                     <summary className="collapse-title font-medium">{faq.question}</summary>
                                     <div className="collapse-content text-base-content/70">
                                         <p>{faq.answer}</p>

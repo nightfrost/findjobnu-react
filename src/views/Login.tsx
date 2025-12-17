@@ -96,7 +96,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
+    <div className="rounded-box border max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
       <h2 className="text-2xl font-bold mb-6 text-center">Log ind</h2>
       <form onSubmit={handleSubmit} className="grid gap-4" ref={formRef}>
         <input
