@@ -1,11 +1,11 @@
 import React, { useState, useRef } from "react";
-import { CityApi } from "../findjobnu-api/";
 import type { CityResponse as City } from "../findjobnu-api/models";
-import { createApiClient } from "../helpers/ApiFactory";
+import LocationTypeahead from "./LocationTypeahead";
 
 type SearchParams = {
   searchTerm?: string;
   location?: string;
+  locationSlug?: string;
   category?: string;
 };
 
@@ -16,19 +16,14 @@ interface Props {
   queryCategory?: string;
 }
 
-const citiesApi = createApiClient(CityApi);
-
 const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [category, setCategory] = useState("");
-  const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
   const [categorySuggestions, setCategorySuggestions] = useState<string[]>([]);
   const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
-  const [activeCityIndex, setActiveCityIndex] = useState(-1);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(-1);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const categoryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const MAX_SUGGESTIONS = 8;
@@ -61,68 +56,27 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     }
   }, [queryCategory, categories, category]);
 
-  const handleLocationFocus = async () => {
-    if (location === "") {
-      try {
-        const results = await citiesApi.getAllCities();
-  setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
-        setShowSuggestions(true);
-  setActiveCityIndex(-1);
-      } catch {
-        setCitySuggestions([]);
-      }
-    } else {
-      setShowSuggestions(true);
-    }
-  };
-
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  const handleLocationChange = (value: string) => {
     setLocation(value);
-
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-    if (value.length > 0) {
-      timeoutRef.current = setTimeout(async () => {
-        try {
-          const results = await citiesApi.getCitiesByQuery({ query: value });
-          setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
-          setShowSuggestions(true);
-          setActiveCityIndex(-1);
-        } catch {
-          setCitySuggestions([]);
-        }
-      }, 300);
-    } else {
-      (async () => {
-        try {
-          const results = await citiesApi.getAllCities();
-          setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
-          setShowSuggestions(true);
-          setActiveCityIndex(-1);
-        } catch {
-          setCitySuggestions([]);
-        }
-      })();
-    }
+    setSelectedCity(null);
   };
 
-  const handleSuggestionClick = (city: City) => {
-    setLocation(city.name ?? "");
-    setShowSuggestions(false);
-  setActiveCityIndex(-1);
+  const handleLocationSelect = (city: City) => {
+    setSelectedCity(city);
+    setLocation(city.name ?? city.slug ?? "");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const normalizedCategory = normalizeCategoryValue(category);
     const categoryParam = normalizedCategory.length > 0 ? normalizedCategory : undefined;
+    const locationValue = location.trim();
     onSearch({
       searchTerm,
-      location,
+      location: locationValue.length ? locationValue : undefined,
+      locationSlug: selectedCity?.slug ?? undefined,
       category: categoryParam,
     });
-    setShowSuggestions(false);
     setShowCategorySuggestions(false);
   };
 
@@ -159,25 +113,6 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     setActiveCategoryIndex(-1);
   };
 
-  // Keyboard navigation for location suggestions
-  const handleLocationKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showSuggestions || citySuggestions.length === 0) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setActiveCityIndex(i => (i + 1) % citySuggestions.length);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setActiveCityIndex(i => (i - 1 + citySuggestions.length) % citySuggestions.length);
-    } else if (e.key === 'Enter') {
-      if (activeCityIndex >= 0 && activeCityIndex < citySuggestions.length) {
-        e.preventDefault();
-        handleSuggestionClick(citySuggestions[activeCityIndex]);
-      }
-    } else if (e.key === 'Escape') {
-      setShowSuggestions(false);
-    }
-  };
-
   // Keyboard navigation for category suggestions
   const handleCategoryKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showCategorySuggestions || categorySuggestions.length === 0) return;
@@ -209,38 +144,18 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
         onChange={e => setSearchTerm(e.target.value)}
       />
       </div>
-      <fieldset
-        className={`relative border-0 p-0 m-0 ${inputWidthClass}`}
-        onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-      >
-        <legend className="sr-only">Lokation</legend>
-        <input
-          className="select select-bordered shadow w-full"
-          placeholder="Lokation"
+      <div className={`relative ${inputWidthClass}`}>
+        <LocationTypeahead
           value={location}
           onChange={handleLocationChange}
-          onFocus={handleLocationFocus}
-          autoComplete="off"
-          aria-label="Lokation"
-          onKeyDown={handleLocationKeyDown}
+          onSelect={handleLocationSelect}
+          placeholder="Lokation"
+          className="select select-bordered shadow"
+          inputProps={{
+            "aria-label": "Lokation",
+          }}
         />
-        {showSuggestions && citySuggestions.length > 0 && (
-          <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 min-h-10 overflow-y-auto shadow-lg rounded-box p-0">
-            {citySuggestions.map((city, idx) => (
-              <li key={city.id}>
-                <button
-                  type="button"
-                  className={`menu-item text px-3 py-2 w-full text-left ${idx === activeCityIndex ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
-                  onClick={() => handleSuggestionClick(city)}
-                  aria-label={`Vælg ${city.name ?? ""}`}
-                >
-                  {highlightMatch(city.name, location)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-  </fieldset>
+      </div>
       <fieldset
         className={`relative border-0 p-0 m-0 ${inputWidthClass}`}
         onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 100)}

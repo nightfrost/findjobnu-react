@@ -4,6 +4,7 @@ import express from 'express';
 import compression from 'compression';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { accessSync, constants as fsConstants } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,16 +15,28 @@ const distDir = path.resolve(__dirname, 'dist');
 
 app.use(compression());
 
-// Serve precompressed assets when available
+// Serve precompressed assets when available (skip rewrite if the compressed file is missing)
 // Many CDNs/servers will do this automatically based on .gz/.br files and Accept-Encoding
 app.get(/\.(js|css|html|svg|json|xml|txt|woff2?)$/, (req, res, next) => {
   const ae = req.headers['accept-encoding'] || '';
-  if (ae.includes('br')) {
-    req.url = req.url + '.br';
-    res.set('Content-Encoding', 'br');
-  } else if (ae.includes('gzip')) {
-    req.url = req.url + '.gz';
-    res.set('Content-Encoding', 'gzip');
+
+  const tryRewrite = (ext, encoding) => {
+    const candidate = path.join(distDir, req.url + ext);
+    try {
+      accessSync(candidate, fsConstants.F_OK);
+      req.url = req.url + ext;
+      res.set('Content-Encoding', encoding);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (ae.includes('br') && tryRewrite('.br', 'br')) {
+    return next();
+  }
+  if (ae.includes('gzip') && tryRewrite('.gz', 'gzip')) {
+    return next();
   }
   next();
 });

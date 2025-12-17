@@ -9,6 +9,21 @@ import JobList from "../components/JobList";
 // Reuse the API client instantiation
 const api = createApiClient(JobIndexPostsApi);
 
+const normalizeLocation = (value?: string | null) => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  // Basic transliteration for Danish characters before stripping diacritics
+  const transliterated = trimmed
+    .replace(/æ/gi, match => match === match.toUpperCase() ? "AE" : "ae")
+    .replace(/ø/gi, match => match === match.toUpperCase() ? "OE" : "oe")
+    .replace(/å/gi, match => match === match.toUpperCase() ? "AA" : "aa");
+
+  const withoutDiacritics = transliterated.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  return withoutDiacritics.toLowerCase();
+};
+
 const JobSearch: React.FC = () => {
   const [jobs, setJobs] = useState<JobIndexPostResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -19,6 +34,7 @@ const JobSearch: React.FC = () => {
   const [lastSearchParams, setLastSearchParams] = useState<{
     searchTerm?: string;
     location?: string;
+    locationSlug?: string;
     category?: string;
   } | null>(null);
   const [searchParams] = useSearchParams();
@@ -37,10 +53,14 @@ const JobSearch: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const cats = await api.getJobCategories();
-      const list = (cats?.categories ?? [])
-        .map(c => {
-          const name = c.name ?? "";
-          const count = c.numberOfJobs ?? 0;
+      const rawList = (cats as any)?.categories
+        ?? (cats as any)?.items
+        ?? (cats as any)?.data
+        ?? [];
+      const list = (Array.isArray(rawList) ? rawList : [])
+        .map((c: any) => {
+          const name = c?.name ?? c?.category ?? c?.categoryName ?? "";
+          const count = c?.numberOfJobs ?? c?.jobCount ?? c?.count ?? 0;
           return name ? `${name} (${count})` : null;
         })
         .filter((v): v is string => Boolean(v));
@@ -51,7 +71,7 @@ const JobSearch: React.FC = () => {
   };
 
   const handleSearch = async (
-    params: { searchTerm?: string; location?: string; category?: string },
+    params: { searchTerm?: string; location?: string; locationSlug?: string; category?: string },
     page = 1
   ) => {
     setLoading(true);
@@ -60,9 +80,16 @@ const JobSearch: React.FC = () => {
       if (category) {
         category = category.replace(/ \(\d+\)$/i, "");
       }
-  // Front-end normalization for location (temporary until backend is case-insensitive)
-  const normalizedLocation = params.location?.trim() ? params.location.trim().toLowerCase() : undefined;
-  const data = await api.getJobPostsBySearch({ ...params, category, page, location: normalizedLocation });
+      const locationFromSlug = params.locationSlug?.trim();
+      const locationFromInput = params.location?.trim();
+      const locationNormalized = normalizeLocation(locationFromSlug || locationFromInput);
+      const data = await api.getJobPostsBySearch({
+        ...params,
+        category,
+        page,
+        location: locationNormalized,
+        pageSize,
+      });
       setJobs(data?.items ?? []);
       setTotalCount(data?.totalCount ?? 0);
       setCurrentPage(page);
