@@ -10,6 +10,7 @@ interface LocationTypeaheadProps {
   placeholder?: string;
   className?: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  useValidator?: boolean;
 }
 
 const MAX_SUGGESTIONS = 8;
@@ -21,6 +22,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   placeholder = "By",
   className = "",
   inputProps = {},
+  useValidator = true,
 }) => {
   const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -116,7 +118,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   return (
     <div className="relative w-full">
       <input
-        className={`input input-bordered validator w-full ${className}`}
+        className={`input input-bordered ${useValidator ? "validator" : ""} w-full ${className}`.trim()}
         placeholder={placeholder}
         value={value}
         onChange={handleChange}

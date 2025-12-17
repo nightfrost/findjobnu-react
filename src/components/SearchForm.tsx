@@ -39,6 +39,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   const categoryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [postedAfter, setPostedAfter] = useState("");
   const [postedBefore, setPostedBefore] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const MAX_SUGGESTIONS = 8;
 
@@ -99,6 +100,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitted(true);
     const normalizedCategory = normalizeCategoryValue(categoryInput);
     const matchedCategoryId = selectedCategoryId
       ?? normalizedCategories.find(c => c.name === normalizedCategory || c.label === normalizedCategory)?.id
@@ -113,6 +115,15 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     });
     setShowCategorySuggestions(false);
   };
+
+  const searchValid = !searchTerm || searchTerm.trim().length >= 2;
+  const locationValid = !location || location.trim().length >= 2;
+  const postedAfterValid = !postedAfter || !Number.isNaN(Date.parse(postedAfter));
+  const postedBeforeValid = !postedBefore || !Number.isNaN(Date.parse(postedBefore));
+  const categoryValid = true; // always valid when filled
+
+  const successClass = (base: string, condition: boolean) =>
+    condition && submitted ? `${base} input-success` : base;
 
   const openAllCategories = () => {
     setCategorySuggestions(normalizedCategories);
@@ -174,10 +185,13 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
       <div className={`relative ${inputWidthClass}`}>
         <input
-        className="input input-bordered shadow w-full"
+        className={successClass("input input-bordered shadow w-full", searchValid && !!searchTerm)}
         placeholder="Søgeord"
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
+        minLength={2}
+        pattern={searchTerm ? "^.{2,}$" : undefined}
+        aria-invalid={Boolean(searchTerm) && searchTerm.length < 2}
       />
       </div>
       <div className={`relative ${inputWidthClass}`}>
@@ -186,10 +200,14 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
           onChange={handleLocationChange}
           onSelect={handleLocationSelect}
           placeholder="Lokation"
-          className="select select-bordered shadow"
+          className={successClass("select select-bordered shadow", locationValid && !!location)}
           inputProps={{
             "aria-label": "Lokation",
+            minLength: 2,
+            pattern: location ? "^.{2,}$" : undefined,
+            "aria-invalid": Boolean(location) && location.length < 2,
           }}
+          useValidator={false}
         />
       </div>
       <fieldset
@@ -198,7 +216,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
       >
         <legend className="sr-only">Kategori</legend>
         <input
-          className="select select-bordered shadow w-full"
+          className={successClass("select select-bordered shadow w-full", categoryValid && !!categoryInput)}
           placeholder="Kategori"
           value={categoryInput}
           onChange={handleCategoryChange}
@@ -206,6 +224,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
           autoComplete="off"
           aria-label="Kategori"
           onKeyDown={handleCategoryKeyDown}
+          // Category always validates if present; no pattern needed
         />
         {showCategorySuggestions && categorySuggestions.length > 0 && (
           <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 min-h-10 overflow-y-auto shadow-lg rounded-box p-0">
@@ -229,19 +248,21 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
         <input
           id="postedAfter"
           type="date"
-          className="input input-bordered shadow w-full"
+          className={successClass("input input-bordered shadow w-full", postedAfterValid && !!postedAfter)}
           value={postedAfter}
           onChange={e => setPostedAfter(e.target.value)}
           aria-label="Opslag efter dato"
+          aria-invalid={Boolean(postedAfter) && Number.isNaN(Date.parse(postedAfter))}
         />
         <label className="text-sm font-medium" htmlFor="postedBefore">Opslag før</label>
         <input
           id="postedBefore"
           type="date"
-          className="input input-bordered shadow w-full"
+          className={successClass("input input-bordered shadow w-full", postedBeforeValid && !!postedBefore)}
           value={postedBefore}
           onChange={e => setPostedBefore(e.target.value)}
           aria-label="Opslag før dato"
+          aria-invalid={Boolean(postedBefore) && Number.isNaN(Date.parse(postedBefore))}
         />
       </div>
       <button className={`btn btn-primary shadow ${inputWidthClass}`} type="submit">

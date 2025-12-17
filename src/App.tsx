@@ -15,6 +15,7 @@ import MyJobs from "./views/MyJobs";
 import GoodCv from "./views/GoodCv";
 import About from "./views/About";
 import Contact from "./views/Contact";
+import Settings from "./views/Settings";
 
 const App: React.FC = () => {
   return (
@@ -45,7 +46,7 @@ const AppWithAuthCheck: React.FC = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/linkedin-auth" element={<LinkedInAuthHandler />} />
-            <Route path="/settings" element={<div>Settings Page</div>} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/jobsearch" element={<JobSearch />}></Route>
