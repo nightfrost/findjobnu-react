@@ -30,7 +30,7 @@ interface Props {
 const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
-  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+  const setSelectedCity = useState<City | null>(null)[1];
   const [categoryInput, setCategoryInput] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [categorySuggestions, setCategorySuggestions] = useState<CategoryOption[]>([]);

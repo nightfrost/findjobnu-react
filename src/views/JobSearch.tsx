@@ -46,15 +46,26 @@ const JobSearch: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const cats = await api.getJobCategories();
-      const rawList = (cats as any)?.categories
-        ?? (cats as any)?.items
-        ?? (cats as any)?.data
+      const rawList = (cats as unknown as { categories?: RawCategory[]; items?: RawCategory[]; data?: RawCategory[]; })?.categories
+        ?? (cats as unknown as { items?: RawCategory[]; data?: RawCategory[]; categories?: RawCategory[]; })?.items
+        ?? (cats as unknown as { data?: RawCategory[]; categories?: RawCategory[]; items?: RawCategory[]; })?.data
         ?? [];
+      type RawCategory = {
+        id?: unknown;
+        name?: string;
+        category?: string;
+        categoryName?: string;
+        numberOfJobs?: unknown;
+        jobCount?: unknown;
+        count?: unknown;
+      };
+
       const list = (Array.isArray(rawList) ? rawList : [])
-        .map((c: any) => {
-          const id = typeof c?.id === "number" ? c.id : undefined;
-          const name = c?.name ?? c?.category ?? c?.categoryName ?? "";
-          const count = c?.numberOfJobs ?? c?.jobCount ?? c?.count ?? 0;
+        .map((c: RawCategory) => {
+          const id = typeof c.id === "number" ? c.id : undefined;
+          const name = c.name ?? c.category ?? c.categoryName ?? "";
+          const countValue = c.numberOfJobs ?? c.jobCount ?? c.count;
+          const count = typeof countValue === "number" ? countValue : 0;
           if (!id || !name) return null;
           return {
             id,
