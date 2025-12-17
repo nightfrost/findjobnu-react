@@ -41,10 +41,10 @@ const Settings: React.FC = () => {
         newEmail: emailForm.newEmail.trim(),
         currentPassword: emailForm.currentPassword,
       }});
-      setStatus("We sent a confirmation email to the new address.");
+      setStatus("Vi har sendt en bekræftelsesmail til den nye adresse.");
       setEmailForm({ newEmail: "", currentPassword: "" });
     } catch (err) {
-      setError("Could not update email. Check password and email.");
+      setError("Kunne ikke opdatere e-mail. Tjek adgangskode og e-mail.");
       console.warn(err);
     } finally {
       setLoadingEmail(false);
@@ -61,10 +61,10 @@ const Settings: React.FC = () => {
         oldPassword: passwordForm.oldPassword,
         newPassword: passwordForm.newPassword,
       }});
-      setStatus("Password updated.");
+      setStatus("Adgangskode opdateret.");
       setPasswordForm({ oldPassword: "", newPassword: "" });
     } catch (err) {
-      setError("Could not update password. Check the entered fields.");
+      setError("Kunne ikke opdatere adgangskode. Tjek felterne.");
       console.warn(err);
     } finally {
       setLoadingPassword(false);
@@ -78,7 +78,7 @@ const Settings: React.FC = () => {
     setLoadingLockout(true);
     try {
       await authApi.lockoutUser({ body: userId });
-      setStatus("The account is locked. Log in again to unlock.");
+      setStatus("Kontoen er låst. Log ind igen for at låse op.");
       // Clear local session
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
@@ -87,7 +87,7 @@ const Settings: React.FC = () => {
       setUser(null);
       navigate("/login");
     } catch (err) {
-      setError("Could not lock the account.");
+      setError("Kunne ikke låse kontoen.");
       console.warn(err);
     } finally {
       setLoadingLockout(false);
@@ -99,12 +99,12 @@ const Settings: React.FC = () => {
       <div className="flex w-full mb-8 items-start">
         <div className="flex-[4_5_0%] min-w-0 pr-6">
           <div className="card bg-base-100 shadow-md p-6 mb-6">
-            <h2 className="card-title mb-4">Change email</h2>
+            <h2 className="card-title mb-4">Skift e-mail</h2>
             <form className="flex flex-col gap-3" onSubmit={handleEmailSubmit}>
               <input
                 className="input input-bordered w-full"
                 type="email"
-                placeholder="New email"
+                placeholder="Ny e-mail"
                 value={emailForm.newEmail}
                 onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
                 required
@@ -112,25 +112,25 @@ const Settings: React.FC = () => {
               <input
                 className="input input-bordered w-full"
                 type="password"
-                placeholder="Current password"
+                placeholder="Nuværende adgangskode"
                 value={emailForm.currentPassword}
                 onChange={e => setEmailForm(f => ({ ...f, currentPassword: e.target.value }))}
                 required
                 minLength={6}
               />
               <button className="btn btn-primary" type="submit" disabled={loadingEmail}>
-                {loadingEmail ? "Updating..." : "Send confirmation"}
+                {loadingEmail ? "Opdaterer..." : "Send bekræftelse"}
               </button>
             </form>
           </div>
 
           <div className="card bg-base-100 shadow-md p-6">
-            <h2 className="card-title mb-4">Change password</h2>
+            <h2 className="card-title mb-4">Skift adgangskode</h2>
             <form className="flex flex-col gap-3" onSubmit={handlePasswordSubmit}>
               <input
                 className="input input-bordered w-full"
                 type="password"
-                placeholder="Current password"
+                placeholder="Nuværende adgangskode"
                 value={passwordForm.oldPassword}
                 onChange={e => setPasswordForm(f => ({ ...f, oldPassword: e.target.value }))}
                 required
@@ -139,14 +139,14 @@ const Settings: React.FC = () => {
               <input
                 className="input input-bordered w-full"
                 type="password"
-                placeholder="New password"
+                placeholder="Ny adgangskode"
                 value={passwordForm.newPassword}
                 onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
                 required
                 minLength={6}
               />
               <button className="btn btn-primary" type="submit" disabled={loadingPassword}>
-                {loadingPassword ? "Updating..." : "Save new password"}
+                {loadingPassword ? "Opdaterer..." : "Gem ny adgangskode"}
               </button>
             </form>
           </div>
@@ -156,10 +156,10 @@ const Settings: React.FC = () => {
 
         <div className="flex-[4_0_0%] min-w-0 pl-6">
           <div className="card bg-base-100 shadow-md p-6">
-            <h2 className="card-title mb-4 text-error">Lock account</h2>
-            <p className="mb-4 text-sm text-base-content/70">Locks the account until you log in again. Useful if you need to pause access.</p>
+            <h2 className="card-title mb-4 text-error">Lås konto</h2>
+            <p className="mb-4 text-sm text-base-content/70">Låser kontoen indtil du logger ind igen. Brugbar hvis du vil pause adgang.</p>
             <button className="btn btn-outline btn-error" onClick={handleLockout} disabled={loadingLockout}>
-              {loadingLockout ? "Locking..." : "Lock account"}
+              {loadingLockout ? "Låser..." : "Lås konto"}
             </button>
           </div>
 

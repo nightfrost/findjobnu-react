@@ -93,25 +93,25 @@ const Contact: React.FC = () => {
                             Brug formularen, hvis du vil dele feedback, fejl eller idéer. Vi læser alt og svarer hurtigst muligt.
                         </p>
                         <form className="mt-4 grid gap-4">
-                            <div className="form-control">
-                                <label className="label" htmlFor="contact-name">
+                            <div className="form-control gap-2">
+                                <label className="label p-0" htmlFor="contact-name">
                                     <span className="label-text">Navn</span>
                                 </label>
-                                <input id="contact-name" type="text" className="input input-bordered" placeholder="Dit navn" />
+                                <input id="contact-name" type="text" className="input input-bordered w-full" placeholder="Dit navn" />
                             </div>
-                            <div className="form-control">
-                                <label className="label" htmlFor="contact-email">
+                            <div className="form-control gap-2">
+                                <label className="label p-0" htmlFor="contact-email">
                                     <span className="label-text">E-mail</span>
                                 </label>
-                                <input id="contact-email" type="email" className="input input-bordered" placeholder="dig@eksempel.dk" />
+                                <input id="contact-email" type="email" className="input input-bordered w-full" placeholder="dig@eksempel.dk" />
                             </div>
-                            <div className="form-control">
-                                <label className="label" htmlFor="contact-message">
+                            <div className="form-control gap-2">
+                                <label className="label p-0" htmlFor="contact-message">
                                     <span className="label-text">Besked</span>
                                 </label>
                                 <textarea
                                     id="contact-message"
-                                    className="textarea textarea-bordered min-h-32"
+                                    className="textarea textarea-bordered min-h-32 w-full"
                                     placeholder="Fortæl os hvad du har på hjertet"
                                     value={message}
                                     onChange={(event) => setMessage(event.target.value)}

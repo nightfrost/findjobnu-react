@@ -281,7 +281,7 @@ const JobList: React.FC<Props> = ({
 
     return (
       <div key={safeJobId ?? idx} className="card bg-base-100 shadow-sm space-y-3 p-4" data-testid="job-card">
-        <div className="flex justify-between items-start gap-4">
+        <div className="flex justify-between items-start border-b my-2 p-1">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900 leading-snug">{job.title ?? "(Ingen titel)"}</h2>
             {(job.company || job.location) ? (
@@ -301,29 +301,32 @@ const JobList: React.FC<Props> = ({
         </div>
 
         {bannerPicture && (
-          <div className="flex justify-center">
+          <div className="flex justify-center pt-2">
             <img
               src={bannerPicture}
               alt="Banner for jobopslag"
-              className="max-w-full h-auto max-h-64 rounded-md border border-base-200"
+              className="max-w-full h-auto max-h-64 rounded-md"
               loading="lazy"
             />
           </div>
         )}
+        {bannerPicture && <div className="divider my-1" />}
 
-        <div>{descriptionBlock}</div>
+        <div className="border border-gray-400 p-2 bg-base-200/40 my-2">{descriptionBlock}</div>
+
+        {footerPicture && <div className="divider my-3" />}
         {footerPicture && (
           <div className="flex justify-center">
             <img
               src={footerPicture}
               alt="Footer grafik for jobopslag"
-              className="max-w-full h-auto max-h-48 rounded-md border border-base-200"
+              className="max-w-full h-auto max-h-48 rounded-md"
               loading="lazy"
             />
           </div>
         )}
 
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="flex flex-wrap gap-3">
           {safeJobUrl && (
             <a href={safeJobUrl} target="_blank" rel="noopener noreferrer" className="text-sm px-3 py-1 rounded border border-blue-600 text-blue-600 hover:bg-blue-50">
               Gå til opslag
