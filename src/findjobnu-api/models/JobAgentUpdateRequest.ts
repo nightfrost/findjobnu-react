@@ -39,6 +39,24 @@ export interface JobAgentUpdateRequest {
      * @memberof JobAgentUpdateRequest
      */
     frequency?: JobAgentFrequency;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobAgentUpdateRequest
+     */
+    preferredLocations?: Array<string> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof JobAgentUpdateRequest
+     */
+    preferredCategoryIds?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobAgentUpdateRequest
+     */
+    includeKeywords?: Array<string> | null;
 }
 
 
@@ -63,6 +81,9 @@ export function JobAgentUpdateRequestFromJSONTyped(json: any, ignoreDiscriminato
         
         'enabled': json['enabled'],
         'frequency': json['frequency'] == null ? undefined : JobAgentFrequencyFromJSON(json['frequency']),
+        'preferredLocations': json['preferredLocations'] == null ? undefined : json['preferredLocations'],
+        'preferredCategoryIds': json['preferredCategoryIds'] == null ? undefined : json['preferredCategoryIds'],
+        'includeKeywords': json['includeKeywords'] == null ? undefined : json['includeKeywords'],
     };
 }
 
@@ -79,6 +100,9 @@ export function JobAgentUpdateRequestToJSONTyped(value?: JobAgentUpdateRequest |
         
         'enabled': value['enabled'],
         'frequency': JobAgentFrequencyToJSON(value['frequency']),
+        'preferredLocations': value['preferredLocations'],
+        'preferredCategoryIds': value['preferredCategoryIds'],
+        'includeKeywords': value['includeKeywords'],
     };
 }
 

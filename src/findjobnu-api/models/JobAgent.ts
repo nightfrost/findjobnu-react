@@ -94,6 +94,24 @@ export interface JobAgent {
      * @memberof JobAgent
      */
     unsubscribeToken?: string | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobAgent
+     */
+    preferredLocations?: Array<string> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof JobAgent
+     */
+    preferredCategoryIds?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobAgent
+     */
+    includeKeywords?: Array<string> | null;
 }
 
 
@@ -125,6 +143,9 @@ export function JobAgentFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'updatedAt': json['updatedAt'] == null ? undefined : (new Date(json['updatedAt'])),
         'unsubscribeToken': json['unsubscribeToken'] == null ? undefined : json['unsubscribeToken'],
+        'preferredLocations': json['preferredLocations'] == null ? undefined : json['preferredLocations'],
+        'preferredCategoryIds': json['preferredCategoryIds'] == null ? undefined : json['preferredCategoryIds'],
+        'includeKeywords': json['includeKeywords'] == null ? undefined : json['includeKeywords'],
     };
 }
 
@@ -149,6 +170,9 @@ export function JobAgentToJSONTyped(value?: JobAgent | null, ignoreDiscriminator
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'updatedAt': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
         'unsubscribeToken': value['unsubscribeToken'],
+        'preferredLocations': value['preferredLocations'],
+        'preferredCategoryIds': value['preferredCategoryIds'],
+        'includeKeywords': value['includeKeywords'],
     };
 }
 

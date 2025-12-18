@@ -94,7 +94,7 @@ const JobSearch: React.FC = () => {
       const postedBefore = params.postedBefore ? new Date(params.postedBefore) : undefined;
       const data = await api.getJobPostsBySearch({
         ...params,
-        category: params.categoryId != null ? String(params.categoryId) : undefined,
+        categoryId: params.categoryId != null ? params.categoryId : undefined,
         page,
         location: locationNormalized,
         pageSize,

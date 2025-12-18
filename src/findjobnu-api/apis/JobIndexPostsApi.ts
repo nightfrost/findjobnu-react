@@ -40,7 +40,7 @@ export interface GetJobPostsByIdRequest {
 export interface GetJobPostsBySearchRequest {
     searchTerm?: string;
     location?: string;
-    category?: string;
+    categoryId?: number;
     postedAfter?: Date;
     postedBefore?: Date;
     page?: number;
@@ -182,8 +182,8 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
             queryParameters['Location'] = requestParameters['location'];
         }
 
-        if (requestParameters['category'] != null) {
-            queryParameters['Category'] = requestParameters['category'];
+        if (requestParameters['categoryId'] != null) {
+            queryParameters['CategoryId'] = requestParameters['categoryId'];
         }
 
         if (requestParameters['postedAfter'] != null) {

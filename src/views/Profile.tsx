@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useUser } from "../context/UserContext.shared";
 import UserProfileComponent from "../components/UserProfile";
 import ConnectionsComponent from "../components/Connections";
+import JobAgentCard from "../components/JobAgentCard";
 import { useNavigate } from "react-router-dom";
 
 const Profile: React.FC = () => {
@@ -25,6 +26,9 @@ const Profile: React.FC = () => {
         <div className="divider divider-horizontal" />
         <div className="flex-[4_0_0%] min-w-0 pl-6">
           <ConnectionsComponent userId={userId} accessToken={token} />
+          <div className="mt-6">
+            <JobAgentCard userId={userId} accessToken={token} />
+          </div>
         </div>
       </div>
   </div>
