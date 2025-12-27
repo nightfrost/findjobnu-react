@@ -3,6 +3,7 @@ import LocationTypeahead from "./LocationTypeahead";
 import type { Experience } from "../findjobnu-api/models/Experience";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
+import { DANISH_DATE_PATTERN, formatDateForDisplay, isValidDanishDateString, toApiDateString, toDateFromInput } from "../helpers/date";
 
 interface Props {
   experiences: Experience[];
@@ -31,23 +32,15 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
   const pikadayToRef = useRef<Pikaday | null>(null);
   const [isCurrent, setIsCurrent] = useState<boolean>(false);
 
-  const normalizeDate = (val?: string | null): string => {
-    if (!val) return "";
-    // Accept ISO date or datetime; return YYYY-MM-DD
-    // e.g. 2020-01-01T00:00:00 -> 2020-01-01
-    if (val.length >= 10) return val.substring(0, 10);
-    return val;
-  };
-
   const handleEdit = (exp: Experience) => {
     if (readOnly) return;
     setEditingId(exp.id!);
     setForm({
       ...exp,
-      fromDate: normalizeDate(exp.fromDate ?? undefined),
-      toDate: normalizeDate(exp.toDate ?? undefined),
+      fromDate: formatDateForDisplay(exp.fromDate ?? undefined),
+      toDate: formatDateForDisplay(exp.toDate ?? undefined),
     });
-    setIsCurrent(!exp.toDate || normalizeDate(exp.toDate || "") === "");
+    setIsCurrent(!exp.toDate || formatDateForDisplay(exp.toDate ?? undefined) === "");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -66,7 +59,28 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
         }
       }
     }
-    const prepared = { ...form, toDate: isCurrent ? "" : form.toDate } as Experience;
+
+    const isValidDateInput = (value?: string | null) => typeof value === "string" && isValidDanishDateString(value);
+    const dateInputsValid = isCurrent
+      ? isValidDateInput(form.fromDate)
+      : isValidDateInput(form.fromDate) && isValidDateInput(form.toDate);
+
+    if (!dateInputsValid) {
+      [fromDateInputRef.current, toDateInputRef.current].forEach(input => {
+        if (!input) return;
+        input.setCustomValidity("Ugyldig dato. Brug formatet dd/mm/yyyy.");
+        input.reportValidity();
+        input.setCustomValidity("");
+      });
+      return;
+    }
+
+    const prepared = {
+      ...form,
+      fromDate: toApiDateString(form.fromDate) ?? form.fromDate,
+      toDate: isCurrent ? "" : (toApiDateString(form.toDate) ?? form.toDate),
+    } as Experience;
+
     if (editingId) {
       onUpdate({ ...prepared, id: editingId });
     } else {
@@ -94,14 +108,14 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
       if (existing) return existing; // already created
       const picker = new Pikaday({
         field: inputEl,
-        format: "YYYY-MM-DD",
+        format: "DD/MM/YYYY",
         minDate: new Date(1900, 0, 1),
         yearRange: [1900, new Date().getFullYear()],
         onSelect: (d: Date) => {
           const y = d.getFullYear();
           const m = String(d.getMonth() + 1).padStart(2, "0");
           const dd = String(d.getDate()).padStart(2, "0");
-          onSelect(`${y}-${m}-${dd}`);
+          onSelect(`${dd}/${m}/${y}`);
         },
       });
       return picker;
@@ -114,12 +128,12 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
 
       // Initialize pickers with current form values
   if (pikadayFromRef.current && form.fromDate) {
-        const [y, m, d] = normalizeDate(form.fromDate).split("-").map(Number);
-        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) pikadayFromRef.current.setDate(new Date(y, m - 1, d), true);
+        const parsed = toDateFromInput(form.fromDate);
+        if (parsed) pikadayFromRef.current.setDate(parsed, true);
       }
   if (pikadayToRef.current && form.toDate && !isCurrent) {
-        const [y, m, d] = normalizeDate(form.toDate).split("-").map(Number);
-        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) pikadayToRef.current.setDate(new Date(y, m - 1, d), true);
+        const parsed = toDateFromInput(form.toDate);
+        if (parsed) pikadayToRef.current.setDate(parsed, true);
       }
     }
 
@@ -141,10 +155,10 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
                 <p className="validator-hint">Mindst 2 tegn, fx "Softwareudvikler"</p>
                 <input className="input input-bordered validator w-full" name="company" value={form.company || ""} onChange={handleChange} placeholder="Virksomhed" title="Virksomhed" required minLength={2} pattern="^[A-Za-zÆØÅæøå0-9' .,-]{2,}$" />
                 <p className="validator-hint">Mindst 2 tegn, fx "FindJob.nu"</p>
-                <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (YYYY-MM-DD)" title="Fra dato" required pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ref={fromDateInputRef} autoComplete="off" />
-                <div className="validator-hint">Format: ÅÅÅÅ-MM-DD</div>
-                <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (YYYY-MM-DD eller tomt for nuværende)" title="Til dato" pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ref={toDateInputRef} autoComplete="off" disabled={isCurrent} />
-                <div className="validator-hint">Format: ÅÅÅÅ-MM-DD. Lad feltet være tomt, hvis det er din nuværende stilling.</div>
+                <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (dd/mm/yyyy)" title="Fra dato" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
+                <div className="validator-hint">Format: dd/mm/yyyy</div>
+                <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (dd/mm/yyyy eller tomt for nuværende)" title="Til dato" pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" disabled={isCurrent} />
+                <div className="validator-hint">Format: dd/mm/yyyy. Lad feltet være tomt, hvis det er din nuværende stilling.</div>
                 <div className="form-control">
                   <label className="label cursor-pointer justify-start gap-3">
                     <input
@@ -200,10 +214,10 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
       <p className="validator-hint">Mindst 2 tegn, fx "Softwareudvikler"</p>
           <input className="input input-bordered validator w-full" name="company" value={form.company || ""} onChange={handleChange} placeholder="Virksomhed" title="Virksomhed" required minLength={2} pattern="^[A-Za-zÆØÅæøå0-9' .,-]{2,}$" />
       <p className="validator-hint">Mindst 2 tegn, fx "FindJob.nu"</p>
-          <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (YYYY-MM-DD)" title="Fra dato" required pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ref={fromDateInputRef} autoComplete="off" />
-      <div className="validator-hint">Format: ÅÅÅÅ-MM-DD</div>
-          <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (YYYY-MM-DD eller tomt for nuværende)" title="Til dato" pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}$" ref={toDateInputRef} autoComplete="off" disabled={isCurrent} />
-    <div className="validator-hint">Format: ÅÅÅÅ-MM-DD. Lad feltet være tomt, hvis det er din nuværende stilling.</div>
+            <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (dd/mm/yyyy)" title="Fra dato" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
+          <div className="validator-hint">Format: dd/mm/yyyy</div>
+            <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (dd/mm/yyyy eller tomt for nuværende)" title="Til dato" pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" disabled={isCurrent} />
+        <div className="validator-hint">Format: dd/mm/yyyy. Lad feltet være tomt, hvis det er din nuværende stilling.</div>
           <div className="form-control mb-1">
             <label className="label cursor-pointer justify-start gap-3">
               <input

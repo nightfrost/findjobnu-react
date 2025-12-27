@@ -4,6 +4,7 @@ import LocationTypeahead from "../LocationTypeahead";
 import EditableCardFrame from "./EditableCardFrame";
 import type { Profile } from "../../findjobnu-api/models/Profile";
 import type { ProfileDto } from "../../findjobnu-api/models/ProfileDto";
+import { DANISH_DATE_PATTERN } from "../../helpers/date";
 
 interface BasicInfoCardProps {
   profile: ProfileDto;
@@ -161,9 +162,9 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
             type="text"
             value={dateOfBirthInput}
             onChange={(event) => onDateOfBirthChange(event.target.value)}
-            placeholder="YYYY-MM-DD"
-            pattern="^\\d{4}-\\d{2}-\\d{2}$"
-            title="Brug formatet YYYY-MM-DD."
+            placeholder="dd/mm/yyyy"
+            pattern={DANISH_DATE_PATTERN.source}
+            title="Brug formatet dd/mm/yyyy."
           />
         ) : (
           <div>{renderDate(profile.basicInfo?.dateOfBirth ?? null)}</div>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import type { Education } from "../findjobnu-api/models/Education";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
+import { DANISH_DATE_PATTERN, formatDateForDisplay, isValidDanishDateString, toApiDateString, toDateFromInput } from "../helpers/date";
 
 interface Props {
   educations: Education[];
@@ -28,18 +29,13 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
   const pikadayFromRef = useRef<Pikaday | null>(null);
   const pikadayToRef = useRef<Pikaday | null>(null);
 
-  const normalizeDate = (val?: string | null): string => {
-    if (!val) return "";
-    return val.length >= 10 ? val.substring(0, 10) : val;
-  };
-
   const handleEdit = (edu: Education) => {
     if (readOnly) return;
     setEditingId(edu.id!);
     setForm({
       ...edu,
-      fromDate: normalizeDate(edu.fromDate ?? undefined),
-      toDate: normalizeDate(edu.toDate ?? undefined),
+      fromDate: formatDateForDisplay(edu.fromDate ?? undefined),
+      toDate: formatDateForDisplay(edu.toDate ?? undefined),
     });
   };
 
@@ -59,10 +55,30 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
         }
       }
     }
+
+    const isValidDateInput = (value?: string | null) => typeof value === "string" && isValidDanishDateString(value);
+    const datesValid = isValidDateInput(form.fromDate) && isValidDateInput(form.toDate);
+
+    if (!datesValid) {
+      [fromDateInputRef.current, toDateInputRef.current].forEach(input => {
+        if (!input) return;
+        input.setCustomValidity("Ugyldig dato. Brug formatet dd/mm/yyyy.");
+        input.reportValidity();
+        input.setCustomValidity("");
+      });
+      return;
+    }
+
+    const withApiDates: Education = {
+      ...form,
+      fromDate: toApiDateString(form.fromDate) ?? form.fromDate,
+      toDate: toApiDateString(form.toDate) ?? form.toDate,
+    };
+
     if (editingId) {
-      onUpdate({ ...form, id: editingId });
+      onUpdate({ ...withApiDates, id: editingId });
     } else {
-      onAdd(form);
+      onAdd(withApiDates);
     }
     setEditingId(null);
     setForm(emptyEducation);
@@ -84,14 +100,14 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
       if (existing) return existing;
       const picker = new Pikaday({
         field: inputEl,
-        format: "YYYY-MM-DD",
+        format: "DD/MM/YYYY",
         minDate: new Date(1900, 0, 1),
         yearRange: [1900, new Date().getFullYear()],
         onSelect: (d: Date) => {
           const y = d.getFullYear();
           const m = String(d.getMonth() + 1).padStart(2, "0");
           const dd = String(d.getDate()).padStart(2, "0");
-          onSelect(`${y}-${m}-${dd}`);
+          onSelect(`${dd}/${m}/${y}`);
         },
       });
       return picker;
@@ -102,12 +118,12 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
       pikadayToRef.current = setupPicker(toDateInputRef.current, pikadayToRef.current, (val) => setForm(f => ({ ...f, toDate: val })));
 
       if (pikadayFromRef.current && form.fromDate) {
-        const [y, m, d] = normalizeDate(form.fromDate).split("-").map(Number);
-        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) pikadayFromRef.current.setDate(new Date(y, m - 1, d), true);
+        const parsed = toDateFromInput(form.fromDate);
+        if (parsed) pikadayFromRef.current.setDate(parsed, true);
       }
       if (pikadayToRef.current && form.toDate) {
-        const [y, m, d] = normalizeDate(form.toDate).split("-").map(Number);
-        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) pikadayToRef.current.setDate(new Date(y, m - 1, d), true);
+        const parsed = toDateFromInput(form.toDate);
+        if (parsed) pikadayToRef.current.setDate(parsed, true);
       }
     }
 
@@ -129,10 +145,10 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
                 <p className="validator-hint">Mindst 2 tegn</p>
                 <input className="input input-bordered validator w-full" name="institution" value={form.institution || ""} onChange={handleChange} placeholder="Institution" title="Institution" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
                 <p className="validator-hint">Mindst 2 tegn</p>
-                <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (YYYY-MM-DD)" title="Fra" required pattern="^\\d{4}-\\d{2}-\\d{2}$" ref={fromDateInputRef} autoComplete="off" />
-                <div className="validator-hint">Format: ÅÅÅÅ-MM-DD</div>
-                <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (YYYY-MM-DD)" title="Til" required pattern="^\\d{4}-\\d{2}-\\d{2}$" ref={toDateInputRef} autoComplete="off" />
-                <div className="validator-hint">Format: ÅÅÅÅ-MM-DD</div>
+                <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (dd/mm/yyyy)" title="Fra" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
+                <div className="validator-hint">Format: dd/mm/yyyy</div>
+                <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (dd/mm/yyyy)" title="Til" required pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" />
+                <div className="validator-hint">Format: dd/mm/yyyy</div>
                 <textarea className="textarea textarea-bordered validator w-full" name="description" value={form.description || ""} onChange={handleChange} placeholder="Beskrivelse" title="Beskrivelse" maxLength={1000} />
                 <div className="validator-hint">Maks 1000 tegn</div>
                 <div className="flex gap-2 mt-2">
@@ -165,10 +181,10 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
       <p className="validator-hint">Mindst 2 tegn</p>
           <input className="input input-bordered validator w-full" name="institution" value={form.institution || ""} onChange={handleChange} placeholder="Institution" title="Institution" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
       <p className="validator-hint">Mindst 2 tegn</p>
-          <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (YYYY-MM-DD)" title="Fra" required pattern="^\\d{4}-\\d{2}-\\d{2}$" ref={fromDateInputRef} autoComplete="off" />
-      <div className="validator-hint">Format: ÅÅÅÅ-MM-DD</div>
-          <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (YYYY-MM-DD)" title="Til" required pattern="^\\d{4}-\\d{2}-\\d{2}$" ref={toDateInputRef} autoComplete="off" />
-      <div className="validator-hint">Format: ÅÅÅÅ-MM-DD</div>
+            <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (dd/mm/yyyy)" title="Fra" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
+          <div className="validator-hint">Format: dd/mm/yyyy</div>
+            <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (dd/mm/yyyy)" title="Til" required pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" />
+          <div className="validator-hint">Format: dd/mm/yyyy</div>
       <textarea className="textarea textarea-bordered validator w-full" name="description" value={form.description || ""} onChange={handleChange} placeholder="Beskrivelse" title="Beskrivelse" maxLength={1000} />
       <div className="validator-hint">Maks 1000 tegn</div>
           <div className="flex gap-2 mt-2">

@@ -295,7 +295,7 @@ const JobList: React.FC<Props> = ({
             )}
           </div>
           <div className="text-right min-w-[120px]">
-            {job.postedDate && <p className="text-xs text-gray-500">Publiceret {new Date(job.postedDate).toLocaleDateString()}</p>}
+            {job.postedDate && <p className="text-xs text-gray-500">Publiceret {new Date(job.postedDate).toLocaleDateString("da-DK")}</p>}
             {job.category && <p className="text-xs text-gray-600 mt-1">{job.category}</p>}
           </div>
         </div>

@@ -5,6 +5,7 @@ import type { JobIndexPostResponse } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 import SearchForm, { type CategoryOption } from "../components/SearchForm";
 import JobList from "../components/JobList";
+import { toDateFromInput } from "../helpers/date";
 
 // Reuse the API client instantiation
 const api = createApiClient(JobIndexPostsApi);
@@ -90,8 +91,8 @@ const JobSearch: React.FC = () => {
     try {
       const locationFromInput = params.location?.trim();
       const locationNormalized = normalizeLocation(locationFromInput);
-      const postedAfter = params.postedAfter ? new Date(params.postedAfter) : undefined;
-      const postedBefore = params.postedBefore ? new Date(params.postedBefore) : undefined;
+      const postedAfter = params.postedAfter ? toDateFromInput(params.postedAfter) ?? undefined : undefined;
+      const postedBefore = params.postedBefore ? toDateFromInput(params.postedBefore) ?? undefined : undefined;
       const data = await api.getJobPostsBySearch({
         ...params,
         categoryId: params.categoryId != null ? params.categoryId : undefined,

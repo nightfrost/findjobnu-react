@@ -164,7 +164,7 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
                     <div className="text-sm text-gray-600">
                       <p>Bruger: {connection.username}</p>
                       {connection.lastSync && (
-                        <p>Sidst synkroniseret: {connection.lastSync.toLocaleDateString()}</p>
+                        <p>Sidst synkroniseret: {connection.lastSync.toLocaleDateString("da-DK")}</p>
                       )}
                     </div>
                   ) : (

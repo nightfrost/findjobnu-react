@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import type { CityResponse as City } from "../findjobnu-api/models";
 import LocationTypeahead from "./LocationTypeahead";
+import { DANISH_DATE_PATTERN, isValidDanishDateString, toApiDateString } from "../helpers/date";
 
 type SearchParams = {
   searchTerm?: string;
@@ -100,26 +101,34 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const formEl = e.currentTarget as HTMLFormElement;
+    if (!formEl.checkValidity()) {
+      formEl.reportValidity();
+      return;
+    }
     setSubmitted(true);
     const normalizedCategory = normalizeCategoryValue(categoryInput);
     const matchedCategoryId = selectedCategoryId
       ?? normalizedCategories.find(c => c.name === normalizedCategory || c.label === normalizedCategory)?.id
       ?? undefined;
     const locationValue = location.trim();
+    const postedAfterApi = postedAfter ? toApiDateString(postedAfter) ?? undefined : undefined;
+    const postedBeforeApi = postedBefore ? toApiDateString(postedBefore) ?? undefined : undefined;
+
     onSearch({
       searchTerm,
       location: locationValue.length ? locationValue : undefined,
       categoryId: matchedCategoryId,
-      postedAfter: postedAfter || undefined,
-      postedBefore: postedBefore || undefined,
+      postedAfter: postedAfterApi,
+      postedBefore: postedBeforeApi,
     });
     setShowCategorySuggestions(false);
   };
 
   const searchValid = !searchTerm || searchTerm.trim().length >= 2;
   const locationValid = !location || location.trim().length >= 2;
-  const postedAfterValid = !postedAfter || !Number.isNaN(Date.parse(postedAfter));
-  const postedBeforeValid = !postedBefore || !Number.isNaN(Date.parse(postedBefore));
+  const postedAfterValid = !postedAfter || isValidDanishDateString(postedAfter);
+  const postedBeforeValid = !postedBefore || isValidDanishDateString(postedBefore);
   const categoryValid = true; // always valid when filled
 
   const successClass = (base: string, condition: boolean) =>
@@ -233,6 +242,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
                 <button
                   type="button"
                   className={`menu-item text px-3 py-2 w-full text-left ${idx === activeCategoryIndex ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+                  onMouseDown={(e) => { e.preventDefault(); handleCategorySuggestionClick(cat); }}
                   onClick={() => handleCategorySuggestionClick(cat)}
                   aria-label={`Vælg kategori ${cat.name}`}
                 >
@@ -243,26 +253,32 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
           </ul>
         )}
       </fieldset>
-      <div className="flex flex-col gap-2 ${inputWidthClass}">
+      <div className={`flex flex-col gap-2 ${inputWidthClass}`}>
         <label className="text-sm font-medium" htmlFor="postedAfter">Opslag efter</label>
         <input
           id="postedAfter"
-          type="date"
+          type="text"
+          inputMode="numeric"
           className={successClass("input input-bordered shadow w-full", postedAfterValid && !!postedAfter)}
           value={postedAfter}
           onChange={e => setPostedAfter(e.target.value)}
+          placeholder="dd/mm/yyyy"
+          pattern={DANISH_DATE_PATTERN.source}
           aria-label="Opslag efter dato"
-          aria-invalid={Boolean(postedAfter) && Number.isNaN(Date.parse(postedAfter))}
+          aria-invalid={Boolean(postedAfter) && !postedAfterValid}
         />
         <label className="text-sm font-medium" htmlFor="postedBefore">Opslag før</label>
         <input
           id="postedBefore"
-          type="date"
+          type="text"
+          inputMode="numeric"
           className={successClass("input input-bordered shadow w-full", postedBeforeValid && !!postedBefore)}
           value={postedBefore}
           onChange={e => setPostedBefore(e.target.value)}
+          placeholder="dd/mm/yyyy"
+          pattern={DANISH_DATE_PATTERN.source}
           aria-label="Opslag før dato"
-          aria-invalid={Boolean(postedBefore) && Number.isNaN(Date.parse(postedBefore))}
+          aria-invalid={Boolean(postedBefore) && !postedBeforeValid}
         />
       </div>
       <button className={`btn btn-primary shadow ${inputWidthClass}`} type="submit">

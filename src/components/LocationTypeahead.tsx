@@ -135,6 +135,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
               <button
                 type="button"
                 className={`w-full text-left px-3 py-2 rounded-none border-0 bg-base-100 ${idx === activeCityIndex ? "bg-primary text-primary-content" : "hover:bg-base-200"}`}
+                onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(city); }}
                 onClick={() => handleSuggestionClick(city)}
                 aria-label={`Vælg ${city.name ?? ""}`}
               >

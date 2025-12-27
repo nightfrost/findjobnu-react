@@ -18,6 +18,7 @@ import SkillsCard from "./userProfile/SkillsCard";
 import { handleApiError } from "../helpers/ErrorHelper";
 import { createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 import { mapProfileDtoToProfile, mapProfileToUpdateRequest } from "../helpers/mappers";
+import { formatDateForDisplay, toApiDateString, toDateFromInput } from "../helpers/date";
 
 interface Props { userId: string; }
 
@@ -52,15 +53,6 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   const { user } = useUser();
   const token = user?.accessToken;
 
-  const formatDateForInput = useCallback((value?: Date | null) => {
-    if (!value) return "";
-    if (!(value instanceof Date) || Number.isNaN(value.getTime())) return "";
-    const year = value.getFullYear();
-    const month = String(value.getMonth() + 1).padStart(2, "0");
-    const day = String(value.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }, []);
-
   const applyProfileState = useCallback((dto: ProfileDto | null) => {
     if (!dto) {
       setProfile(null);
@@ -74,23 +66,24 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     const mapped = mapProfileDtoToProfile(dto);
     setProfile(dto);
     setForm(mapped);
-    setDateOfBirthInput(formatDateForInput(mapped.basicInfo.dateOfBirth));
+    setDateOfBirthInput(formatDateForDisplay(mapped.basicInfo.dateOfBirth));
     setLocation(mapped.basicInfo.location ?? "");
     setKeywordsInput((mapped.keywords ?? []).join(", "));
-  }, [formatDateForInput]);
+  }, []);
 
   // Date picker setup
   useEffect(() => {
     if (editingCard === 'basic' && dateInputRef.current) {
       pikadayRef.current ??= new Pikaday({
         field: dateInputRef.current,
-        format: "YYYY-MM-DD",
+        format: "DD/MM/YYYY",
         minDate: new Date(1900, 0, 1),
-        yearRange: [1900, new Date().getFullYear()]
+        yearRange: [1900, new Date().getFullYear()],
+        onSelect: (d: Date) => setDateOfBirthInput(formatDateForDisplay(d)),
       });
       if (dateOfBirthInput) {
-        const [y, m, d] = dateOfBirthInput.split('-').map(Number);
-        pikadayRef.current.setDate(new Date(y, m - 1, d), true);
+        const parsed = toDateFromInput(dateOfBirthInput);
+        if (parsed) pikadayRef.current.setDate(parsed, true);
       }
     }
     return () => { if (pikadayRef.current) { pikadayRef.current.destroy(); pikadayRef.current = null; } };
@@ -145,24 +138,30 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         const trimmed = value.trim();
         return trimmed.length === 0 ? null : trimmed;
       };
+
+      const normalizeDateString = (value?: string | null): string | null => {
+        const trimmed = trimOrNull(value);
+        if (!trimmed) return null;
+        return toApiDateString(trimmed) ?? trimmed;
+      };
       const parsedKeywords = keywordsInput
         .split(',')
         .map(k => k.trim())
         .filter(k => k.length > 0);
-      const dateValue = dateOfBirthInput ? new Date(dateOfBirthInput) : null;
+      const dateValue = dateOfBirthInput ? toDateFromInput(dateOfBirthInput) : null;
       const normalizedDob = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue : null;
       const updatedProfile: Profile = {
         ...form,
         keywords: parsedKeywords,
         experiences: (form.experiences || []).map(exp => ({
           ...exp,
-          fromDate: trimOrNull(exp.fromDate),
-          toDate: trimOrNull(exp.toDate),
+          fromDate: normalizeDateString(exp.fromDate),
+          toDate: normalizeDateString(exp.toDate),
         })),
         educations: (form.educations || []).map(edu => ({
           ...edu,
-          fromDate: trimOrNull(edu.fromDate),
-          toDate: trimOrNull(edu.toDate),
+          fromDate: normalizeDateString(edu.fromDate),
+          toDate: normalizeDateString(edu.toDate),
         })),
         basicInfo: {
           ...form.basicInfo,
