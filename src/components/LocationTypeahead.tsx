@@ -118,6 +118,7 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   return (
     <div className="relative w-full">
       <input
+        id="locationInput"
         className={`input input-bordered ${useValidator ? "validator" : ""} w-full ${className}`.trim()}
         placeholder={placeholder}
         value={value}

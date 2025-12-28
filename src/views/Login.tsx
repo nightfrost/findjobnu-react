@@ -97,52 +97,58 @@ const Login: React.FC = () => {
 
   return (
     <div className="rounded-box border max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
-      <h2 className="text-2xl font-bold mb-6 text-center">Log ind</h2>
       <form onSubmit={handleSubmit} className="grid gap-4" ref={formRef}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="input input-bordered validator w-full"
-          value={form.email ?? ""}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          ref={emailRef}
-          required
-        />
-        {emailTouched && emailInvalid && (
-          <div className="validator-hint">Indtast en gyldig e-mailadresse</div>
-        )}
-        <input
-          type="password"
-          name="password"
-          placeholder="Adgangskode"
-          className="input input-bordered validator w-full"
-          value={form.password ?? ""}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          ref={passwordRef}
-          minLength={8}
-          pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}"
-          title="Mindst 8 tegn, inkl. tal, små og store bogstaver"
-          required
-        />
-        {passwordTouched && passwordInvalid && (
-          <p className="validator-hint">
-            Mindst 8 tegn, inklusive
-            <br/>Mindst ét tal
-            <br/>Mindst ét lille bogstav
-            <br/>Mindst ét stort bogstav
-          </p>
-        )}
-        <button
-          type="submit"
-          className="btn btn-success w-full"
-          disabled={loading}
-        >
-          {loading ? "Logger ind..." : "Log ind"}
-        </button>
-        {error && <div className="text-error text-center">{error}</div>}
+        <fieldset className="fieldset gap-3">
+          <legend className="fieldset-legend text-2xl font-bold text-center">Log ind</legend>
+          <label className="fieldset-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className={`input input-bordered validator w-full ${emailTouched && emailInvalid ? "input-error" : ""}`.trim()}
+            value={form.email ?? ""}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            ref={emailRef}
+            required
+            aria-invalid={emailTouched && emailInvalid}
+          />
+          {emailTouched && emailInvalid && (
+            <div className="validator-hint text-error text-sm">Indtast en gyldig e-mailadresse</div>
+          )}
+          <label className="fieldset-label">Adgangskode</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Adgangskode"
+            className={`input input-bordered validator w-full ${passwordTouched && passwordInvalid ? "input-error" : ""}`.trim()}
+            value={form.password ?? ""}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            ref={passwordRef}
+            minLength={8}
+            pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}"
+            title="Mindst 8 tegn, inkl. tal, små og store bogstaver"
+            required
+            aria-invalid={passwordTouched && passwordInvalid}
+          />
+          {passwordTouched && passwordInvalid && (
+            <p className="validator-hint text-error text-sm">
+              Mindst 8 tegn, inklusive
+              <br/>Mindst ét tal
+              <br/>Mindst ét lille bogstav
+              <br/>Mindst ét stort bogstav
+            </p>
+          )}
+          <button
+            type="submit"
+            className="btn btn-success w-full"
+            disabled={loading}
+          >
+            {loading ? "Logger ind..." : "Log ind"}
+          </button>
+          {error && <div className="text-error text-center">{error}</div>}
+        </fieldset>
       </form>
       <button
         type="button"

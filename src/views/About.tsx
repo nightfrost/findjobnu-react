@@ -72,7 +72,7 @@ const values = [
 const About: React.FC = () => {
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
-                <div className="hero bg-base-100 rounded-box border shadow-sm mb-10">
+                <div className="hero bg-base-100 rounded-box shadow-sm mb-10">
                 <div className="hero-content text-center">
                     <div className="max-w-2xl">
                         <h1 className="text-3xl md:text-4xl font-bold">Om Findjobnu</h1>
@@ -171,7 +171,7 @@ const About: React.FC = () => {
                 <h3 className="text-xl font-semibold mb-3">Vores værdier</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {values.map((value) => (
-                        <div key={value.title} className="rounded-box border bg-base-100 p-6">
+                        <div key={value.title} className="card bg-base-100 p-6">
                             <h4 className="text-lg font-semibold">{value.title}</h4>
                             <p className="text-base-content/70 mt-2">{value.description}</p>
                         </div>

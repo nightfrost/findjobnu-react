@@ -135,58 +135,64 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
   }, [editingId]);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="space-y-4">
       <ul className="list-disc ml-6">
         {educations.map((edu) => (
-          <li key={edu.id} className="mb-2">
-            {editingId === edu.id && !readOnly ? (
-              <div className="space-y-2">
-                <input className="input input-bordered validator w-full" name="degree" value={form.degree || ""} onChange={handleChange} placeholder="Uddannelse" title="Uddannelse" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
-                <p className="validator-hint">Mindst 2 tegn</p>
-                <input className="input input-bordered validator w-full" name="institution" value={form.institution || ""} onChange={handleChange} placeholder="Institution" title="Institution" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
-                <p className="validator-hint">Mindst 2 tegn</p>
-                <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (dd/mm/yyyy)" title="Fra" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
-                <div className="validator-hint">Format: dd/mm/yyyy</div>
-                <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (dd/mm/yyyy)" title="Til" required pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" />
-                <div className="validator-hint">Format: dd/mm/yyyy</div>
-                <textarea className="textarea textarea-bordered validator w-full" name="description" value={form.description || ""} onChange={handleChange} placeholder="Beskrivelse" title="Beskrivelse" maxLength={1000} />
-                <div className="validator-hint">Maks 1000 tegn</div>
-                <div className="flex gap-2 mt-2">
-                  <button className="btn btn-success" onClick={handleSave}>Gem</button>
-                  <button className="btn btn-outline btn-error" onClick={handleCancel}>Annuller</button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span>{edu.degree} - {edu.institution}</span>
-                {!readOnly && (
-                  <>
-                    <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(edu)}>Rediger</button>
-                    <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(edu.id!)}>Slet</button>
-                  </>
-                )}
-              </div>
+          <li key={edu.id} className="mb-2 flex items-center gap-2">
+            <span>{edu.degree} - {edu.institution}</span>
+            {!readOnly && (
+              <>
+                <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(edu)}>Rediger</button>
+                <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(edu.id!)}>Slet</button>
+              </>
             )}
           </li>
         ))}
       </ul>
+
       {!readOnly && editingId === null && (
-        <div className="mt-4">
-          <button className="btn btn-primary" onClick={() => setEditingId(0)}>Tilføj uddannelse</button>
-        </div>
+        <button className="btn btn-primary" onClick={() => { setEditingId(0); setForm(emptyEducation); }}>
+          Tilføj uddannelse
+        </button>
       )}
-    {!readOnly && editingId === 0 && (
-        <div className="space-y-2 mt-2">
-          <input className="input input-bordered validator w-full" name="degree" value={form.degree || ""} onChange={handleChange} placeholder="Uddannelse" title="Uddannelse" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
-      <p className="validator-hint">Mindst 2 tegn</p>
-          <input className="input input-bordered validator w-full" name="institution" value={form.institution || ""} onChange={handleChange} placeholder="Institution" title="Institution" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
-      <p className="validator-hint">Mindst 2 tegn</p>
-            <input className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="Fra (dd/mm/yyyy)" title="Fra" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
+
+      {!readOnly && editingId !== null && (
+        <div className="space-y-2">
+          <div className="form-control gap-2">
+            <label className="label p-0">
+              <span className="label-text">Uddannelse</span>
+            </label>
+            <input className="input input-bordered validator w-full" name="degree" value={form.degree || ""} onChange={handleChange} placeholder="Uddannelse" title="Uddannelse" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
+          </div>
+          <p className="validator-hint">Mindst 2 tegn</p>
+          <div className="form-control gap-2">
+            <label className="label p-0">
+              <span className="label-text">Institution</span>
+            </label>
+            <input className="input input-bordered validator w-full" name="institution" value={form.institution || ""} onChange={handleChange} placeholder="Institution" title="Institution" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
+          </div>
+          <p className="validator-hint">Mindst 2 tegn</p>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="fromDate-new">
+              <span className="label-text">Fra (dd/mm/yyyy)</span>
+            </label>
+            <input id="fromDate-new" className="input input-bordered validator w-full" name="fromDate" value={form.fromDate || ""} onChange={handleChange} placeholder="dd/mm/yyyy" title="Fra" required pattern={DANISH_DATE_PATTERN.source} ref={fromDateInputRef} autoComplete="off" />
+          </div>
           <div className="validator-hint">Format: dd/mm/yyyy</div>
-            <input className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="Til (dd/mm/yyyy)" title="Til" required pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" />
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="toDate-new">
+              <span className="label-text">Til (dd/mm/yyyy)</span>
+            </label>
+            <input id="toDate-new" className="input input-bordered validator w-full" name="toDate" value={form.toDate || ""} onChange={handleChange} placeholder="dd/mm/yyyy" title="Til" required pattern={DANISH_DATE_PATTERN.source} ref={toDateInputRef} autoComplete="off" />
+          </div>
           <div className="validator-hint">Format: dd/mm/yyyy</div>
-      <textarea className="textarea textarea-bordered validator w-full" name="description" value={form.description || ""} onChange={handleChange} placeholder="Beskrivelse" title="Beskrivelse" maxLength={1000} />
-      <div className="validator-hint">Maks 1000 tegn</div>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="description-new">
+              <span className="label-text">Beskrivelse</span>
+            </label>
+            <textarea id="description-new" className="textarea textarea-bordered validator w-full" name="description" value={form.description || ""} onChange={handleChange} placeholder="Beskrivelse" title="Beskrivelse" maxLength={1000} />
+          </div>
+          <div className="validator-hint">Maks 1000 tegn</div>
           <div className="flex gap-2 mt-2">
             <button className="btn btn-sm btn-success" onClick={handleSave}>Gem</button>
             <button className="btn btn-sm btn-outline btn-error" onClick={handleCancel}>Annuller</button>

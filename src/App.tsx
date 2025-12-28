@@ -49,7 +49,7 @@ const AppWithAuthCheck: React.FC = () => {
             <Route path="/settings" element={<Settings />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/jobsearch" element={<JobSearch />}></Route>
+            <Route path="/jobsearch" element={<JobSearch />} />
             <Route path="/myjobs" element={<MyJobs />} />
             <Route path="/cv" element={<GoodCv />} />
           </Routes>

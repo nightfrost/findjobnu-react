@@ -4,13 +4,35 @@
 }
 
 @layer components {
-   .card {
+   /* .card {
       @apply border border-black;
-   }
+   } */
 
    .rounded-box.border,
    .rounded-box.border-base-200,
    .rounded-box.border-base-300 {
       @apply border-black;
+   }
+
+   /* Default shadow on buttons for visual depth */
+   .btn {
+      @apply shadow;
+   }
+
+   /* Neutral, stacked labels for legacy floating-label markup */
+   .floating-label-group {
+      @apply flex flex-col gap-1 w-full;
+   }
+
+   .floating-label-group label {
+      @apply text-sm text-base-content;
+   }
+
+   .floating-label-group .input,
+   .floating-label-group .textarea,
+   .floating-label-group select,
+   .floating-label-group input,
+   .floating-label-group textarea {
+      @apply w-full;
    }
 }

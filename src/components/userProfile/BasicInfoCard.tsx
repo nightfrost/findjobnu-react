@@ -73,18 +73,18 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
       bodyClassName="grid gap-4 lg:grid-cols-2"
     >
       <div>
-        <label className="label" htmlFor="firstName">
-          Fornavn
-        </label>
         {editing ? (
-          <>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="firstName">
+              <span className="label-text">Fornavn</span>
+            </label>
             <input
               className="input input-bordered validator w-full"
               id="firstName"
               name="firstName"
               value={form?.basicInfo?.firstName ?? ""}
               onChange={onBasicInfoChange}
-              placeholder="Indtast fornavn"
+              placeholder="Fornavn"
               required
               minLength={2}
               pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
@@ -93,25 +93,28 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
             <p className="validator-hint">
               Mindst 2 bogstaver. Tilladte tegn: bogstaver, mellemrum, bindestreg og apostrof.
             </p>
-          </>
+          </div>
         ) : (
-          <div>{renderValue(profile.basicInfo?.firstName)}</div>
+          <>
+            <label className="label" htmlFor="firstName">Fornavn</label>
+            <div>{renderValue(profile.basicInfo?.firstName)}</div>
+          </>
         )}
       </div>
 
       <div>
-        <label className="label" htmlFor="lastName">
-          Efternavn
-        </label>
         {editing ? (
-          <>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="lastName">
+              <span className="label-text">Efternavn</span>
+            </label>
             <input
               className="input input-bordered validator w-full"
               id="lastName"
               name="lastName"
               value={form?.basicInfo?.lastName ?? ""}
               onChange={onBasicInfoChange}
-              placeholder="Indtast efternavn"
+              placeholder="Efternavn"
               required
               minLength={2}
               pattern="^[A-Za-zÀ-ÿ' -]{2,}$"
@@ -120,9 +123,12 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
             <p className="validator-hint">
               Mindst 2 bogstaver. Tilladte tegn: bogstaver, mellemrum, bindestreg og apostrof.
             </p>
-          </>
+          </div>
         ) : (
-          <div>{renderValue(profile.basicInfo?.lastName)}</div>
+          <>
+            <label className="label" htmlFor="lastName">Efternavn</label>
+            <div>{renderValue(profile.basicInfo?.lastName)}</div>
+          </>
         )}
       </div>
 
@@ -150,33 +156,38 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
       </div>
 
       <div>
-        <label className="label" htmlFor="dateOfBirth">
-          Fødselsdato
-        </label>
         {editing ? (
-          <input
-            ref={onDateInputRef}
-            className="input input-bordered validator w-full"
-            id="dateOfBirth"
-            name="dateOfBirth"
-            type="text"
-            value={dateOfBirthInput}
-            onChange={(event) => onDateOfBirthChange(event.target.value)}
-            placeholder="dd/mm/yyyy"
-            pattern={DANISH_DATE_PATTERN.source}
-            title="Brug formatet dd/mm/yyyy."
-          />
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="dateOfBirth">
+              <span className="label-text">Fødselsdato</span>
+            </label>
+            <input
+              ref={onDateInputRef}
+              className="input input-bordered validator w-full"
+              id="dateOfBirth"
+              name="dateOfBirth"
+              type="text"
+              value={dateOfBirthInput}
+              onChange={(event) => onDateOfBirthChange(event.target.value)}
+              placeholder="dd/mm/yyyy"
+              pattern={DANISH_DATE_PATTERN.source}
+              title="Brug formatet dd/mm/yyyy."
+            />
+          </div>
         ) : (
-          <div>{renderDate(profile.basicInfo?.dateOfBirth ?? null)}</div>
+          <>
+            <label className="label" htmlFor="dateOfBirth">Fødselsdato</label>
+            <div>{renderDate(profile.basicInfo?.dateOfBirth ?? null)}</div>
+          </>
         )}
       </div>
 
       <div>
-        <label className="label" htmlFor="jobTitle">
-          Jobtitel
-        </label>
         {editing ? (
-          <>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="jobTitle">
+              <span className="label-text">Jobtitel</span>
+            </label>
             <input
               className="input input-bordered validator w-full"
               id="jobTitle"
@@ -188,18 +199,21 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
               title="Mindst 2 tegn. Tilladte tegn: bogstaver, tal, mellemrum, punktum, komma, bindestreg og apostrof."
             />
             <div className="validator-hint">Mindst 2 tegn, fx "Softwareudvikler"</div>
-          </>
+          </div>
         ) : (
-          <div>{renderValue(profile.basicInfo?.jobTitle)}</div>
+          <>
+            <label className="label" htmlFor="jobTitle">Jobtitel</label>
+            <div>{renderValue(profile.basicInfo?.jobTitle)}</div>
+          </>
         )}
       </div>
 
       <div>
-        <label className="label" htmlFor="company">
-          Virksomhed
-        </label>
         {editing ? (
-          <>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="company">
+              <span className="label-text">Virksomhed</span>
+            </label>
             <input
               className="input input-bordered validator w-full"
               id="company"
@@ -211,18 +225,21 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
               title="Mindst 2 tegn. Tilladte tegn: bogstaver, tal, mellemrum, punktum, komma, bindestreg og apostrof."
             />
             <div className="validator-hint">Mindst 2 tegn, fx "FindJob.nu"</div>
-          </>
+          </div>
         ) : (
-          <div>{renderValue(profile.basicInfo?.company)}</div>
+          <>
+            <label className="label" htmlFor="company">Virksomhed</label>
+            <div>{renderValue(profile.basicInfo?.company)}</div>
+          </>
         )}
       </div>
 
       <div>
-        <label className="label" htmlFor="phoneNumber">
-          Telefonnummer
-        </label>
         {editing ? (
-          <>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="phoneNumber">
+              <span className="label-text">Telefonnummer</span>
+            </label>
             <input
               className="input input-bordered validator w-full"
               id="phoneNumber"
@@ -230,14 +247,17 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
               type="tel"
               value={form?.basicInfo?.phoneNumber ?? ""}
               onChange={onBasicInfoChange}
-              placeholder="Indtast telefonnummer"
+              placeholder="Telefonnummer"
               pattern="^[+()0-9\\s-]{6,20}$"
               title="Indtast et gyldigt telefonnummer (6-20 tegn, tal, mellemrum, +, (), -)."
             />
             <p className="validator-hint">Gyldigt telefonnummer, f.eks. +45 12 34 56 78</p>
-          </>
+          </div>
         ) : (
-          <div>{renderValue(profile.basicInfo?.phoneNumber)}</div>
+          <>
+            <label className="label" htmlFor="phoneNumber">Telefonnummer</label>
+            <div>{renderValue(profile.basicInfo?.phoneNumber)}</div>
+          </>
         )}
       </div>
 

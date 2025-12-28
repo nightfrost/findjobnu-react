@@ -22,7 +22,7 @@ const EditableCardFrame: React.FC<EditableCardFrameProps> = ({
   bodyClassName,
 }) => {
   return (
-    <div className="card bg-base-100 shadow rounded-lg p-6 mb-6">
+    <div className="bg-base-100 shadow rounded-lg p-6 mb-6">
       <div className="mb-4 flex items-center justify-between">
         <div className="card-title flex items-center gap-2">{title}</div>
         <button
@@ -59,7 +59,10 @@ const EditableCardFrame: React.FC<EditableCardFrameProps> = ({
           <button className="btn btn-outline btn-error" onClick={onCancel}>
             Annuller
           </button>
+          <div className="divider">
+          </div>
         </div>
+        
       )}
     </div>
   );

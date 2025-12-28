@@ -18,7 +18,6 @@ interface Connection {
 }
 
 const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
-  // Mock data - in a real app, this would come from an API
   const [connections, setConnections] = useState<Connection[]>([
     {
       id: "1",

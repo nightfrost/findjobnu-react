@@ -4,7 +4,6 @@ import "pikaday/css/pikaday.css";
 import { useUser } from "../context/UserContext.shared";
 import { ProfileApi } from "../findjobnu-api";
 import type { Profile } from "../findjobnu-api/models/Profile";
-// using new DTO type for fetched profile
 import type { Experience } from "../findjobnu-api/models/Experience";
 import type { Education } from "../findjobnu-api/models/Education";
 import type { Skill } from "../findjobnu-api/models/Skill";
@@ -37,6 +36,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
   // Toast confirmation handling
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  const [detailsTab, setDetailsTab] = useState<"experiences" | "educations" | "skills">("experiences");
 
   const showToast = (message: string) => {
     setToast(message);
@@ -210,7 +210,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     setForm(mapped);
     if (card === "basic") {
       setLocation(mapped.basicInfo.location ?? "");
-      setDateOfBirthInput(formatDateForInput(mapped.basicInfo.dateOfBirth));
+      setDateOfBirthInput(formatDateForDisplay(mapped.basicInfo.dateOfBirth));
       setKeywordsInput((mapped.keywords ?? []).join(", "));
     }
     if (card === "about") {
@@ -317,6 +317,11 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
     setEditingCard(null);
   };
 
+  const switchDetailsTab = (tab: "experiences" | "educations" | "skills") => {
+    setDetailsTab(tab);
+    setEditingCard(null);
+  };
+
   if (loading) return <ProfileSkeleton />;
 
   if (!profile) {
@@ -344,68 +349,107 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
         </div>
       )}
 
-      <BasicInfoCard
-        profile={profile}
-        form={form}
-        editing={editingCard === 'basic'}
-        location={location}
-        dateOfBirthInput={dateOfBirthInput}
-        onToggleEdit={() => beginEditingCard('basic')}
-        onCancel={() => cancelEditingCard('basic')}
-        onSave={handleSave}
-        onBasicInfoChange={handleBasicInfoChange}
-        onLocationChange={handleLocationChange}
-        onDateOfBirthChange={(value) => setDateOfBirthInput(value)}
-        onToggleOpenToWork={handleToggleOpenToWork}
-        onDateInputRef={(node) => {
-          dateInputRef.current = node;
-        }}
-      />
+      <div className="space-y-6">
+          <BasicInfoCard
+          profile={profile}
+          form={form}
+          editing={editingCard === 'basic'}
+          location={location}
+          dateOfBirthInput={dateOfBirthInput}
+          onToggleEdit={() => beginEditingCard('basic')}
+          onCancel={() => cancelEditingCard('basic')}
+          onSave={handleSave}
+          onBasicInfoChange={handleBasicInfoChange}
+          onLocationChange={handleLocationChange}
+          onDateOfBirthChange={(value) => setDateOfBirthInput(value)}
+          onToggleOpenToWork={handleToggleOpenToWork}
+          onDateInputRef={(node) => {
+            dateInputRef.current = node;
+          }}
+        />
+        
+        
 
-      <AboutKeywordsCard
-        profile={profile}
-        form={form}
-        editing={editingCard === 'about'}
-        keywordsInput={keywordsInput}
-        onToggleEdit={() => beginEditingCard('about')}
-        onCancel={() => cancelEditingCard('about')}
-        onSave={handleSave}
-        onBasicInfoChange={handleBasicInfoChange}
-        onKeywordsChange={(value) => setKeywordsInput(value)}
-      />
+        <AboutKeywordsCard
+          profile={profile}
+          form={form}
+          editing={editingCard === 'about'}
+          keywordsInput={keywordsInput}
+          onToggleEdit={() => beginEditingCard('about')}
+          onCancel={() => cancelEditingCard('about')}
+          onSave={handleSave}
+          onBasicInfoChange={handleBasicInfoChange}
+          onKeywordsChange={(value) => setKeywordsInput(value)}
+        />
 
-      <ExperiencesCard
-        experiences={experiences}
-        editing={editingCard === 'experiences'}
-        onToggleEdit={() => beginEditingCard('experiences')}
-        onCancel={() => cancelEditingCard('experiences')}
-        onSave={handleSave}
-        onAdd={handleExperienceAdd}
-        onUpdate={handleExperienceUpdate}
-        onDelete={handleExperienceDelete}
-      />
+        <div role="tablist" className="tabs tabs-box">
+          <input
+            type="radio"
+            name="profile-details"
+            role="tab"
+            aria-label="Erfaringer"
+            className="tab"
+            checked={detailsTab === "experiences"}
+            onChange={() => switchDetailsTab("experiences")}
+          />
+          <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-4 md:p-6">
+            <ExperiencesCard
+              experiences={experiences}
+              editing={editingCard === 'experiences'}
+              onToggleEdit={() => beginEditingCard('experiences')}
+              onCancel={() => cancelEditingCard('experiences')}
+              onSave={handleSave}
+              onAdd={handleExperienceAdd}
+              onUpdate={handleExperienceUpdate}
+              onDelete={handleExperienceDelete}
+            />
+          </div>
 
-      <EducationsCard
-        educations={educations}
-        editing={editingCard === 'educations'}
-        onToggleEdit={() => beginEditingCard('educations')}
-        onCancel={() => cancelEditingCard('educations')}
-        onSave={handleSave}
-        onAdd={handleEducationAdd}
-        onUpdate={handleEducationUpdate}
-        onDelete={handleEducationDelete}
-      />
+          <input
+            type="radio"
+            name="profile-details"
+            role="tab"
+            aria-label="Uddannelser"
+            className="tab"
+            checked={detailsTab === "educations"}
+            onChange={() => switchDetailsTab("educations")}
+          />
+          <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-4 md:p-6">
+            <EducationsCard
+              educations={educations}
+              editing={editingCard === 'educations'}
+              onToggleEdit={() => beginEditingCard('educations')}
+              onCancel={() => cancelEditingCard('educations')}
+              onSave={handleSave}
+              onAdd={handleEducationAdd}
+              onUpdate={handleEducationUpdate}
+              onDelete={handleEducationDelete}
+            />
+          </div>
 
-      <SkillsCard
-        skills={skills}
-        editing={editingCard === 'skills'}
-        onToggleEdit={() => beginEditingCard('skills')}
-        onCancel={() => cancelEditingCard('skills')}
-        onSave={handleSave}
-        onAdd={handleSkillAdd}
-        onUpdate={handleSkillUpdate}
-        onDelete={handleSkillDelete}
-      />
+          <input
+            type="radio"
+            name="profile-details"
+            role="tab"
+            aria-label="Færdigheder"
+            className="tab"
+            checked={detailsTab === "skills"}
+            onChange={() => switchDetailsTab("skills")}
+          />
+          <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-box p-4 md:p-6">
+            <SkillsCard
+              skills={skills}
+              editing={editingCard === 'skills'}
+              onToggleEdit={() => beginEditingCard('skills')}
+              onCancel={() => cancelEditingCard('skills')}
+              onSave={handleSave}
+              onAdd={handleSkillAdd}
+              onUpdate={handleSkillUpdate}
+              onDelete={handleSkillDelete}
+            />
+          </div>
+        </div>
+      </div>
 
       {toast && (
         <div className="toast toast-end z-50">

@@ -100,54 +100,64 @@ const Settings: React.FC = () => {
         <div className="flex-[4_5_0%] min-w-0 pr-6">
           <div className="card bg-base-100 shadow-md p-6 mb-6">
             <h2 className="card-title mb-4">Skift e-mail</h2>
-            <form className="flex flex-col gap-3" onSubmit={handleEmailSubmit}>
-              <input
-                className="input input-bordered w-full"
-                type="email"
-                placeholder="Ny e-mail"
-                value={emailForm.newEmail}
-                onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
-                required
-              />
-              <input
-                className="input input-bordered w-full"
-                type="password"
-                placeholder="Nuværende adgangskode"
-                value={emailForm.currentPassword}
-                onChange={e => setEmailForm(f => ({ ...f, currentPassword: e.target.value }))}
-                required
-                minLength={6}
-              />
-              <button className="btn btn-primary" type="submit" disabled={loadingEmail}>
-                {loadingEmail ? "Opdaterer..." : "Send bekræftelse"}
-              </button>
+            <form className="flex flex-col" onSubmit={handleEmailSubmit}>
+              <fieldset className="fieldset gap-3">
+                <legend className="fieldset-legend text-lg font-semibold">Opdater e-mail</legend>
+                <label className="fieldset-label">Ny e-mail</label>
+                <input
+                  className="input input-bordered w-full"
+                  type="email"
+                  placeholder="Ny e-mail"
+                  value={emailForm.newEmail}
+                  onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
+                  required
+                />
+                <label className="fieldset-label">Nuværende adgangskode</label>
+                <input
+                  className="input input-bordered w-full"
+                  type="password"
+                  placeholder="Nuværende adgangskode"
+                  value={emailForm.currentPassword}
+                  onChange={e => setEmailForm(f => ({ ...f, currentPassword: e.target.value }))}
+                  required
+                  minLength={6}
+                />
+                <button className="btn btn-primary" type="submit" disabled={loadingEmail}>
+                  {loadingEmail ? "Opdaterer..." : "Send bekræftelse"}
+                </button>
+              </fieldset>
             </form>
           </div>
 
           <div className="card bg-base-100 shadow-md p-6">
             <h2 className="card-title mb-4">Skift adgangskode</h2>
-            <form className="flex flex-col gap-3" onSubmit={handlePasswordSubmit}>
-              <input
-                className="input input-bordered w-full"
-                type="password"
-                placeholder="Nuværende adgangskode"
-                value={passwordForm.oldPassword}
-                onChange={e => setPasswordForm(f => ({ ...f, oldPassword: e.target.value }))}
-                required
-                minLength={6}
-              />
-              <input
-                className="input input-bordered w-full"
-                type="password"
-                placeholder="Ny adgangskode"
-                value={passwordForm.newPassword}
-                onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
-                required
-                minLength={6}
-              />
-              <button className="btn btn-primary" type="submit" disabled={loadingPassword}>
-                {loadingPassword ? "Opdaterer..." : "Gem ny adgangskode"}
-              </button>
+            <form className="flex flex-col" onSubmit={handlePasswordSubmit}>
+              <fieldset className="fieldset gap-3">
+                <legend className="fieldset-legend text-lg font-semibold">Opdater adgangskode</legend>
+                <label className="fieldset-label">Nuværende adgangskode</label>
+                <input
+                  className="input input-bordered w-full"
+                  type="password"
+                  placeholder="Nuværende adgangskode"
+                  value={passwordForm.oldPassword}
+                  onChange={e => setPasswordForm(f => ({ ...f, oldPassword: e.target.value }))}
+                  required
+                  minLength={6}
+                />
+                <label className="fieldset-label">Ny adgangskode</label>
+                <input
+                  className="input input-bordered w-full"
+                  type="password"
+                  placeholder="Ny adgangskode"
+                  value={passwordForm.newPassword}
+                  onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
+                  required
+                  minLength={6}
+                />
+                <button className="btn btn-primary" type="submit" disabled={loadingPassword}>
+                  {loadingPassword ? "Opdaterer..." : "Gem ny adgangskode"}
+                </button>
+              </fieldset>
             </form>
           </div>
         </div>

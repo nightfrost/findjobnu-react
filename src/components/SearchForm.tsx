@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import type { CityResponse as City } from "../findjobnu-api/models";
 import LocationTypeahead from "./LocationTypeahead";
-import { DANISH_DATE_PATTERN, isValidDanishDateString, toApiDateString } from "../helpers/date";
+import Pikaday from "pikaday";
+import "pikaday/css/pikaday.css";
+import { DANISH_DATE_PATTERN, isValidDanishDateString, toApiDateString, toDateFromInput, formatDateForDisplay } from "../helpers/date";
 
 type SearchParams = {
   searchTerm?: string;
@@ -41,6 +43,10 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   const [postedAfter, setPostedAfter] = useState("");
   const [postedBefore, setPostedBefore] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const postedAfterInputRef = useRef<HTMLInputElement | null>(null);
+  const postedBeforeInputRef = useRef<HTMLInputElement | null>(null);
+  const postedAfterPickerRef = useRef<Pikaday | null>(null);
+  const postedBeforePickerRef = useRef<Pikaday | null>(null);
 
   const MAX_SUGGESTIONS = 8;
 
@@ -98,6 +104,54 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     setSelectedCity(city);
     setLocation(city.name ?? "");
   };
+
+  useEffect(() => {
+    const toUtcMidnight = (d: Date) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+
+    const setupPicker = (
+      inputEl: HTMLInputElement | null,
+      existing: Pikaday | null,
+      onSelect: (date: Date) => void
+    ): Pikaday | null => {
+      if (!inputEl) return null;
+      if (existing) return existing;
+      return new Pikaday({
+        field: inputEl,
+        format: "DD/MM/YYYY",
+        minDate: new Date(1900, 0, 1),
+        yearRange: [1900, new Date().getFullYear()],
+        toString: (date: Date) => formatDateForDisplay(toUtcMidnight(date)) ?? "",
+        parse: (dateString: string) => toDateFromInput(dateString) ?? new Date(),
+        onSelect,
+      });
+    };
+
+    postedAfterPickerRef.current = setupPicker(postedAfterInputRef.current, postedAfterPickerRef.current, (d) => {
+      const utc = toUtcMidnight(d);
+      setPostedAfter(formatDateForDisplay(utc) ?? "");
+    });
+
+    postedBeforePickerRef.current = setupPicker(postedBeforeInputRef.current, postedBeforePickerRef.current, (d) => {
+      const utc = toUtcMidnight(d);
+      setPostedBefore(formatDateForDisplay(utc) ?? "");
+    });
+
+    return () => {
+      if (postedAfterPickerRef.current) { postedAfterPickerRef.current.destroy(); postedAfterPickerRef.current = null; }
+      if (postedBeforePickerRef.current) { postedBeforePickerRef.current.destroy(); postedBeforePickerRef.current = null; }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (postedAfterPickerRef.current && postedAfter) {
+      const parsed = toDateFromInput(postedAfter);
+      if (parsed) postedAfterPickerRef.current.setDate(parsed, true);
+    }
+    if (postedBeforePickerRef.current && postedBefore) {
+      const parsed = toDateFromInput(postedBefore);
+      if (parsed) postedBeforePickerRef.current.setDate(parsed, true);
+    }
+  }, [postedAfter, postedBefore]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,100 +245,129 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   const inputWidthClass = "w-full lg:w-64";
 
   return (
-    <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-      <div className={`relative ${inputWidthClass}`}>
-        <input
-        className={successClass("input input-bordered shadow w-full", searchValid && !!searchTerm)}
-        placeholder="Søgeord"
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        minLength={2}
-        pattern={searchTerm ? "^.{2,}$" : undefined}
-        aria-invalid={Boolean(searchTerm) && searchTerm.length < 2}
-      />
-      </div>
-      <div className={`relative ${inputWidthClass}`}>
-        <LocationTypeahead
-          value={location}
-          onChange={handleLocationChange}
-          onSelect={handleLocationSelect}
-          placeholder="Lokation"
-          className={successClass("select select-bordered shadow", locationValid && !!location)}
-          inputProps={{
-            "aria-label": "Lokation",
-            minLength: 2,
-            pattern: location ? "^.{2,}$" : undefined,
-            "aria-invalid": Boolean(location) && location.length < 2,
-          }}
-          useValidator={false}
-        />
-      </div>
-      <fieldset
-        className={`relative border-0 p-0 m-0 ${inputWidthClass}`}
-        onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 100)}
-      >
-        <legend className="sr-only">Kategori</legend>
-        <input
-          className={successClass("select select-bordered shadow w-full", categoryValid && !!categoryInput)}
-          placeholder="Kategori"
-          value={categoryInput}
-          onChange={handleCategoryChange}
-          onFocus={handleCategoryFocus}
-          autoComplete="off"
-          aria-label="Kategori"
-          onKeyDown={handleCategoryKeyDown}
-          // Category always validates if present; no pattern needed
-        />
-        {showCategorySuggestions && categorySuggestions.length > 0 && (
-          <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 min-h-10 overflow-y-auto shadow-lg rounded-box p-0">
-            {categorySuggestions.map((cat, idx) => (
-              <li key={cat.id ?? `${cat.name}-${idx}`}>
-                <button
-                  type="button"
-                  className={`menu-item text px-3 py-2 w-full text-left ${idx === activeCategoryIndex ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
-                  onMouseDown={(e) => { e.preventDefault(); handleCategorySuggestionClick(cat); }}
-                  onClick={() => handleCategorySuggestionClick(cat)}
-                  aria-label={`Vælg kategori ${cat.name}`}
-                >
-                  {highlightMatch(cat.label, categoryInput)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+    <form className="flex flex-col" onSubmit={handleSubmit}>
+      <fieldset className="fieldset gap-3">
+        <legend className="fieldset-legend text-lg font-semibold">Søg efter job</legend>
+        <div className={`relative ${inputWidthClass}`}>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="searchTerm">
+              <span className="label-text">Søgeord</span>
+            </label>
+            <input
+              id="searchTerm"
+              className={successClass("input input-bordered shadow", searchValid && !!searchTerm)}
+              placeholder="Søgeord"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              minLength={2}
+              pattern={searchTerm ? "^.{2,}$" : undefined}
+              aria-invalid={Boolean(searchTerm) && searchTerm.length < 2}
+              aria-label="Søgeord"
+            />
+          </div>
+        </div>
+        <div className={`relative ${inputWidthClass}`}>
+          <label className="label p-0" htmlFor="locationInput">
+              <span className="label-text">Lokation</span>
+          </label>
+          <LocationTypeahead
+            value={location}
+            onChange={handleLocationChange}
+            onSelect={handleLocationSelect}
+            placeholder="Lokation"
+            className={successClass("select select-bordered shadow", locationValid && !!location)}
+            inputProps={{
+              "aria-label": "Lokation",
+              minLength: 2,
+              pattern: location ? "^.{2,}$" : undefined,
+              "aria-invalid": Boolean(location) && location.length < 2,
+            }}
+            useValidator={false}
+          />
+        </div>
+        <fieldset
+          className={`relative border-0 p-0 m-0 ${inputWidthClass}`}
+          onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 100)}
+        >
+          <legend className="sr-only">Kategori</legend>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="categoryInput">
+              <span className="label-text">Kategori</span>
+            </label>
+            <input
+              id="categoryInput"
+              className={successClass("select select-bordered shadow", categoryValid && !!categoryInput)}
+              placeholder="Kategori"
+              value={categoryInput}
+              onChange={handleCategoryChange}
+              onFocus={handleCategoryFocus}
+              autoComplete="off"
+              aria-label="Kategori"
+              onKeyDown={handleCategoryKeyDown}
+              // Category always validates if present; no pattern needed
+            />
+          </div>
+          {showCategorySuggestions && categorySuggestions.length > 0 && (
+            <ul className="menu-vertical absolute left-0 top-full z-20 bg-base-100 border border-base-300 w-full max-h-40 min-h-10 overflow-y-auto shadow-lg rounded-box p-0">
+              {categorySuggestions.map((cat, idx) => (
+                <li key={cat.id ?? `${cat.name}-${idx}`}>
+                  <button
+                    type="button"
+                    className={`menu-item text px-3 py-2 w-full text-left ${idx === activeCategoryIndex ? 'bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+                    onMouseDown={(e) => { e.preventDefault(); handleCategorySuggestionClick(cat); }}
+                    onClick={() => handleCategorySuggestionClick(cat)}
+                    aria-label={`Vælg kategori ${cat.name}`}
+                  >
+                    {highlightMatch(cat.label, categoryInput)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </fieldset>
+        <div className={`flex flex-col gap-2 ${inputWidthClass}`}>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="postedAfter">
+              <span className="label-text">Opslag efter</span>
+            </label>
+            <input
+              id="postedAfter"
+              type="text"
+              inputMode="numeric"
+              className={successClass("input input-bordered shadow", postedAfterValid && !!postedAfter)}
+              value={postedAfter}
+              onChange={e => setPostedAfter(e.target.value)}
+              placeholder="dd/mm/yyyy"
+              pattern={DANISH_DATE_PATTERN.source}
+              aria-label="Opslag efter dato"
+              aria-invalid={Boolean(postedAfter) && !postedAfterValid}
+              ref={postedAfterInputRef}
+            />
+          </div>
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="postedBefore">
+              <span className="label-text">Opslag før</span>
+            </label>
+            <input
+              id="postedBefore"
+              type="text"
+              inputMode="numeric"
+              className={successClass("input input-bordered shadow", postedBeforeValid && !!postedBefore)}
+              value={postedBefore}
+              onChange={e => setPostedBefore(e.target.value)}
+              placeholder="dd/mm/yyyy"
+              pattern={DANISH_DATE_PATTERN.source}
+              aria-label="Opslag før dato"
+              aria-invalid={Boolean(postedBefore) && !postedBeforeValid}
+              ref={postedBeforeInputRef}
+            />
+          </div>
+        </div>
+        <button className={`btn btn-primary shadow ${inputWidthClass}`} type="submit">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+          Søg
+        </button>
       </fieldset>
-      <div className={`flex flex-col gap-2 ${inputWidthClass}`}>
-        <label className="text-sm font-medium" htmlFor="postedAfter">Opslag efter</label>
-        <input
-          id="postedAfter"
-          type="text"
-          inputMode="numeric"
-          className={successClass("input input-bordered shadow w-full", postedAfterValid && !!postedAfter)}
-          value={postedAfter}
-          onChange={e => setPostedAfter(e.target.value)}
-          placeholder="dd/mm/yyyy"
-          pattern={DANISH_DATE_PATTERN.source}
-          aria-label="Opslag efter dato"
-          aria-invalid={Boolean(postedAfter) && !postedAfterValid}
-        />
-        <label className="text-sm font-medium" htmlFor="postedBefore">Opslag før</label>
-        <input
-          id="postedBefore"
-          type="text"
-          inputMode="numeric"
-          className={successClass("input input-bordered shadow w-full", postedBeforeValid && !!postedBefore)}
-          value={postedBefore}
-          onChange={e => setPostedBefore(e.target.value)}
-          placeholder="dd/mm/yyyy"
-          pattern={DANISH_DATE_PATTERN.source}
-          aria-label="Opslag før dato"
-          aria-invalid={Boolean(postedBefore) && !postedBeforeValid}
-        />
-      </div>
-      <button className={`btn btn-primary shadow ${inputWidthClass}`} type="submit">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-        Søg
-      </button>
     </form>
   );
 };

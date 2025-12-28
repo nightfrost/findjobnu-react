@@ -61,56 +61,43 @@ const SkillList: React.FC<Props> = ({ skills, onAdd, onUpdate, onDelete, readOnl
   };
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="space-y-4">
       <ul className="list-disc ml-6">
         {skills.map((skill) => (
-          <li key={skill.id} className="mb-2">
-            {editingId === skill.id && !readOnly ? (
-              <div className="space-y-2">
-                <input className="input input-bordered validator w-full" name="name" value={form.name || ""} onChange={handleChange} placeholder="Færdighed" title="Færdighed" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
-                <p className="validator-hint">Mindst 2 tegn</p>
-                <select className="select select-bordered validator w-full" name="proficiency" value={form.proficiency} onChange={handleChange} title="Kompetenceniveau">
-                  <option value={SkillProficiency.NUMBER_0}>Begynder</option>
-                  <option value={SkillProficiency.NUMBER_1}>Let øvet</option>
-                  <option value={SkillProficiency.NUMBER_2}>Øvet</option>
-                  <option value={SkillProficiency.NUMBER_3}>Ekspert</option>
-                </select>
-                <div className="validator-hint">Vælg kompetenceniveau</div>
-                <div className="flex gap-2 mt-2">
-                  <button className="btn btn-success" onClick={handleSave}>Gem</button>
-                  <button className="btn btn-outline btn-error" onClick={handleCancel}>Annuller</button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span>{skill.name} ({["Begynder","Let øvet","Øvet","Ekspert"][skill.proficiency]})</span>
-                {!readOnly && (
-                  <>
-                    <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(skill)}>Rediger</button>
-                    <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(skill.id!)}>Slet</button>
-                  </>
-                )}
-              </div>
+          <li key={skill.id} className="mb-2 flex items-center gap-2">
+            <span>{skill.name} ({["Begynder","Let øvet","Øvet","Ekspert"][skill.proficiency]})</span>
+            {!readOnly && (
+              <>
+                <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(skill)}>Rediger</button>
+                <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(skill.id!)}>Slet</button>
+              </>
             )}
           </li>
         ))}
       </ul>
+
       {!readOnly && editingId === null && (
-        <div className="mt-4">
-          <button className="btn btn-primary" onClick={() => setEditingId(0)}>Tilføj færdighed</button>
-        </div>
+        <button className="btn btn-primary" onClick={() => { setEditingId(0); setForm(emptySkill); }}>
+          Tilføj færdighed
+        </button>
       )}
-    {!readOnly && editingId === 0 && (
-        <div className="space-y-2 mt-2">
-          <input className="input input-bordered validator w-full" name="name" value={form.name || ""} onChange={handleChange} placeholder="Færdighed" title="Færdighed" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
-      <p className="validator-hint">Mindst 2 tegn</p>
-      <select className="select select-bordered validator w-full" name="proficiency" value={form.proficiency} onChange={handleChange} title="Kompetenceniveau">
+
+      {!readOnly && editingId !== null && (
+        <div className="space-y-2">
+          <div className="form-control gap-2">
+            <label className="label p-0" htmlFor="skill-name-new">
+              <span className="label-text">Færdighed</span>
+            </label>
+            <input id="skill-name-new" className="input input-bordered validator w-full" name="name" value={form.name || ""} onChange={handleChange} placeholder="Færdighed" title="Færdighed" required minLength={2} pattern="^[A-Za-zÀ-ÿ0-9' .,-]{2,}$" />
+          </div>
+          <p className="validator-hint">Mindst 2 tegn</p>
+          <select className="select select-bordered validator w-full" name="proficiency" value={form.proficiency} onChange={handleChange} title="Kompetenceniveau">
             <option value={SkillProficiency.NUMBER_0}>Begynder</option>
             <option value={SkillProficiency.NUMBER_1}>Let øvet</option>
             <option value={SkillProficiency.NUMBER_2}>Øvet</option>
             <option value={SkillProficiency.NUMBER_3}>Ekspert</option>
           </select>
-      <div className="validator-hint">Vælg kompetenceniveau</div>
+          <div className="validator-hint">Vælg kompetenceniveau</div>
           <div className="flex gap-2 mt-2">
             <button className="btn btn-sm btn-success" onClick={handleSave}>Gem</button>
             <button className="btn btn-sm btn-outline btn-error" onClick={handleCancel}>Annuller</button>
