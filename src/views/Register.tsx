@@ -114,15 +114,16 @@ const Register: React.FC = () => {
   }, [success]);
 
   return (
-    <div className="rounded-box border max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
+    <div className="card max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
       <form onSubmit={handleSubmit} className="grid" ref={formRef}>
         <fieldset className="fieldset gap-3">
           <legend className="fieldset-legend text-2xl font-bold text-center">Opret bruger</legend>
-          <label className="fieldset-label">Fornavn</label>
+          <label className="fieldset-label" htmlFor="firstName">Fornavn</label>
           <input
             type="text"
             name="firstName"
-            placeholder="Fornavn"
+            id="firstName"
+            placeholder="Jens"
             className={`input input-bordered validator w-full ${firstNameTouched && firstNameInvalid ? "input-error" : ""}`.trim()}
             value={form.firstName ?? ""}
             onChange={handleChange}
@@ -137,11 +138,12 @@ const Register: React.FC = () => {
           {firstNameTouched && firstNameInvalid && (
             <p className="validator-hint text-error text-sm">Mindst 2 bogstaver</p>
           )}
-          <label className="fieldset-label">Efternavn</label>
+          <label className="fieldset-label" htmlFor="lastName">Efternavn</label>
           <input
             type="text"
             name="lastName"
-            placeholder="Efternavn"
+            id="lastName"
+            placeholder="Jensen"
             className={`input input-bordered validator w-full ${lastNameTouched && lastNameInvalid ? "input-error" : ""}`.trim()}
             value={form.lastName ?? ""}
             onChange={handleChange}
@@ -156,11 +158,12 @@ const Register: React.FC = () => {
           {lastNameTouched && lastNameInvalid && (
             <p className="validator-hint text-error text-sm">Mindst 2 bogstaver</p>
           )}
-          <label className="fieldset-label">Email</label>
+          <label className="fieldset-label" htmlFor="email">Email</label>
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            id="email"
+            placeholder="Jens@gmail.com"
             className={`input input-bordered validator w-full ${emailTouched && emailInvalid ? "input-error" : ""}`.trim()}
             value={form.email ?? ""}
             onChange={handleChange}
@@ -172,11 +175,12 @@ const Register: React.FC = () => {
           {emailTouched && emailInvalid && (
             <div className="validator-hint text-error text-sm">Indtast en gyldig e-mailadresse</div>
           )}
-          <label className="fieldset-label">Adgangskode</label>
+          <label className="fieldset-label" htmlFor="password">Adgangskode</label>
           <input
             type="password"
             name="password"
-            placeholder="Adgangskode"
+            id="password"
+            placeholder="•••••••••"
             className={`input input-bordered validator w-full ${passwordTouched && passwordInvalid ? "input-error" : ""}`.trim()}
             value={form.password ?? ""}
             onChange={handleChange}

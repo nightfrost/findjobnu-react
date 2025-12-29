@@ -4,6 +4,19 @@ import { AuthenticationApi } from "../findjobnu-auth";
 import { createAuthClient } from "../helpers/ApiFactory";
 import { useUser } from "../context/UserContext.shared";
 
+type SettingsCardProps = {
+  title: string;
+  children: React.ReactNode;
+  tone?: "default" | "danger";
+};
+
+const SettingsCard: React.FC<SettingsCardProps> = ({ title, children, tone = "default" }) => (
+  <div className={`card bg-base-100 shadow-md p-6 ${tone === "danger" ? "border border-error/20" : ""}`}>
+    <h2 className={`card-title mb-4 ${tone === "danger" ? "text-error" : ""}`}>{title}</h2>
+    {children}
+  </div>
+);
+
 const Settings: React.FC = () => {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
@@ -96,90 +109,85 @@ const Settings: React.FC = () => {
 
   return (
     <div className="container max-w-7xl mx-auto px-4">
-      <div className="flex w-full mb-8 items-start">
-        <div className="flex-[4_5_0%] min-w-0 pr-6">
-          <div className="card bg-base-100 shadow-md p-6 mb-6">
-            <h2 className="card-title mb-4">Skift e-mail</h2>
-            <form className="flex flex-col" onSubmit={handleEmailSubmit}>
-              <fieldset className="fieldset gap-3">
-                <legend className="fieldset-legend text-lg font-semibold">Opdater e-mail</legend>
-                <label className="fieldset-label">Ny e-mail</label>
-                <input
-                  className="input input-bordered w-full"
-                  type="email"
-                  placeholder="Ny e-mail"
-                  value={emailForm.newEmail}
-                  onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
-                  required
-                />
-                <label className="fieldset-label">Nuværende adgangskode</label>
-                <input
-                  className="input input-bordered w-full"
-                  type="password"
-                  placeholder="Nuværende adgangskode"
-                  value={emailForm.currentPassword}
-                  onChange={e => setEmailForm(f => ({ ...f, currentPassword: e.target.value }))}
-                  required
-                  minLength={6}
-                />
-                <button className="btn btn-primary" type="submit" disabled={loadingEmail}>
-                  {loadingEmail ? "Opdaterer..." : "Send bekræftelse"}
-                </button>
-              </fieldset>
-            </form>
-          </div>
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <SettingsCard title="Skift e-mail">
+          <form className="flex flex-col" onSubmit={handleEmailSubmit}>
+            <fieldset className="fieldset gap-3">
+              <legend className="fieldset-legend text-lg font-semibold">Opdater e-mail</legend>
+              <label className="fieldset-label" htmlFor="newEmail">Ny e-mail</label>
+              <input
+                id="newEmail"
+                className="input input-bordered w-full"
+                type="email"
+                placeholder="Ny e-mail"
+                value={emailForm.newEmail}
+                onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))}
+                required
+              />
+              <label className="fieldset-label" htmlFor="currentPassword">Nuværende adgangskode</label>
+              <input
+                id="currentPassword"
+                className="input input-bordered w-full"
+                type="password"
+                placeholder="Nuværende adgangskode"
+                value={emailForm.currentPassword}
+                onChange={e => setEmailForm(f => ({ ...f, currentPassword: e.target.value }))}
+                required
+                minLength={6}
+              />
+              <button className="btn btn-primary" type="submit" disabled={loadingEmail}>
+                {loadingEmail ? "Opdaterer..." : "Send bekræftelse"}
+              </button>
+            </fieldset>
+          </form>
+        </SettingsCard>
 
-          <div className="card bg-base-100 shadow-md p-6">
-            <h2 className="card-title mb-4">Skift adgangskode</h2>
-            <form className="flex flex-col" onSubmit={handlePasswordSubmit}>
-              <fieldset className="fieldset gap-3">
-                <legend className="fieldset-legend text-lg font-semibold">Opdater adgangskode</legend>
-                <label className="fieldset-label">Nuværende adgangskode</label>
-                <input
-                  className="input input-bordered w-full"
-                  type="password"
-                  placeholder="Nuværende adgangskode"
-                  value={passwordForm.oldPassword}
-                  onChange={e => setPasswordForm(f => ({ ...f, oldPassword: e.target.value }))}
-                  required
-                  minLength={6}
-                />
-                <label className="fieldset-label">Ny adgangskode</label>
-                <input
-                  className="input input-bordered w-full"
-                  type="password"
-                  placeholder="Ny adgangskode"
-                  value={passwordForm.newPassword}
-                  onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
-                  required
-                  minLength={6}
-                />
-                <button className="btn btn-primary" type="submit" disabled={loadingPassword}>
-                  {loadingPassword ? "Opdaterer..." : "Gem ny adgangskode"}
-                </button>
-              </fieldset>
-            </form>
-          </div>
-        </div>
+        <SettingsCard title="Skift adgangskode">
+          <form className="flex flex-col" onSubmit={handlePasswordSubmit}>
+            <fieldset className="fieldset gap-3">
+              <legend className="fieldset-legend text-lg font-semibold">Opdater adgangskode</legend>
+              <label className="fieldset-label" htmlFor="oldPassword">Nuværende adgangskode</label>
+              <input
+                id="oldPassword"
+                className="input input-bordered w-full"
+                type="password"
+                placeholder="Nuværende adgangskode"
+                value={passwordForm.oldPassword}
+                onChange={e => setPasswordForm(f => ({ ...f, oldPassword: e.target.value }))}
+                required
+                minLength={6}
+              />
+              <label className="fieldset-label" htmlFor="newPassword">Ny adgangskode</label>
+              <input
+                id="newPassword"
+                className="input input-bordered w-full"
+                type="password"
+                placeholder="Ny adgangskode"
+                value={passwordForm.newPassword}
+                onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
+                required
+                minLength={6}
+              />
+              <button className="btn btn-primary" type="submit" disabled={loadingPassword}>
+                {loadingPassword ? "Opdaterer..." : "Gem ny adgangskode"}
+              </button>
+            </fieldset>
+          </form>
+        </SettingsCard>
 
-        <div className="divider divider-horizontal" />
-
-        <div className="flex-[4_0_0%] min-w-0 pl-6">
-          <div className="card bg-base-100 shadow-md p-6">
-            <h2 className="card-title mb-4 text-error">Lås konto</h2>
-            <p className="mb-4 text-sm text-base-content/70">Låser kontoen indtil du logger ind igen. Brugbar hvis du vil pause adgang.</p>
-            <button className="btn btn-outline btn-error" onClick={handleLockout} disabled={loadingLockout}>
-              {loadingLockout ? "Låser..." : "Lås konto"}
-            </button>
-          </div>
-
-          {(status || error) && (
-            <div className={`alert mt-4 ${status ? "alert-success" : "alert-error"}`}>
-              <span>{status ?? error}</span>
-            </div>
-          )}
-        </div>
+        <SettingsCard title="Lås konto" tone="danger">
+          <p className="mb-4 text-sm text-base-content/70">Låser kontoen indtil du logger ind igen. Brugbar hvis du vil pause adgang.</p>
+          <button className="btn btn-outline btn-error" onClick={handleLockout} disabled={loadingLockout}>
+            {loadingLockout ? "Låser..." : "Lås konto"}
+          </button>
+        </SettingsCard>
       </div>
+
+      {(status || error) && (
+        <div className={`alert mt-6 ${status ? "alert-success" : "alert-error"}`}>
+          <span>{status ?? error}</span>
+        </div>
+      )}
     </div>
   );
 };

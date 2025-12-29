@@ -84,7 +84,7 @@ const About: React.FC = () => {
                             <span className="badge badge-secondary badge-outline">Gennemsigtighed</span>
                             <span className="badge badge-accent badge-outline">Kandidatfokus</span>
                         </div>
-                        <div className="rounded-box border mt-6 grid gap-3 text-left bg-base-200 p-4">
+                        <div className="rounded-box border mt-6 grid gap-3 text-left p-4">
                             <div className="flex items-center gap-3">
                                 <span className="font-semibold">Grundlagt</span>
                                 <span className="text-base-content/70">2025 i Aalborg</span>

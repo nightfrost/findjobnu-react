@@ -96,13 +96,14 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="rounded-box border max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
+    <div className="card max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
       <form onSubmit={handleSubmit} className="grid gap-4" ref={formRef}>
         <fieldset className="fieldset gap-3">
           <legend className="fieldset-legend text-2xl font-bold text-center">Log ind</legend>
-          <label className="fieldset-label">Email</label>
+          <label className="fieldset-label" htmlFor="email">Email</label>
           <input
             type="email"
+            id="email"
             name="email"
             placeholder="Email"
             className={`input input-bordered validator w-full ${emailTouched && emailInvalid ? "input-error" : ""}`.trim()}
@@ -111,14 +112,15 @@ const Login: React.FC = () => {
             onBlur={handleBlur}
             ref={emailRef}
             required
-            aria-invalid={emailTouched && emailInvalid}
+            aria-invalid={emailTouched && emailInvalid ? "true" : "false"}
           />
           {emailTouched && emailInvalid && (
             <div className="validator-hint text-error text-sm">Indtast en gyldig e-mailadresse</div>
           )}
-          <label className="fieldset-label">Adgangskode</label>
+          <label className="fieldset-label" htmlFor="password">Adgangskode</label>
           <input
             type="password"
+            id="password"
             name="password"
             placeholder="Adgangskode"
             className={`input input-bordered validator w-full ${passwordTouched && passwordInvalid ? "input-error" : ""}`.trim()}
@@ -130,7 +132,7 @@ const Login: React.FC = () => {
             pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}"
             title="Mindst 8 tegn, inkl. tal, små og store bogstaver"
             required
-            aria-invalid={passwordTouched && passwordInvalid}
+            aria-invalid={passwordTouched && passwordInvalid ? "true" : "false"}
           />
           {passwordTouched && passwordInvalid && (
             <p className="validator-hint text-error text-sm">
