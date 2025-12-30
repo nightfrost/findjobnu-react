@@ -30,9 +30,9 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
 
   return (
     <div className="flex justify-center mt-6">
-      <div className="join">
+      <div className="join shadow">
         <button
-          className="join-item btn btn-lg"
+          className="join-item btn btn-lg bg-base-100 border border-base-300 hover:bg-base-200 text-base-content"
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
@@ -42,14 +42,18 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
           page === "..." ? (
             <button
               key={`ellipsis-${arr[idx - 1]}-${arr[idx + 1]}`}
-              className="join-item btn btn-lg btn-disabled"
+              className="join-item btn btn-lg btn-disabled bg-base-100 border border-base-300 text-base-content"
             >
               ...
             </button>
           ) : (
             <button
               key={page}
-              className={`join-item btn btn-lg ${currentPage === page ? " btn-active" : ""}`}
+              className={`join-item btn btn-lg text-base-content ${
+                currentPage === page
+                  ? "btn-primary"
+                  : "bg-base-100 border border-base-300 hover:bg-base-200"
+              }`}
               onClick={() => onPageChange(Number(page))}
             >
               {page}
@@ -57,7 +61,7 @@ const Paging: React.FC<PagingProps> = ({ currentPage, totalPages, onPageChange }
           )
         )}
         <button
-          className="join-item btn btn-lg"
+          className="join-item btn btn-lg bg-base-100 border border-base-300 hover:bg-base-200 text-base-content"
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
         >
