@@ -18,36 +18,37 @@ const MyJobs: React.FC = () => {
 
 	const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
-	const switchTab = (tab: TabKey) => {
-		setActiveTab(tab);
-	};
-
 	return (
 		<div className="container max-w-7xl mx-auto px-4 py-6">
 			<h1 className="text-3xl font-bold mb-4">Mine Jobs</h1>
 
-			<div role="tablist" className="tabs tabs-boxed">
-				<button
+			<div role="tablist" className="tabs tabs-box">
+				<input
+					type="radio"
+					name="my-jobs-tabs"
 					role="tab"
-					className={`tab ${activeTab === "saved" ? "tab-active" : ""}`}
-					onClick={() => switchTab("saved")}
-				>
-					Gemte
-				</button>
-				<button
-					role="tab"
-					className={`tab ${activeTab === "recommended" ? "tab-active" : ""}`}
-					onClick={() => switchTab("recommended")}
-				>
-					Anbefalede
-				</button>
-			</div>
+					aria-label="Gemte"
+					className="tab"
+					checked={activeTab === "saved"}
+					onChange={() => setActiveTab("saved")}
+				/>
+				<div className="tab-content bg-base-100 border-base-300 rounded-box p-4 md:p-6">
+					{activeTab === "saved" && <SavedJobs userId={userId} />}
+				</div>
 
-			{activeTab === "saved" ? (
-				<SavedJobs userId={userId} />
-			) : (
-				<RecommendedJobs userId={userId} />
-			)}
+				<input
+					type="radio"
+					name="my-jobs-tabs"
+					role="tab"
+					aria-label="Anbefalede"
+					className="tab"
+					checked={activeTab === "recommended"}
+					onChange={() => setActiveTab("recommended")}
+				/>
+				<div className="tab-content bg-base-100 border-base-300 rounded-box p-4 md:p-6">
+					{activeTab === "recommended" && <RecommendedJobs userId={userId} />}
+				</div>
+			</div>
 		</div>
 	);
 };
