@@ -72,7 +72,7 @@ const values = [
 const About: React.FC = () => {
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
-                <div className="hero bg-base-100 rounded-box shadow-sm mb-10">
+                <div className="hero bg-base-100 rounded-box shadow-xl mb-10">
                 <div className="hero-content text-center">
                     <div className="max-w-2xl">
                         <h1 className="text-3xl md:text-4xl font-bold">Om Findjobnu</h1>
