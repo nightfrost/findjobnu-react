@@ -1,28 +1,26 @@
-import type {
-  Accomplishment,
-  AccomplishmentDto,
-  AccomplishmentUpdate,
-  BasicInfo,
-  BasicInfoDto,
-  Contact,
-  ContactDto,
-  ContactUpdate,
-  Education,
-  EducationDto,
-  EducationUpdate,
-  Experience,
-  ExperienceDto,
-  ExperienceUpdate,
-  Interest,
-  InterestDto,
-  InterestUpdate,
-  Profile,
-  ProfileDto,
-  ProfileUpdateRequest,
-  Skill,
-  SkillDto,
-  SkillUpdate,
-} from "../findjobnu-api/models";
+import type { Accomplishment } from "../findjobnu-api/models/Accomplishment";
+import type { AccomplishmentDto } from "../findjobnu-api/models/AccomplishmentDto";
+import type { AccomplishmentUpdate } from "../findjobnu-api/models/AccomplishmentUpdate";
+import type { BasicInfo } from "../findjobnu-api/models/BasicInfo";
+import type { BasicInfoDto } from "../findjobnu-api/models/BasicInfoDto";
+import type { Contact } from "../findjobnu-api/models/Contact";
+import type { ContactDto } from "../findjobnu-api/models/ContactDto";
+import type { ContactUpdate } from "../findjobnu-api/models/ContactUpdate";
+import type { Education } from "../findjobnu-api/models/Education";
+import type { EducationDto } from "../findjobnu-api/models/EducationDto";
+import type { EducationUpdate } from "../findjobnu-api/models/EducationUpdate";
+import type { Experience } from "../findjobnu-api/models/Experience";
+import type { ExperienceDto } from "../findjobnu-api/models/ExperienceDto";
+import type { ExperienceUpdate } from "../findjobnu-api/models/ExperienceUpdate";
+import type { Interest } from "../findjobnu-api/models/Interest";
+import type { InterestDto } from "../findjobnu-api/models/InterestDto";
+import type { InterestUpdate } from "../findjobnu-api/models/InterestUpdate";
+import type { Profile } from "../findjobnu-api/models/Profile";
+import type { ProfileDto } from "../findjobnu-api/models/ProfileDto";
+import type { ProfileUpdateRequest } from "../findjobnu-api/models/ProfileUpdateRequest";
+import type { Skill } from "../findjobnu-api/models/Skill";
+import type { SkillDto } from "../findjobnu-api/models/SkillDto";
+import type { SkillUpdate } from "../findjobnu-api/models/SkillUpdate";
 import { SkillProficiency } from "../findjobnu-api/models/SkillProficiency";
 import { SkillProficiencyUpdate } from "../findjobnu-api/models/SkillProficiencyUpdate";
 

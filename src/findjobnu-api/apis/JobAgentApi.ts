@@ -15,12 +15,12 @@
 
 import * as runtime from '../runtime';
 import type {
-  JobAgent,
+  JobAgentDto,
   JobAgentUpdateRequest,
 } from '../models/index';
 import {
-    JobAgentFromJSON,
-    JobAgentToJSON,
+    JobAgentDtoFromJSON,
+    JobAgentDtoToJSON,
     JobAgentUpdateRequestFromJSON,
     JobAgentUpdateRequestToJSON,
 } from '../models/index';
@@ -49,7 +49,7 @@ export class JobAgentApi extends runtime.BaseAPI {
 
     /**
      */
-    async createOrUpdateJobAgentRaw(requestParameters: CreateOrUpdateJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobAgent>> {
+    async createOrUpdateJobAgentRaw(requestParameters: CreateOrUpdateJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobAgentDto>> {
         if (requestParameters['profileId'] == null) {
             throw new runtime.RequiredError(
                 'profileId',
@@ -78,19 +78,19 @@ export class JobAgentApi extends runtime.BaseAPI {
             body: JobAgentUpdateRequestToJSON(requestParameters['jobAgentUpdateRequest']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => JobAgentFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobAgentDtoFromJSON(jsonValue));
     }
 
     /**
      */
-    async createOrUpdateJobAgent(requestParameters: CreateOrUpdateJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobAgent> {
+    async createOrUpdateJobAgent(requestParameters: CreateOrUpdateJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobAgentDto> {
         const response = await this.createOrUpdateJobAgentRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
     /**
      */
-    async getJobAgentRaw(requestParameters: GetJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobAgent>> {
+    async getJobAgentRaw(requestParameters: GetJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobAgentDto>> {
         if (requestParameters['profileId'] == null) {
             throw new runtime.RequiredError(
                 'profileId',
@@ -109,12 +109,12 @@ export class JobAgentApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => JobAgentFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobAgentDtoFromJSON(jsonValue));
     }
 
     /**
      */
-    async getJobAgent(requestParameters: GetJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobAgent> {
+    async getJobAgent(requestParameters: GetJobAgentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobAgentDto> {
         const response = await this.getJobAgentRaw(requestParameters, initOverrides);
         return await response.value();
     }

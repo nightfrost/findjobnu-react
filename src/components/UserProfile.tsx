@@ -19,11 +19,11 @@ import { createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 import { mapProfileDtoToProfile, mapProfileToUpdateRequest } from "../helpers/mappers";
 import { formatDateForDisplay, toApiDateString, toDateFromInput } from "../helpers/date";
 
-interface Props { userId: string; }
+interface Props { userId: string; refreshKey?: number; }
 
 type EditingCard = 'basic' | 'about' | 'experiences' | 'educations' | 'skills' | null;
 
-const UserProfileComponent: React.FC<Props> = ({ userId }) => {
+const UserProfileComponent: React.FC<Props> = ({ userId, refreshKey }) => {
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateOfBirthInput, setDateOfBirthInput] = useState<string>("");
@@ -106,7 +106,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId }) => {
       } finally { if (!cancelled) setLoading(false); }
     })();
     return () => { cancelled = true; };
-  }, [userId, token, applyProfileState]);
+  }, [userId, token, applyProfileState, refreshKey]);
 
   const handleBasicInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!form) return;

@@ -15,14 +15,21 @@
 
 import * as runtime from '../runtime';
 import type {
+  CvImportResult,
   CvReadabilityResult,
 } from '../models/index';
 import {
+    CvImportResultFromJSON,
+    CvImportResultToJSON,
     CvReadabilityResultFromJSON,
     CvReadabilityResultToJSON,
 } from '../models/index';
 
 export interface AnalyzeCvPdfRequest {
+    file?: Blob | null;
+}
+
+export interface ImportCvIntoProfileRequest {
     file?: Blob | null;
 }
 
@@ -73,6 +80,51 @@ export class CVApi extends runtime.BaseAPI {
      */
     async analyzeCvPdf(requestParameters: AnalyzeCvPdfRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CvReadabilityResult> {
         const response = await this.analyzeCvPdfRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async importCvIntoProfileRaw(requestParameters: ImportCvIntoProfileRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CvImportResult>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const consumes: runtime.Consume[] = [
+            { contentType: 'multipart/form-data' },
+        ];
+        // @ts-ignore: canConsumeForm may be unused
+        const canConsumeForm = runtime.canConsumeForm(consumes);
+
+        let formParams: { append(param: string, value: any): any };
+        let useForm = false;
+        // use FormData to transmit files using content-type "multipart/form-data"
+        useForm = canConsumeForm;
+        if (useForm) {
+            formParams = new FormData();
+        } else {
+            formParams = new URLSearchParams();
+        }
+
+        if (requestParameters['file'] != null) {
+            formParams.append('file', requestParameters['file'] as any);
+        }
+
+        const response = await this.request({
+            path: `/api/cv/import`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: formParams,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CvImportResultFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async importCvIntoProfile(requestParameters: ImportCvIntoProfileRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CvImportResult> {
+        const response = await this.importCvIntoProfileRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

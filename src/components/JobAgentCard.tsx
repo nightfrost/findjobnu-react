@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { JobAgentApi, ProfileApi } from "../findjobnu-api";
 import { JobAgentFrequency } from "../findjobnu-api/models/JobAgentFrequency";
-import type { JobAgent } from "../findjobnu-api/models/JobAgent";
+import type { JobAgentDto } from "../findjobnu-api/models/JobAgentDto";
 import { createApiClient } from "../helpers/ApiFactory";
 import { handleApiError } from "../helpers/ErrorHelper";
 
@@ -20,7 +20,7 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profileId, setProfileId] = useState<number | null>(null);
-  const [jobAgent, setJobAgent] = useState<JobAgent | null>(null);
+  const [jobAgent, setJobAgent] = useState<JobAgentDto | null>(null);
   const [enabled, setEnabled] = useState<boolean>(true);
   const [frequency, setFrequency] = useState<JobAgentFrequency>(JobAgentFrequency.NUMBER_2);
   const [lastSentAt, setLastSentAt] = useState<Date | null>(null);
@@ -56,8 +56,8 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
       setJobAgent(existing);
       setEnabled(existing?.enabled ?? true);
       setFrequency((existing?.frequency as JobAgentFrequency | undefined) ?? JobAgentFrequency.NUMBER_2);
-      setLastSentAt(existing?.lastSentAt ?? null);
-      setNextSendAt(existing?.nextSendAt ?? null);
+      setLastSentAt(existing?.lastSentAt ? new Date(existing.lastSentAt) : null);
+      setNextSendAt(existing?.nextSendAt ? new Date(existing.nextSendAt) : null);
       setLocationsInput((existing?.preferredLocations ?? []).join(", "));
       setCategoriesInput((existing?.preferredCategoryIds ?? []).join(", "));
       setKeywordsInput((existing?.includeKeywords ?? []).join(", "));
@@ -164,8 +164,8 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
       setJobAgent(refreshed);
       setEnabled(refreshed.enabled ?? enabled);
       setFrequency((refreshed.frequency as JobAgentFrequency | undefined) ?? frequency);
-      setLastSentAt(refreshed.lastSentAt ?? null);
-      setNextSendAt(refreshed.nextSendAt ?? null);
+      setLastSentAt(refreshed.lastSentAt ? new Date(refreshed.lastSentAt) : null);
+      setNextSendAt(refreshed.nextSendAt ? new Date(refreshed.nextSendAt) : null);
       setLocationsInput((refreshed.preferredLocations ?? []).join(", "));
       setCategoriesInput((refreshed.preferredCategoryIds ?? []).join(", "));
       setKeywordsInput((refreshed.includeKeywords ?? []).join(", "));

@@ -27,6 +27,12 @@ export interface JobAgentDto {
     id?: number;
     /**
      * 
+     * @type {number}
+     * @memberof JobAgentDto
+     */
+    profileId?: number;
+    /**
+     * 
      * @type {boolean}
      * @memberof JobAgentDto
      */
@@ -61,6 +67,24 @@ export interface JobAgentDto {
      * @memberof JobAgentDto
      */
     updatedAt?: Date | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobAgentDto
+     */
+    preferredLocations?: Array<string> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof JobAgentDto
+     */
+    preferredCategoryIds?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof JobAgentDto
+     */
+    includeKeywords?: Array<string> | null;
 }
 
 /**
@@ -81,12 +105,16 @@ export function JobAgentDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'profileId': json['profileId'] == null ? undefined : json['profileId'],
         'enabled': json['enabled'] == null ? undefined : json['enabled'],
         'frequency': json['frequency'] == null ? undefined : json['frequency'],
         'lastSentAt': json['lastSentAt'] == null ? undefined : (new Date(json['lastSentAt'])),
         'nextSendAt': json['nextSendAt'] == null ? undefined : (new Date(json['nextSendAt'])),
         'createdAt': json['createdAt'] == null ? undefined : (new Date(json['createdAt'])),
         'updatedAt': json['updatedAt'] == null ? undefined : (new Date(json['updatedAt'])),
+        'preferredLocations': json['preferredLocations'] == null ? undefined : json['preferredLocations'],
+        'preferredCategoryIds': json['preferredCategoryIds'] == null ? undefined : json['preferredCategoryIds'],
+        'includeKeywords': json['includeKeywords'] == null ? undefined : json['includeKeywords'],
     };
 }
 
@@ -102,12 +130,16 @@ export function JobAgentDtoToJSONTyped(value?: JobAgentDto | null, ignoreDiscrim
     return {
         
         'id': value['id'],
+        'profileId': value['profileId'],
         'enabled': value['enabled'],
         'frequency': value['frequency'],
         'lastSentAt': value['lastSentAt'] == null ? undefined : ((value['lastSentAt'] as any).toISOString()),
         'nextSendAt': value['nextSendAt'] == null ? undefined : ((value['nextSendAt'] as any).toISOString()),
         'createdAt': value['createdAt'] == null ? undefined : ((value['createdAt']).toISOString()),
         'updatedAt': value['updatedAt'] == null ? undefined : ((value['updatedAt'] as any).toISOString()),
+        'preferredLocations': value['preferredLocations'],
+        'preferredCategoryIds': value['preferredCategoryIds'],
+        'includeKeywords': value['includeKeywords'],
     };
 }
 

@@ -4,12 +4,15 @@ import UserProfileComponent from "../components/UserProfile";
 import ConnectionsComponent from "../components/Connections";
 import JobAgentCard from "../components/JobAgentCard";
 import { useNavigate } from "react-router-dom";
+import ImportCvCard from "../components/ImportCvCard";
+import { useState } from "react";
 
 const Profile: React.FC = () => {
   const { user } = useUser();
   const userId = user?.userId || "";
   const token = user?.accessToken || "";
   const navigate = useNavigate();
+  const [profileRefreshKey, setProfileRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!userId || !token) {
@@ -21,10 +24,15 @@ const Profile: React.FC = () => {
   <div className="container max-w-7xl mx-auto px-4">
       <div className="flex w-full mb-8 items-start">
         <div className="flex-[4_5_0%] min-w-0 pr-6">
-          <UserProfileComponent userId={userId} />
+          <UserProfileComponent userId={userId} refreshKey={profileRefreshKey} />
         </div>
         <div className="divider divider-horizontal" />
         <div className="flex-[4_0_0%] min-w-0 pl-6">
+          <ImportCvCard
+            userId={userId}
+            accessToken={token}
+            onImported={() => setProfileRefreshKey((k) => k + 1)}
+          />
           <ConnectionsComponent userId={userId} accessToken={token} />
           <div className="mt-6">
             <JobAgentCard userId={userId} accessToken={token} />

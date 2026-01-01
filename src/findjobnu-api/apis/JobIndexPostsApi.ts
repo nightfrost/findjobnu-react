@@ -48,7 +48,12 @@ export interface GetJobPostsBySearchRequest {
 }
 
 export interface GetRecommendedJobsForUserRequest {
-    page: number;
+    searchTerm?: string;
+    location?: string;
+    categoryId?: number;
+    postedAfter?: Date;
+    postedBefore?: Date;
+    page?: number;
     pageSize?: number;
 }
 
@@ -231,21 +236,34 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
     /**
      */
     async getRecommendedJobsForUserRaw(requestParameters: GetRecommendedJobsForUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobIndexPostResponsePagedResponse>> {
-        if (requestParameters['page'] == null) {
-            throw new runtime.RequiredError(
-                'page',
-                'Required parameter "page" was null or undefined when calling getRecommendedJobsForUser().'
-            );
-        }
-
         const queryParameters: any = {};
 
+        if (requestParameters['searchTerm'] != null) {
+            queryParameters['SearchTerm'] = requestParameters['searchTerm'];
+        }
+
+        if (requestParameters['location'] != null) {
+            queryParameters['Location'] = requestParameters['location'];
+        }
+
+        if (requestParameters['categoryId'] != null) {
+            queryParameters['CategoryId'] = requestParameters['categoryId'];
+        }
+
+        if (requestParameters['postedAfter'] != null) {
+            queryParameters['PostedAfter'] = (requestParameters['postedAfter'] as any).toISOString();
+        }
+
+        if (requestParameters['postedBefore'] != null) {
+            queryParameters['PostedBefore'] = (requestParameters['postedBefore'] as any).toISOString();
+        }
+
         if (requestParameters['page'] != null) {
-            queryParameters['page'] = requestParameters['page'];
+            queryParameters['Page'] = requestParameters['page'];
         }
 
         if (requestParameters['pageSize'] != null) {
-            queryParameters['pageSize'] = requestParameters['pageSize'];
+            queryParameters['PageSize'] = requestParameters['pageSize'];
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -262,7 +280,7 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
 
     /**
      */
-    async getRecommendedJobsForUser(requestParameters: GetRecommendedJobsForUserRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostResponsePagedResponse | null | undefined > {
+    async getRecommendedJobsForUser(requestParameters: GetRecommendedJobsForUserRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostResponsePagedResponse | null | undefined > {
         const response = await this.getRecommendedJobsForUserRaw(requestParameters, initOverrides);
         switch (response.raw.status) {
             case 200:
