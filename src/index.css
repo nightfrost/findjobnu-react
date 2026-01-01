@@ -3,6 +3,17 @@
    themes: corporate --default;
 }
 
+@layer base {
+   html {
+      scrollbar-gutter: stable;
+   }
+
+   body {
+      min-height: 100vh;
+      overflow-y: scroll;
+   }
+}
+
 @layer components {
    /* .card {
       @apply border border-black;

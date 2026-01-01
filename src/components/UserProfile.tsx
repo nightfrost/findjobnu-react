@@ -18,6 +18,7 @@ import { handleApiError } from "../helpers/ErrorHelper";
 import { createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 import { mapProfileDtoToProfile, mapProfileToUpdateRequest } from "../helpers/mappers";
 import { formatDateForDisplay, toApiDateString, toDateFromInput } from "../helpers/date";
+import ImportCvCard from "./ImportCvCard";
 
 interface Props { userId: string; refreshKey?: number; }
 
@@ -37,6 +38,8 @@ const UserProfileComponent: React.FC<Props> = ({ userId, refreshKey }) => {
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<number | null>(null);
   const [detailsTab, setDetailsTab] = useState<"experiences" | "educations" | "skills">("experiences");
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importRefresh, setImportRefresh] = useState(0);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -106,7 +109,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId, refreshKey }) => {
       } finally { if (!cancelled) setLoading(false); }
     })();
     return () => { cancelled = true; };
-  }, [userId, token, applyProfileState, refreshKey]);
+  }, [userId, token, applyProfileState, refreshKey, importRefresh]);
 
   const handleBasicInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!form) return;
@@ -366,6 +369,7 @@ const UserProfileComponent: React.FC<Props> = ({ userId, refreshKey }) => {
           onDateInputRef={(node) => {
             dateInputRef.current = node;
           }}
+          onImportClick={() => setShowImportDialog(true)}
         />
         
         
@@ -456,6 +460,33 @@ const UserProfileComponent: React.FC<Props> = ({ userId, refreshKey }) => {
           <div className="alert alert-success">
             <span>{toast}</span>
           </div>
+        </div>
+      )}
+
+      {showImportDialog && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-3xl">
+            <div className="flex items-start justify-end mb-4">
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                aria-label="Luk"
+                onClick={() => setShowImportDialog(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <ImportCvCard
+              userId={userId}
+              accessToken={token ?? ""}
+              onImported={() => {
+                setShowImportDialog(false);
+                setImportRefresh((n) => n + 1);
+                showToast("CV importeret");
+              }}
+            />
+          </div>
+          <div className="modal-backdrop" onClick={() => setShowImportDialog(false)} aria-hidden />
         </div>
       )}
     </div>

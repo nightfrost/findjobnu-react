@@ -121,8 +121,10 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
         minDate: new Date(1900, 0, 1),
         yearRange: [1900, new Date().getFullYear()],
         toString: (date: Date) => formatDateForDisplay(toUtcMidnight(date)) ?? "",
-        parse: (dateString: string) => toDateFromInput(dateString) ?? new Date(),
+        // Do not default empty/invalid input to today; keep empty instead
+        parse: (dateString: string) => toDateFromInput(dateString) ?? null,
         onSelect,
+        setDefaultDate: false,
       });
     };
 
@@ -247,7 +249,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   return (
     <form className="flex flex-col" onSubmit={handleSubmit}>
       <fieldset className="fieldset gap-3">
-        <legend className="fieldset-legend text-lg font-semibold">Søg efter job</legend>
+        <legend className="fieldset-legend text-lg font-semibold">Udsøg</legend>
         <div className={`relative ${inputWidthClass}`}>
           <div className="form-control gap-2">
             <label className="label p-0" htmlFor="searchTerm">

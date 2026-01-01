@@ -118,29 +118,10 @@ const RecommendedJobs: React.FC<Props> = ({ userId }) => {
     setLastSearchParams(params);
   };
 
-  if (jobs.length === 0 && !loading) {
-    return (
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex-1 min-w-0">
-          <h2 className="card-title mb-4">Anbefalede Jobs</h2>
-          <div className="text-center py-8">Ingen anbefalede jobs fundet.</div>
-        </div>
-        <div className="shrink-0 w-full lg:w-fit">
-          <div className="card bg-base-100 shadow-sm lg:sticky lg:top-24 w-full">
-            <div className="p-4">
-              <SearchForm onSearch={handleSearch} categories={categories} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="mt-8">
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="order-2 lg:order-1 flex-1 min-w-0">
-          <h2 className="card-title mb-4">Anbefalede Jobs</h2>
           <JobList
             jobs={jobs}
             loading={loading}

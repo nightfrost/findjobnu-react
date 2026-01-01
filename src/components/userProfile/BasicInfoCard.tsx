@@ -20,6 +20,7 @@ interface BasicInfoCardProps {
   onDateOfBirthChange: (value: string) => void;
   onToggleOpenToWork: (checked: boolean) => void;
   onDateInputRef: (node: HTMLInputElement | null) => void;
+  onImportClick: () => void;
 }
 
 const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
@@ -36,6 +37,7 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
   onDateOfBirthChange,
   onToggleOpenToWork,
   onDateInputRef,
+  onImportClick,
 }) => {
   const renderValue = (value?: string | null) => {
     if (!value || value.trim().length === 0) return <span className="text-gray-400">Ikke angivet</span>;
@@ -66,6 +68,26 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({
         </>
       }
       editTooltip="Rediger Basisoplysninger"
+      actions={(
+        <button
+          type="button"
+          className="tooltip tooltip-bottom"
+          data-tip="Importér fra PDF"
+          onClick={onImportClick}
+          aria-label="Importér fra PDF"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="1.5"
+            stroke="currentColor"
+            className="w-6 h-6 hover:text-primary"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v12m0 0 3.5-3.5M12 15l-3.5-3.5M5 19h14" />
+          </svg>
+        </button>
+      )}
       editing={editing}
       onToggleEdit={onToggleEdit}
       onCancel={onCancel}
