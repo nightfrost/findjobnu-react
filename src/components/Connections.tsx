@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Configuration as AuthConfiguration, AuthenticationApi, LinkedInAuthApi } from "../findjobnu-auth";
+import { AuthenticationApi, LinkedInAuthApi } from "../findjobnu-auth";
+import { createAuthClient } from "../helpers/ApiFactory";
 import { prepareLinkedInLogin } from "../helpers/oauth";
 import { sanitizeExternalUrl } from "../helpers/url";
 
@@ -42,15 +43,7 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
     // Fetch user profile to check if LinkedIn user
     const fetchUserProfile = async () => {
       try {
-        const authApi = new AuthenticationApi(
-          new AuthConfiguration({
-            basePath: "https://auth.findjob.nu",
-            accessToken: accessToken ?? undefined,
-            headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
-          })
-        );
+        const authApi = createAuthClient(AuthenticationApi, accessToken);
         const response = await authApi.getUserInformation();
         // If the user is a LinkedIn user, update the LinkedIn connection status
         if (response.success && response.userInformation?.hasVerifiedLinkedIn === true) {
@@ -94,15 +87,7 @@ const ConnectionsComponent: React.FC<Props> = ({ userId, accessToken }) => {
     setLoading(true);
 
     try {
-      const linkedInAuthApi = new LinkedInAuthApi(
-        new AuthConfiguration({
-          basePath: "https://auth.findjob.nu",
-          accessToken: accessToken ?? undefined,
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        })
-      );
+      const linkedInAuthApi = createAuthClient(LinkedInAuthApi, accessToken);
       await linkedInAuthApi.unlinkLinkedInProfile();
       setConnections(prev =>
         prev.map(conn =>

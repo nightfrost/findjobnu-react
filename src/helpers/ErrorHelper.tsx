@@ -1,4 +1,5 @@
-import { AuthenticationApi } from "../findjobnu-auth/apis/AuthenticationApi";
+import { AuthenticationApi } from "../findjobnu-auth";
+import { createAuthClient } from "./ApiFactory";
 import type { User } from "../context/UserContext.shared";
 
 // Adapter interface to accept the UserContext without importing the hook
@@ -56,7 +57,7 @@ export async function handleApiError(error: unknown, ctx?: UserContextAdapter) {
       const expirationDate = toDate(accessTokenExpiration);
       if (expirationDate && expirationDate <= new Date()) {
         try {
-          const api = new AuthenticationApi();
+          const api = createAuthClient(AuthenticationApi, accessToken ?? undefined);
           const response = await api.refreshToken({
             tokenRefreshRequest: { refreshToken, accessToken }
           });
