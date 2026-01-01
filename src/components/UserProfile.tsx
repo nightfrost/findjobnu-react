@@ -477,7 +477,6 @@ const UserProfileComponent: React.FC<Props> = ({ userId, refreshKey }) => {
               </button>
             </div>
             <ImportCvCard
-              userId={userId}
               accessToken={token ?? ""}
               onImported={() => {
                 setShowImportDialog(false);

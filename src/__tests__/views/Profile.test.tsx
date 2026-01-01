@@ -1,6 +1,8 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import Profile from "../../views/Profile";
+import { MemoryRouter } from "react-router-dom";
 import { renderWithProviders, screen, waitFor } from "../../test/testUtils";
 
 const navigateMock = vi.fn();
@@ -40,33 +42,55 @@ describe("Profile view", () => {
   });
 
   it("redirects to login when no user is present", async () => {
-    renderWithProviders(<Profile />);
+    renderWithProviders(
+      <MemoryRouter initialEntries={["/profile"]}>
+        <Profile />
+      </MemoryRouter>
+    );
 
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/login"));
   });
 
   it("renders profile content when user is present", async () => {
-    renderWithProviders(<Profile />, {
-      userContext: { user: { userId: "user-123", accessToken: "token-abc" } },
-    });
+    renderWithProviders(
+      <MemoryRouter initialEntries={["/profile"]}>
+        <Profile />
+      </MemoryRouter>,
+      {
+        userContext: { user: { userId: "user-123", accessToken: "token-abc" } },
+      }
+    );
 
     await waitFor(() => expect(navigateMock).not.toHaveBeenCalled());
 
     expect(screen.getByTestId("user-profile")).toHaveTextContent("user-123");
-    expect(screen.getByTestId("connections")).toHaveTextContent("user-123:token-abc");
-    expect(screen.getByTestId("job-agent")).toHaveTextContent("user-123:token-abc");
+
+    await userEvent.click(screen.getByRole("button", { name: /forbindelser/i }));
+    expect(await screen.findByTestId("connections")).toHaveTextContent("user-123:token-abc");
+
+    await userEvent.click(screen.getByRole("button", { name: /jobagent/i }));
+    expect(await screen.findByTestId("job-agent")).toHaveTextContent("user-123:token-abc");
   });
 
   it("does not navigate away when a valid user stays the same", async () => {
     const user = { userId: "user-abc", accessToken: "token-123" };
 
-    const { rerender } = renderWithProviders(<Profile />, {
-      userContext: { user },
-    });
+    const { rerender } = renderWithProviders(
+      <MemoryRouter initialEntries={["/profile"]}>
+        <Profile />
+      </MemoryRouter>,
+      {
+        userContext: { user },
+      }
+    );
 
     await waitFor(() => expect(navigateMock).not.toHaveBeenCalled());
 
-    rerender(<Profile />);
+    rerender(
+      <MemoryRouter initialEntries={["/profile"]}>
+        <Profile />
+      </MemoryRouter>
+    );
 
     expect(navigateMock).not.toHaveBeenCalled();
   });

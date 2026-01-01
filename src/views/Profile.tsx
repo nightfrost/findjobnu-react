@@ -4,25 +4,34 @@ import UserProfileComponent from "../components/UserProfile";
 import ConnectionsComponent from "../components/Connections";
 import JobAgentCard from "../components/JobAgentCard";
 import SavedJobs from "../components/SavedJobs";
-import RecommendedJobs from "../components/RecommendedJobs";
 import SettingsPanel from "../components/SettingsPanel";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-type PanelKey = "profile" | "connections" | "jobAgent" | "savedJobs" | "recommendedJobs" | "settings";
+type PanelKey = "profile" | "connections" | "jobAgent" | "savedJobs" | "settings";
 
 const Profile: React.FC = () => {
   const { user } = useUser();
   const userId = user?.userId || "";
   const token = user?.accessToken || "";
   const navigate = useNavigate();
-  const [profileRefreshKey, setProfileRefreshKey] = useState(0);
-  const [activePanel, setActivePanel] = useState<PanelKey>("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [profileRefreshKey] = useState(0);
+  const panelFromParams = (): PanelKey => {
+    const panel = searchParams.get("panel");
+    if (panel === "connections" || panel === "jobAgent" || panel === "savedJobs" || panel === "settings") return panel;
+    return "profile";
+  };
+  const [activePanel, setActivePanel] = useState<PanelKey>(panelFromParams);
 
   useEffect(() => {
     if (!userId || !token) {
       navigate("/login");
     }
   }, [userId, token, navigate]);
+
+  useEffect(() => {
+    setActivePanel(panelFromParams());
+  }, [searchParams]);
 
   const navItems = useMemo(
     () => [
@@ -65,15 +74,6 @@ const Profile: React.FC = () => {
         ),
       },
       {
-        key: "recommendedJobs" as const,
-        label: "Anbefalede Jobs",
-        icon: (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        ),
-      },
-      {
         key: "settings" as const,
         label: "Indstillinger",
         icon: (
@@ -95,8 +95,6 @@ const Profile: React.FC = () => {
         return <JobAgentCard userId={userId} accessToken={token} />;
       case "savedJobs":
         return <SavedJobs userId={userId} />;
-      case "recommendedJobs":
-        return <RecommendedJobs userId={userId} />;
       case "settings":
         return <SettingsPanel />;
       case "profile":
@@ -120,7 +118,14 @@ const Profile: React.FC = () => {
                     type="button"
                     className={`btn btn-sm justify-start gap-2 ${isActive ? "btn-primary" : "btn-ghost"}`}
                     aria-pressed={isActive}
-                    onClick={() => setActivePanel(item.key)}
+                    onClick={() => {
+                      setActivePanel(item.key);
+                      setSearchParams((prev) => {
+                        const params = new URLSearchParams(prev);
+                        params.set("panel", item.key);
+                        return params;
+                      });
+                    }}
                   >
                     <span className="text-base-content/80">{item.icon}</span>
                     <span>{item.label}</span>

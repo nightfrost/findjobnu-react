@@ -6,6 +6,7 @@ import Login from "./views/Login";
 import Register from "./views/Register";
 import Footer from "./components/Footer";
 import Profile from "./views/Profile";
+import JobSeeker from "./views/JobSeeker";
 import LinkedInAuthHandler from "./views/LinkedInAuthHandler";
 import { checkAndClearExpiredToken } from "./helpers/AuthHelper";
 import { useUser } from "./context/UserContext.shared";
@@ -15,7 +16,6 @@ import MyJobs from "./views/MyJobs";
 import GoodCv from "./views/GoodCv";
 import About from "./views/About";
 import Contact from "./views/Contact";
-import Settings from "./views/Settings";
 
 const App: React.FC = () => {
   return (
@@ -44,9 +44,9 @@ const AppWithAuthCheck: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/arbejdssogende" element={<JobSeeker />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/linkedin-auth" element={<LinkedInAuthHandler />} />
-            <Route path="/settings" element={<Settings />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/jobsearch" element={<JobSearch />} />

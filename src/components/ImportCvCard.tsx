@@ -5,14 +5,13 @@ import { createApiClient } from "../helpers/ApiFactory";
 import { handleApiError } from "../helpers/ErrorHelper";
 
 interface Props {
-  userId: string;
   accessToken: string;
   onImported?: () => void;
 }
 
 const MAX_FILE_SIZE_MB = 10;
 
-const ImportCvCard: React.FC<Props> = ({ userId: _userId, accessToken, onImported }) => {
+const ImportCvCard: React.FC<Props> = ({ accessToken, onImported }) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
