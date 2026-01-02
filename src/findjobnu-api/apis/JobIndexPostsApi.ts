@@ -18,6 +18,7 @@ import type {
   CategoriesResponse,
   JobIndexPostResponse,
   JobIndexPostResponsePagedResponse,
+  JobStatisticsResponse,
 } from '../models/index';
 import {
     CategoriesResponseFromJSON,
@@ -26,6 +27,8 @@ import {
     JobIndexPostResponseToJSON,
     JobIndexPostResponsePagedResponseFromJSON,
     JobIndexPostResponsePagedResponseToJSON,
+    JobStatisticsResponseFromJSON,
+    JobStatisticsResponseToJSON,
 } from '../models/index';
 
 export interface GetAllJobPostsRequest {
@@ -223,6 +226,37 @@ export class JobIndexPostsApi extends runtime.BaseAPI {
      */
     async getJobPostsBySearch(requestParameters: GetJobPostsBySearchRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobIndexPostResponsePagedResponse | null | undefined > {
         const response = await this.getJobPostsBySearchRaw(requestParameters, initOverrides);
+        switch (response.raw.status) {
+            case 200:
+                return await response.value();
+            case 204:
+                return null;
+            default:
+                return await response.value();
+        }
+    }
+
+    /**
+     */
+    async getJobStatisticsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobStatisticsResponse>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/jobindexposts/statistics`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobStatisticsResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getJobStatistics(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobStatisticsResponse | null | undefined > {
+        const response = await this.getJobStatisticsRaw(initOverrides);
         switch (response.raw.status) {
             case 200:
                 return await response.value();

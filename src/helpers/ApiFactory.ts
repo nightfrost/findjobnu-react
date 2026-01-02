@@ -1,4 +1,4 @@
-import { Configuration as ApiConfiguration, ProfileApi } from "../findjobnu-api";
+import { Configuration as ApiConfiguration, ProfileApi, NewsletterApi } from "../findjobnu-api";
 import { Configuration as AuthConfiguration, AuthenticationApi } from "../findjobnu-auth";
 import type { ProfileCreateRequest } from "../findjobnu-api/models/ProfileCreateRequest";
 
@@ -130,3 +130,7 @@ export const getAuthBaseUrl = () => DEFAULT_AUTH_BASE;
 export async function createProfileSimple(api: ProfileApi, data: ProfileCreateRequest) {
   return api.createProfile({ profileCreateRequest: data });
 }
+
+// Convenience helper for newsletter client creation
+export const createNewsletterClient = (accessToken: string | null = null) =>
+  createApiClient(NewsletterApi, accessToken);

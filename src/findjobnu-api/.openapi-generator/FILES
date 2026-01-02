@@ -2,6 +2,7 @@ apis/CVApi.ts
 apis/CityApi.ts
 apis/JobAgentApi.ts
 apis/JobIndexPostsApi.ts
+apis/NewsletterApi.ts
 apis/ProfileApi.ts
 apis/index.ts
 index.ts
@@ -30,6 +31,9 @@ models/JobIndexPostResponse.ts
 models/JobIndexPostResponsePagedResponse.ts
 models/JobIndexPosts.ts
 models/JobIndexPostsPagedList.ts
+models/JobStatisticsResponse.ts
+models/NewsletterSubscribeRequest.ts
+models/NewsletterSubscribeResponse.ts
 models/ProfileCreateRequest.ts
 models/ProfileDto.ts
 models/ProfileUpdateRequest.ts

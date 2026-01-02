@@ -11,6 +11,7 @@ import {
 import illuContact from "../assets/illustrations/undraw_contact_support.svg";
 import illuUpdate from "../assets/illustrations/undraw_my-notifications.svg";
 import Seo from "../components/Seo";
+import { createNewsletterClient } from "../helpers/ApiFactory";
 
 const contactMethods = [
     {
@@ -56,6 +57,31 @@ const faqs = [
 
 const Contact: React.FC = () => {
     const [message, setMessage] = useState("");
+    const [newsletterEmail, setNewsletterEmail] = useState("");
+    const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "loading" | "success" | "exists" | "error">("idle");
+    const [newsletterError, setNewsletterError] = useState<string | null>(null);
+
+    const handleNewsletterSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!newsletterEmail.trim()) return;
+        setNewsletterStatus("loading");
+        setNewsletterError(null);
+        try {
+            const api = createNewsletterClient();
+            const res = await api.subscribeNewsletter({
+                newsletterSubscribeRequest: { email: newsletterEmail.trim() }
+            });
+            if (res.alreadySubscribed) {
+                setNewsletterStatus("exists");
+            } else {
+                setNewsletterStatus("success");
+            }
+        } catch (err) {
+            console.error("Newsletter subscribe failed", err);
+            setNewsletterStatus("error");
+            setNewsletterError("Kunne ikke tilmelde nyhedsbrevet lige nu. Prøv igen senere.");
+        }
+    };
 
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
@@ -189,6 +215,46 @@ const Contact: React.FC = () => {
                                 <li>Events og webinarer for kandidater og virksomheder</li>
                                 <li>Tips til at få mest muligt ud af Findjobnu</li>
                             </ul>
+                            <form className="mt-4 space-y-2" onSubmit={handleNewsletterSubmit} aria-label="Nyhedsbrev">
+                                <label className="label p-0" htmlFor="newsletter-email">
+                                    <span className="label-text">Tilmeld nyhedsbrevet</span>
+                                </label>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                    <input
+                                        id="newsletter-email"
+                                        type="email"
+                                        required
+                                        className="input input-bordered w-full"
+                                        placeholder="din@email.dk"
+                                        value={newsletterEmail}
+                                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                                        aria-describedby="newsletter-help"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        disabled={newsletterStatus === "loading"}
+                                    >
+                                        {newsletterStatus === "loading" ? "Tilmelder..." : "Tilmeld"}
+                                    </button>
+                                </div>
+                                <p id="newsletter-help" className="text-sm text-base-content/60">Du kan afmelde dig når som helst via link i e-mailen.</p>
+                                {newsletterStatus === "success" && (
+                                    <div className="alert alert-success">
+                                        <span>Tak! Du er tilmeldt nyhedsbrevet.</span>
+                                    </div>
+                                )}
+                                {newsletterStatus === "exists" && (
+                                    <div className="alert alert-info">
+                                        <span>Du er allerede tilmeldt nyhedsbrevet.</span>
+                                    </div>
+                                )}
+                                {newsletterStatus === "error" && (
+                                    <div className="alert alert-error">
+                                        <span>{newsletterError}</span>
+                                    </div>
+                                )}
+                            </form>
                         </div>
                         <figure className="p-6 flex items-center justify-center">
                             <img
