@@ -33,7 +33,7 @@ interface Props {
 const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
-  const setSelectedCity = useState<City | null>(null)[1];
+  const [, setSelectedCity] = useState<City | null>(null);
   const [categoryInput, setCategoryInput] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [categorySuggestions, setCategorySuggestions] = useState<CategoryOption[]>([]);
@@ -55,7 +55,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   const normalizedCategories = React.useMemo<CategoryOption[]>(() => {
     return categories.map(c => {
       if (typeof c === "string") {
-        const countMatch = c.match(/\((\d+)\)\s*$/);
+        const countMatch = /\((\d+)\)\s*$/.exec(c);
         const count = countMatch ? Number(countMatch[1]) : undefined;
         const name = normalizeCategoryValue(c);
         return { id: undefined, name, label: c, count };
@@ -249,7 +249,6 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
   return (
     <form className="flex flex-col" onSubmit={handleSubmit}>
       <fieldset className="fieldset gap-3">
-        <legend className="fieldset-legend text-lg font-semibold">Udsøg</legend>
         <div className={`relative ${inputWidthClass}`}>
           <div className="form-control gap-2">
             <label className="label p-0" htmlFor="searchTerm">

@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { PencilSquareIcon, TrashIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import type { Skill } from "../findjobnu-api/models/Skill";
 import { SkillProficiency } from "../findjobnu-api/models/SkillProficiency";
 
@@ -68,8 +69,14 @@ const SkillList: React.FC<Props> = ({ skills, onAdd, onUpdate, onDelete, readOnl
             <span>{skill.name} ({["Begynder","Let øvet","Øvet","Ekspert"][skill.proficiency]})</span>
             {!readOnly && (
               <>
-                <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(skill)}>Rediger</button>
-                <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(skill.id!)}>Slet</button>
+                <button className="btn btn-xs btn-outline btn-warning gap-1" onClick={() => handleEdit(skill)}>
+                  Rediger
+                  <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
+                </button>
+                <button className="btn btn-xs btn-outline btn-error gap-1" onClick={() => onDelete(skill.id!)}>
+                  Slet
+                  <TrashIcon className="w-4 h-4" aria-hidden="true" />
+                </button>
               </>
             )}
           </li>
@@ -77,8 +84,9 @@ const SkillList: React.FC<Props> = ({ skills, onAdd, onUpdate, onDelete, readOnl
       </ul>
 
       {!readOnly && editingId === null && (
-        <button className="btn btn-primary" onClick={() => { setEditingId(0); setForm(emptySkill); }}>
+        <button className="btn btn-primary gap-2" onClick={() => { setEditingId(0); setForm(emptySkill); }}>
           Tilføj færdighed
+          <PlusCircleIcon className="w-5 h-5" aria-hidden="true" />
         </button>
       )}
 

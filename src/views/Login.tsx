@@ -4,6 +4,7 @@ import { createAuthClient, createApiClient } from "../helpers/ApiFactory";
 import { AuthenticationApi, type LoginRequest } from "../findjobnu-auth";
 import { ProfileApi } from "../findjobnu-api";
 import { prepareLinkedInLogin } from "../helpers/oauth";
+import Seo from "../components/Seo";
 
 const api = createAuthClient(AuthenticationApi);
 
@@ -97,6 +98,12 @@ const Login: React.FC = () => {
 
   return (
     <div className="card max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
+      <Seo
+        title="Log ind | FindJob.nu"
+        description="Log ind på FindJob.nu for at se dine jobanbefalinger, gemte jobs og profil."
+        path="/login"
+        noIndex
+      />
       <form onSubmit={handleSubmit} className="grid gap-4" ref={formRef}>
         <fieldset className="fieldset gap-3">
           <legend className="fieldset-legend text-2xl font-bold text-center">Log ind</legend>

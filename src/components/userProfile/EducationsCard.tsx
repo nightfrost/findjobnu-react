@@ -2,6 +2,7 @@ import React from "react";
 import EditableCardFrame from "./EditableCardFrame";
 import EducationList from "../EducationList";
 import type { Education } from "../../findjobnu-api/models/Education";
+import { AcademicCapIcon } from "@heroicons/react/24/outline";
 
 interface EducationsCardProps {
   educations: Education[];
@@ -52,7 +53,12 @@ const EducationsCard: React.FC<EducationsCardProps> = ({
 
   return (
     <EditableCardFrame
-      title={<span>Uddannelser</span>}
+      title={(
+        <span className="flex items-center gap-2">
+          Uddannelser
+          <AcademicCapIcon className="w-5 h-5 text-primary" aria-hidden="true" />
+        </span>
+      )}
       editTooltip="Rediger Uddannelser"
       editing={editing}
       onToggleEdit={onToggleEdit}

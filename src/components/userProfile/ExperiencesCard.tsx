@@ -2,6 +2,7 @@ import React from "react";
 import EditableCardFrame from "./EditableCardFrame";
 import WorkExperienceList from "../WorkExperienceList";
 import type { Experience } from "../../findjobnu-api/models/Experience";
+import { BriefcaseIcon } from "@heroicons/react/24/outline";
 
 interface ExperiencesCardProps {
   experiences: Experience[];
@@ -52,7 +53,12 @@ const ExperiencesCard: React.FC<ExperiencesCardProps> = ({
 
   return (
     <EditableCardFrame
-      title={<span>Erfaringer</span>}
+      title={(
+        <span className="flex items-center gap-2">
+          Erfaringer
+          <BriefcaseIcon className="w-5 h-5 text-primary" aria-hidden="true" />
+        </span>
+      )}
       editTooltip="Rediger Erfaringer"
       editing={editing}
       onToggleEdit={onToggleEdit}

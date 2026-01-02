@@ -6,6 +6,7 @@ import { createApiClient } from "../helpers/ApiFactory";
 import SearchForm, { type CategoryOption } from "../components/SearchForm";
 import JobList from "../components/JobList";
 import { toDateFromInput } from "../helpers/date";
+import Seo from "../components/Seo";
 
 // Reuse the API client instantiation
 const api = createApiClient(JobIndexPostsApi);
@@ -95,7 +96,7 @@ const JobSearch: React.FC = () => {
       const postedBefore = params.postedBefore ? toDateFromInput(params.postedBefore) ?? undefined : undefined;
       const data = await api.getJobPostsBySearch({
         ...params,
-        categoryId: params.categoryId != null ? params.categoryId : undefined,
+        categoryId: params.categoryId ?? undefined,
         page,
         location: locationNormalized,
         pageSize,
@@ -138,6 +139,38 @@ const JobSearch: React.FC = () => {
 
   return (
     <div className="container max-w-7xl mx-auto px-4">
+      <Seo
+        title="Jobsøgning – Find relevante jobopslag | FindJob.nu"
+        description="Filtrér efter nøgleord, kategori og geografi. Opret jobagenter og se de nyeste danske jobopslag samlet ét sted."
+        path="/jobsearch"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: "Jobsøgning",
+            url: "https://findjob.nu/jobsearch",
+            description: "Filtrér efter nøgleord, kategori og geografi på FindJob.nu",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Forside",
+                item: "https://findjob.nu/"
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Jobsøgning",
+                item: "https://findjob.nu/jobsearch"
+              }
+            ]
+          }
+        ]}
+      />
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="order-2 lg:order-1 flex-1 min-w-0">
           <JobList

@@ -1,16 +1,16 @@
-
-
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext.shared";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 const Navbar: React.FC = () => {
   const { user, logout } = useUser();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    globalThis.location.href = "/";
+    navigate("/");
   };
 
   return (
@@ -18,16 +18,16 @@ const Navbar: React.FC = () => {
       <div className="max-w-[1400px] w-full mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Left: Logo now at the start */}
         <div className="flex items-center gap-2">
-          <a href="/" className="btn btn-ghost text-xl normal-case px-2 flex items-center gap-2">
+          <Link to="/" className="btn btn-ghost text-xl normal-case px-2 flex items-center gap-2">
             <img src="/findjobnu-logo.svg" alt="FindJob.nu logo" className="h-8 w-8" />
             <span>FindJob.nu</span>
-          </a>
+          </Link>
         </div>
 
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
             <ul className="flex items-center gap-4 font-medium text-base">
-              <li><a className="link link-hover" href="/arbejdssogende">Arbejdssøgende</a></li>
+              <li><Link className="link link-hover" to="/arbejdssogende">Arbejdssøgende</Link></li>
               <li>
                 <span
                   className="tooltip tooltip-bottom text-base-content/50 cursor-not-allowed"
@@ -37,14 +37,13 @@ const Navbar: React.FC = () => {
                   Arbejdsgiver
                 </span>
               </li>
-              <li><a className="link link-hover" href="/cv">Det gode CV</a></li>
-              <li><a className="link link-hover" href="/about">Om os</a></li>
-              <li><a className="link link-hover" href="/contact">Kontakt</a></li>
+              <li><Link className="link link-hover" to="/cv">Det gode CV</Link></li>
+              <li><Link className="link link-hover" to="/contact">Kontakt</Link></li>
             </ul>
           {!user ? (
             <div className="flex items-center gap-2">
-              <a href="/register" className="btn btn-outline btn-success">Tilmeld</a>
-              <a href="/login" className="btn btn-primary">Log ind</a>
+              <Link to="/register" className="btn btn-outline btn-success">Tilmeld</Link>
+              <Link to="/login" className="btn btn-primary">Log ind</Link>
             </div>
           ) : (
       <div className="dropdown dropdown-end">
@@ -59,8 +58,8 @@ const Navbar: React.FC = () => {
               <ul
                 className="menu menu-m dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow text-base"
               >
-                <li><a href="/profile">Profil</a></li>
-                <li><a href="/settings">Indstillinger</a></li>
+                <li><Link to="/profile">Profil</Link></li>
+                <li><Link to="/settings">Indstillinger</Link></li>
                 <li><button className="btn btn-sm btn-error btn-outline" type="button" onClick={handleLogout}>Log ud</button></li>
               </ul>
             </div>
@@ -97,7 +96,7 @@ const Navbar: React.FC = () => {
         <div className="md:hidden border-t border-base-200 bg-base-100 shadow-inner">
           <div className="px-4 py-4 flex flex-col gap-4">
             <ul className="flex flex-col gap-2 font-medium text-base">
-              <li><a className="link" href="/arbejdssogende" onClick={() => setMobileOpen(false)}>Arbejdssøgende</a></li>
+              <li><Link className="link" to="/arbejdssogende" onClick={() => setMobileOpen(false)}>Arbejdssøgende</Link></li>
               <li>
                 <span
                   className="tooltip tooltip-right text-base-content/50 cursor-not-allowed"
@@ -107,19 +106,18 @@ const Navbar: React.FC = () => {
                   Arbejdsgiver
                 </span>
               </li>
-              <li><a className="link" href="/cv" onClick={() => setMobileOpen(false)}>Det gode CV</a></li>
-              <li><a className="link" href="/about" onClick={() => setMobileOpen(false)}>Om os</a></li>
-              <li><a className="link" href="/contact" onClick={() => setMobileOpen(false)}>Kontakt</a></li>
+              <li><Link className="link" to="/cv" onClick={() => setMobileOpen(false)}>Det gode CV</Link></li>
+              <li><Link className="link" to="/contact" onClick={() => setMobileOpen(false)}>Kontakt</Link></li>
             </ul>
             {!user ? (
               <div className="flex flex-col gap-2">
-                <a href="/register" className="btn btn-outline btn-success" onClick={() => setMobileOpen(false)}>Tilmeld</a>
-                <a href="/login" className="btn btn-primary" onClick={() => setMobileOpen(false)}>Log ind</a>
+                <Link to="/register" className="btn btn-outline btn-success" onClick={() => setMobileOpen(false)}>Tilmeld</Link>
+                <Link to="/login" className="btn btn-primary" onClick={() => setMobileOpen(false)}>Log ind</Link>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <a href="/profile" className="link justify-start" onClick={() => setMobileOpen(false)}>Profil</a>
-                <a href="/settings" className="link justify-start" onClick={() => setMobileOpen(false)}>Indstillinger</a>
+                <Link to="/profile" className="link justify-start" onClick={() => setMobileOpen(false)}>Profil</Link>
+                <Link to="/settings" className="link justify-start" onClick={() => setMobileOpen(false)}>Indstillinger</Link>
                 <button type="button" className="btn btn-error btn-outline" onClick={() => { handleLogout(); setMobileOpen(false); }}>Log ud</button>
               </div>
             )}

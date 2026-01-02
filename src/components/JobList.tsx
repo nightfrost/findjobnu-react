@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { JobIndexPostResponse } from "../findjobnu-api/models";
 import Paging from "./Paging";
 import { ProfileApi, JobIndexPostsApi } from "../findjobnu-api";
@@ -378,9 +379,18 @@ const JobList: React.FC<Props> = ({
 
   return (
     <>
-      <div className="grid gap-3">
-        {jobs.map((job, idx) => renderJobCard(job, idx))}
-      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={currentPage}
+          className="grid gap-3"
+          initial={{ opacity: 0, x: 32 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -32 }}
+          transition={{ duration: 0.24, ease: "easeOut" }}
+        >
+          {jobs.map((job, idx) => renderJobCard(job, idx))}
+        </motion.div>
+      </AnimatePresence>
       <Paging currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
     </>
   );

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { PencilSquareIcon, TrashIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import type { Experience } from "../findjobnu-api/models/Experience";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
@@ -149,8 +150,14 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
             <span>{exp.positionTitle} - {exp.company}</span>
             {!readOnly && (
               <>
-                <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(exp)}>Rediger</button>
-                <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(exp.id!)}>Slet</button>
+                <button className="btn btn-xs btn-outline btn-warning gap-1" onClick={() => handleEdit(exp)}>
+                  Rediger
+                  <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
+                </button>
+                <button className="btn btn-xs btn-outline btn-error gap-1" onClick={() => onDelete(exp.id!)}>
+                  Slet
+                  <TrashIcon className="w-4 h-4" aria-hidden="true" />
+                </button>
               </>
             )}
           </li>
@@ -158,8 +165,9 @@ const WorkExperienceList: React.FC<Props> = ({ experiences, onAdd, onUpdate, onD
       </ul>
 
       {!readOnly && editingId === null && (
-        <button className="btn btn-primary" onClick={() => { setEditingId(0); setForm(emptyExperience); setIsCurrent(false); }}>
+        <button className="btn btn-primary gap-2" onClick={() => { setEditingId(0); setForm(emptyExperience); setIsCurrent(false); }}>
           Tilføj erfaring
+          <PlusCircleIcon className="w-5 h-5" aria-hidden="true" />
         </button>
       )}
 

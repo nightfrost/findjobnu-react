@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ProfileApi } from "../findjobnu-api";
 import { createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 import { clearLinkedInState, validateLinkedInResponse } from "../helpers/oauth";
+import Seo from "../components/Seo";
 
 const SENSITIVE_QUERY_KEYS = [
   "accessToken",
@@ -119,6 +120,12 @@ const LinkedInAuthHandler: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
+      <Seo
+        title="LinkedIn login | FindJob.nu"
+        description="Behandler LinkedIn-login og sender dig videre til din profil."
+        path="/profile/linkedin-auth"
+        noIndex
+      />
       <span className="loading loading-spinner loading-lg"></span>
       <p>Logging you in with LinkedIn...</p>
       {error && <p className="text-error mt-4 text-center max-w-md">{error}</p>}

@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /profile
+Disallow: /settings
+Disallow: /profile/linkedin-auth
+Disallow: /api/
+Allow: /
+
+# Crawling cadence suggestions
+Crawl-delay: 5
+
+Sitemap: https://findjob.nu/sitemap.xml

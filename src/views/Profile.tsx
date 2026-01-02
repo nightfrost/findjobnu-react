@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useUser } from "../context/UserContext.shared";
 import UserProfileComponent from "../components/UserProfile";
 import ConnectionsComponent from "../components/Connections";
 import JobAgentCard from "../components/JobAgentCard";
 import SavedJobs from "../components/SavedJobs";
 import SettingsPanel from "../components/SettingsPanel";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { NavLink, useNavigate, useSearchParams } from "react-router-dom";
+import Seo from "../components/Seo";
 
 type PanelKey = "profile" | "connections" | "jobAgent" | "savedJobs" | "settings";
 
@@ -14,14 +15,14 @@ const Profile: React.FC = () => {
   const userId = user?.userId || "";
   const token = user?.accessToken || "";
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [profileRefreshKey] = useState(0);
-  const panelFromParams = (): PanelKey => {
+  const [searchParams] = useSearchParams();
+  const panelFromParams = useCallback((): PanelKey => {
     const panel = searchParams.get("panel");
     if (panel === "connections" || panel === "jobAgent" || panel === "savedJobs" || panel === "settings") return panel;
     return "profile";
-  };
-  const [activePanel, setActivePanel] = useState<PanelKey>(panelFromParams);
+  }, [searchParams]);
+  const [profileRefreshKey] = useState(0);
+  const [activePanel, setActivePanel] = useState<PanelKey>(() => panelFromParams());
 
   useEffect(() => {
     if (!userId || !token) {
@@ -31,7 +32,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     setActivePanel(panelFromParams());
-  }, [searchParams]);
+  }, [panelFromParams]);
 
   const navItems = useMemo(
     () => [
@@ -105,39 +106,41 @@ const Profile: React.FC = () => {
 
   return (
     <div className="container max-w-7xl mx-auto px-4">
+      <Seo
+        title="Min profil | FindJob.nu"
+        description="Administrer din FindJob.nu-profil, forbindelser, jobagenter og gemte job."
+        path="/profile"
+        noIndex
+      />
       <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 pb-8 items-start">
         <aside className="card bg-base-100 shadow-sm self-start">
           <div className="card-body p-4">
             <h2 className="card-title text-lg mb-2">Min profil</h2>
-            <div className="flex flex-col gap-2" role="tablist" aria-label="Profil navigation">
-              {navItems.map((item) => {
-                const isActive = activePanel === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    className={`btn btn-sm justify-start gap-2 ${isActive ? "btn-primary" : "btn-ghost"}`}
-                    aria-pressed={isActive}
-                    onClick={() => {
-                      setActivePanel(item.key);
-                      setSearchParams((prev) => {
-                        const params = new URLSearchParams(prev);
-                        params.set("panel", item.key);
-                        return params;
-                      });
-                    }}
-                  >
-                    <span className="text-base-content/80">{item.icon}</span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+            <div className="flex flex-col gap-2" aria-label="Profil navigation">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.key}
+                  to={{ pathname: "/profile", search: `?panel=${item.key}` }}
+                  className={({ isActive }) =>
+                    `btn btn-sm justify-start gap-2 ${isActive ? "btn-primary" : "btn-ghost"}`
+                  }
+                  role="button"
+                  aria-current={activePanel === item.key ? "page" : undefined}
+                  onClick={() => setActivePanel(item.key)}
+                >
+                  <span className="text-base-content/80">{item.icon}</span>
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
             </div>
           </div>
         </aside>
 
         <section className="card bg-base-100 shadow-sm">
-          <div className="card-body p-0 sm:p-4 lg:p-6 transition-opacity duration-200" key={activePanel}>
+          <div
+            className="card-body p-0 sm:p-4 lg:p-6 transition-opacity duration-200"
+            key={activePanel}
+          >
             {renderActivePanel()}
           </div>
         </section>

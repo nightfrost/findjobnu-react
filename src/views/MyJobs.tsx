@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext.shared";
 import SavedJobs from "../components/SavedJobs";
 import RecommendedJobs from "../components/RecommendedJobs";
+import Seo from "../components/Seo";
 
 type TabKey = "saved" | "recommended";
 
@@ -20,6 +21,12 @@ const MyJobs: React.FC = () => {
 
 	return (
 		<div className="container max-w-7xl mx-auto px-4 py-6">
+			<Seo
+				title="Mine job – Gemte og anbefalede | FindJob.nu"
+				description="Se dine gemte jobopslag og anbefalede jobs baseret på din profil."
+				path="/myjobs"
+				noIndex
+			/>
 			<div role="tablist" className="tabs tabs-box">
 				<input
 					type="radio"

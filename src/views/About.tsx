@@ -1,7 +1,9 @@
 import React from "react";
-import illuBusiness from "../assets/illustrations/undraw_businesswoman-avatar_ktl2.svg";
-import illuFileSearch from "../assets/illustrations/undraw_file-search_cbur.svg";
-import illuCertification from "../assets/illustrations/undraw_certification_i2m0.svg";
+import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
+import Seo from "../components/Seo";
+import illuData from "../assets/illustrations/undraw_data-processing.svg";
+import illuTogether from "../assets/illustrations/undraw_customer-survey.svg";
+import illuExperts from "../assets/illustrations/undraw_experts.svg";
 
 type Section = {
     title: string;
@@ -22,7 +24,7 @@ const sections: Section[] = [
             "Anbefalinger, der tager højde for både kompetencer og ambitioner",
             "Tæt samarbejde med uddannelses- og erhvervspartnere for at holde alt opdateret",
         ],
-        image: illuFileSearch,
+        image: illuData,
         imageAlt: "Illustration af jobdata",
         badges: ["Data", "Indsigt", "Transparens"],
     },
@@ -35,7 +37,7 @@ const sections: Section[] = [
             "Automatisk tjek af CV-læsbarhed og nøgleord",
             "Gennemtænkt onboarding og support for virksomheder",
         ],
-        image: illuCertification,
+        image: illuTogether,
         imageAlt: "Illustration af læringsrejse",
         badges: ["Støtte", "Værktøjer", "Samarbejde"],
     },
@@ -44,11 +46,11 @@ const sections: Section[] = [
         text:
             "Vores hold består af rekrutteringskonsulenter, data scientists og produktfolk, der selv har prøvet at sidde på begge sider af bordet. Det giver os en jordnær tilgang og løsninger, der virker.",
         bullets: [
-            "10+ års erfaring fra HR-tech, rekruttering og public sector",
+            "10+ års erfaring fra HR-tech og public sector",
             "Fokus på tilgængelighed og inklusion i alle produkter",
             "Partnerskaber med brancheorganisationer og jobcentre",
         ],
-        image: illuBusiness,
+        image: illuExperts,
         imageAlt: "Illustration af team",
         badges: ["Erfaring", "Inklusion", "Partnerskaber"],
     },
@@ -72,10 +74,28 @@ const values = [
 const About: React.FC = () => {
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
+                <Seo
+                    title="Om FindJob.nu – Data, transparens og fairness"
+                    description="Læs om FindJob.nu, vores mission om et fair dansk jobmarked og hvordan vi kombinerer data med menneskelig indsigt."
+                    path="/about"
+                    jsonLd={{
+                        "@context": "https://schema.org",
+                        "@type": "Organization",
+                        name: "FindJob.nu",
+                        url: "https://findjob.nu/",
+                        sameAs: [
+                            "https://findjob.nu/",
+                            "https://rosenornsolutions.dk/"
+                        ]
+                    }}
+                />
                 <div className="hero bg-base-100 rounded-box shadow-xl mb-10">
                 <div className="hero-content text-center">
                     <div className="max-w-2xl">
-                        <h1 className="text-3xl md:text-4xl font-bold">Om Findjobnu</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-2">
+                            <span>Om Findjobnu</span>
+                            <BuildingOffice2Icon className="w-8 h-8 text-primary" aria-hidden="true" />
+                        </h1>
                         <p className="text-base-content/70 mt-2">
                             Vi hjælper kandidater og virksomheder med at finde hinanden hurtigere og bedre. Findjobnu er bygget i Danmark, til det danske jobmarked, med fokus på transparens og fairness.
                         </p>
@@ -106,10 +126,10 @@ const About: React.FC = () => {
                 <div className="card-body p-6 md:p-8 gap-10">
                     {sections.map((s, index) => (
                         <React.Fragment key={s.title}>
-                            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                                 {index % 2 === 0 ? (
                                     <>
-                                        <div className="rounded-box border p-6 h-full flex flex-col">
+                                        <div className="rounded-box border p-6 self-center flex flex-col">
                                             <h2 className="text-2xl font-semibold">{s.title}</h2>
                                             <p className="text-base-content/80">{s.text}</p>
                                             <ul className="list-disc ml-5 mt-2 space-y-1 text-base-content/80">
@@ -123,7 +143,7 @@ const About: React.FC = () => {
                                                 ))}
                                             </div>
                                         </div>
-                                        <figure className="p-6 h-full flex items-center justify-center">
+                                        <figure className="p-6 flex items-center justify-center md:justify-end self-center">
                                             <img
                                                 src={s.image}
                                                 alt={s.imageAlt}
@@ -134,7 +154,7 @@ const About: React.FC = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <figure className="p-6 h-full flex items-center justify-center">
+                                        <figure className="p-6 flex items-center justify-center md:justify-start self-center">
                                             <img
                                                 src={s.image}
                                                 alt={s.imageAlt}
@@ -142,7 +162,7 @@ const About: React.FC = () => {
                                                 loading="lazy"
                                             />
                                         </figure>
-                                        <div className="rounded-box border p-6 h-full flex flex-col">
+                                        <div className="rounded-box border p-6 self-center flex flex-col">
                                             <h2 className="text-2xl font-semibold">{s.title}</h2>
                                             <p className="text-base-content/80">{s.text}</p>
                                             <ul className="list-disc ml-5 mt-2 space-y-1 text-base-content/80">

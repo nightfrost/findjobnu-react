@@ -1,6 +1,6 @@
 import React from "react";
 import type { ReactElement, ReactNode } from "react";
-import { render, type RenderOptions } from "@testing-library/react";
+import { render, screen, waitFor, type RenderOptions } from "@testing-library/react";
 import { vi } from "vitest";
 import { UserContext, type UserContextType } from "../context/UserContext.shared";
 
@@ -42,3 +42,4 @@ export function renderWithProviders(
 }
 
 export * from "@testing-library/react";
+export { screen, waitFor };

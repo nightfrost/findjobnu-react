@@ -1,14 +1,22 @@
 import React, { useState } from "react";
+import {
+    DocumentCheckIcon,
+    SparklesIcon,
+    ArrowTrendingUpIcon,
+    ShieldCheckIcon,
+    BookOpenIcon,
+    QuestionMarkCircleIcon,
+} from "@heroicons/react/24/outline";
 import illuFileSearch from "../assets/illustrations/undraw_file-search_cbur.svg";
-import illuPersonalInformation from '../assets/illustrations/undraw_personal-information_h7kf.svg';
+import illuPersonalInformation from "../assets/illustrations/undraw_personal-information_h7kf.svg";
 import illuCertification from "../assets/illustrations/undraw_certification_i2m0.svg";
 import { CVApi } from "../findjobnu-api";
 import type { CvReadabilityResult } from "../findjobnu-api/models";
 import { createApiClient } from "../helpers/ApiFactory";
 import { useUser } from "../context/UserContext.shared";
 import { handleApiError } from "../helpers/ErrorHelper";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import MetricCard from "../components/MetricCard";
+import Seo from "../components/Seo";
 
 type Section = {
     title: string;
@@ -17,6 +25,7 @@ type Section = {
     image: string;
     imageAlt: string;
     badges: string[];
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
 const sections: Section[] = [
@@ -32,6 +41,7 @@ const sections: Section[] = [
         image: illuFileSearch,
         imageAlt: "Screening af CV'er illustration",
         badges: ["Klarhed", "Relevans", "Præcision"],
+        icon: SparklesIcon,
     },
     {
         title: "Lad den øverste tredjedel gøre arbejdet",
@@ -45,6 +55,7 @@ const sections: Section[] = [
         image: illuCertification,
         imageAlt: "Profil og nøgleord illustration",
         badges: ["Skimning", "Nøgleord", "Profil"],
+        icon: ArrowTrendingUpIcon,
     },
     {
         title: "Finpuds læsbarhed og troværdighed",
@@ -58,6 +69,7 @@ const sections: Section[] = [
         image: illuPersonalInformation,
         imageAlt: "Kvalitet og konsistens illustration",
         badges: ["Kvalitet", "Konsistens", "Læsbarhed"],
+        icon: ShieldCheckIcon,
     },
 ];
 
@@ -91,12 +103,48 @@ const GoodCv: React.FC = () => {
             setAnalyzing(false);
         }
     };
+
     return (
         <div className="container max-w-7xl mx-auto px-4 py-8">
+            <Seo
+                title="Det gode CV – ATS-venlig guide og PDF-tjek | FindJob.nu"
+                description="Få tips til et skarpt CV og test din PDF for læsbarhed, nøgleord og struktur, så du klarer dig bedre i ATS."
+                path="/cv"
+                jsonLd={[
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        name: "Det gode CV",
+                        url: "https://findjob.nu/cv",
+                        description: "Guide til ATS-venligt CV og PDF-analyse på FindJob.nu",
+                    },
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        itemListElement: [
+                            {
+                                "@type": "ListItem",
+                                position: 1,
+                                name: "Forside",
+                                item: "https://findjob.nu/"
+                            },
+                            {
+                                "@type": "ListItem",
+                                position: 2,
+                                name: "Det gode CV",
+                                item: "https://findjob.nu/cv"
+                            }
+                        ]
+                    }
+                ]}
+            />
             <div className="hero bg-base-100 rounded-box shadow-xl mb-10">
                 <div className="hero-content text-center">
                     <div className="max-w-2xl">
-                        <h1 className="text-3xl md:text-4xl font-bold">Det gode CV</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-2">
+                            <span>Det gode CV</span>
+                            <DocumentCheckIcon className="w-8 h-8 text-primary" aria-hidden="true" />
+                        </h1>
                         <p className="text-base-content/70 mt-2">
                             Kort, målrettet og let at skimme. Brug tipsene her for at blive kaldt hurtigere til samtale – og for at klare dig bedre i ATS'er (Applicant Tracking System).
                         </p>
@@ -254,51 +302,57 @@ const GoodCv: React.FC = () => {
                 <div className="card-body p-6 md:p-8 gap-10">
                     {sections.map((s, i) => (
                         <React.Fragment key={s.title}>
-                            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                                 {i % 2 === 0 ? (
                                     <>
-                                        <div className="rounded-box border p-6 h-full flex flex-col">
-                                            <h2 className="text-2xl font-semibold">{s.title}</h2>
-                                            <p className="text-base-content/80">{s.text}</p>
+                                        <div className="rounded-box border p-6 self-center">
+                                            <h2 className="text-2xl font-semibold flex items-center justify-between gap-3">
+                                                <span>{s.title}</span>
+                                                <s.icon className="w-7 h-7 text-primary" aria-hidden="true" />
+                                            </h2>
+                                            <p className="text-base-content/70 mt-2">{s.text}</p>
                                             <ul className="list-disc ml-5 mt-2 space-y-1 text-base-content/80">
                                                 {s.bullets.map((b) => (
                                                     <li key={`${s.title}-${b}`}>{b}</li>
                                                 ))}
                                             </ul>
-                                            <div className="mt-auto pt-4 flex flex-wrap gap-2">
+                                            <div className="pt-4 flex flex-wrap gap-2">
                                                 {s.badges.map((badge) => (
                                                     <span key={`${s.title}-${badge}`} className="badge badge-outline">{badge}</span>
                                                 ))}
                                             </div>
                                         </div>
-                                        <figure className="p-6 h-full flex items-center justify-center">
+                                        <figure className="p-6 flex items-center justify-center md:justify-end self-center">
                                             <img
                                                 src={s.image}
                                                 alt={s.imageAlt}
-                                                className="w-full h-64 md:h-72 object-contain"
+                                                className="w-full max-h-72 md:max-h-80 object-contain"
                                                 loading="lazy"
                                             />
                                         </figure>
                                     </>
                                 ) : (
                                     <>
-                                        <figure className="p-6 h-full flex items-center justify-center">
+                                        <figure className="p-6 flex items-center justify-center md:justify-start self-center">
                                             <img
                                                 src={s.image}
                                                 alt={s.imageAlt}
-                                                className="w-full h-64 md:h-72 object-contain"
+                                                className="w-full max-h-72 md:max-h-80 object-contain"
                                                 loading="lazy"
                                             />
                                         </figure>
-                                        <div className="rounded-box border p-6 h-full flex flex-col">
-                                            <h2 className="text-2xl font-semibold">{s.title}</h2>
-                                            <p className="text-base-content/80">{s.text}</p>
+                                        <div className="rounded-box border p-6 self-center">
+                                            <h2 className="text-2xl font-semibold flex items-center justify-between gap-3">
+                                                <span>{s.title}</span>
+                                                <s.icon className="w-7 h-7 text-primary" aria-hidden="true" />
+                                            </h2>
+                                            <p className="text-base-content/70 mt-2">{s.text}</p>
                                             <ul className="list-disc ml-5 mt-2 space-y-1 text-base-content/80">
                                                 {s.bullets.map((b) => (
                                                     <li key={`${s.title}-${b}`}>{b}</li>
                                                 ))}
                                             </ul>
-                                            <div className="mt-auto pt-4 flex flex-wrap gap-2">
+                                            <div className="pt-4 flex flex-wrap gap-2">
                                                 {s.badges.map((badge) => (
                                                     <span key={`${s.title}-${badge}`} className="badge badge-outline">{badge}</span>
                                                 ))}
@@ -316,7 +370,10 @@ const GoodCv: React.FC = () => {
             <div className="divider my-10" />
 
             <div>
-                <h3 className="text-xl font-semibold mb-2">Yderligere læsning og kilder</h3>
+                <h3 className="text-xl font-semibold mb-2 flex items-center justify-between gap-2">
+                    <span>Yderligere læsning og kilder</span>
+                    <BookOpenIcon className="w-6 h-6 text-primary" aria-hidden="true" />
+                </h3>
                 <ul className="list-disc ml-6 space-y-1">
                     <li>
                         UK National Careers Service — How to write a CV: {" "}

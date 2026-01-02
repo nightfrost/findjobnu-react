@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { BriefcaseIcon } from "@heroicons/react/24/outline";
 import { JobAgentApi, ProfileApi } from "../findjobnu-api";
 import { JobAgentFrequency } from "../findjobnu-api/models/JobAgentFrequency";
 import type { JobAgentDto } from "../findjobnu-api/models/JobAgentDto";
@@ -243,7 +244,10 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
     <div className="card bg-base-100 shadow rounded-lg p-6 w-full h-fit">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="card-title">{mode === "setup" ? "Opsæt jobagent?" : "Jobagent"}</h2>
+          <h2 className="card-title flex items-center gap-2">
+            <span>{mode === "setup" ? "Opsæt jobagent?" : "Jobagent"}</span>
+            <BriefcaseIcon className="w-6 h-6 text-primary" aria-hidden="true" />
+          </h2>
           <p className="text-sm text-gray-500">
             {mode === "setup"
               ? "Ved oprettelse af JobAgent tilsender vi dig daglig, ugentligt eller månedligt, job anbefalinger der matcher din profil her på siden."

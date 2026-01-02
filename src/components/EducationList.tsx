@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { PencilSquareIcon, TrashIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import type { Education } from "../findjobnu-api/models/Education";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
@@ -142,8 +143,14 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
             <span>{edu.degree} - {edu.institution}</span>
             {!readOnly && (
               <>
-                <button className="btn btn-xs btn-outline btn-warning" onClick={() => handleEdit(edu)}>Rediger</button>
-                <button className="btn btn-xs btn-outline btn-error" onClick={() => onDelete(edu.id!)}>Slet</button>
+                <button className="btn btn-xs btn-outline btn-warning gap-1" onClick={() => handleEdit(edu)}>
+                  Rediger
+                  <PencilSquareIcon className="w-4 h-4" aria-hidden="true" />
+                </button>
+                <button className="btn btn-xs btn-outline btn-error gap-1" onClick={() => onDelete(edu.id!)}>
+                  Slet
+                  <TrashIcon className="w-4 h-4" aria-hidden="true" />
+                </button>
               </>
             )}
           </li>
@@ -151,8 +158,9 @@ const EducationList: React.FC<Props> = ({ educations, onAdd, onUpdate, onDelete,
       </ul>
 
       {!readOnly && editingId === null && (
-        <button className="btn btn-primary" onClick={() => { setEditingId(0); setForm(emptyEducation); }}>
+        <button className="btn btn-primary gap-2" onClick={() => { setEditingId(0); setForm(emptyEducation); }}>
           Tilføj uddannelse
+          <PlusCircleIcon className="w-5 h-5" aria-hidden="true" />
         </button>
       )}
 

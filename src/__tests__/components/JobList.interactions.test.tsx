@@ -67,7 +67,7 @@ describe("JobList interactions", () => {
       />
     );
 
-    const snippet = screen.getByText((content) => content.endsWith("…"), { selector: "p" });
+    const snippet = screen.getByText((content: string) => content.endsWith("…"), { selector: "p" });
     expect(snippet.textContent).not.toContain("ord149");
 
     await user.click(screen.getAllByRole("button", { name: "Læs mere" })[0]);
@@ -78,7 +78,7 @@ describe("JobList interactions", () => {
 
     await user.click(screen.getByRole("button", { name: "Vis mindre" }));
     await waitFor(() => expect(screen.queryByRole("button", { name: "Vis mindre" })).not.toBeInTheDocument());
-    expect(screen.getByText((content) => content.endsWith("…"), { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByText((content: string) => content.endsWith("…"), { selector: "p" })).toBeInTheDocument();
   });
 
   it("saves a job and flips the CTA", async () => {

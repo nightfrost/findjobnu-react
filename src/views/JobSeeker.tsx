@@ -1,6 +1,8 @@
 import React from "react";
+import { BriefcaseIcon, DocumentTextIcon, IdentificationIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useUser } from "../context/UserContext.shared";
 import RecommendedJobs from "../components/RecommendedJobs";
+import Seo from "../components/Seo";
 
 const JobSeeker: React.FC = () => {
   const { user } = useUser();
@@ -8,10 +10,26 @@ const JobSeeker: React.FC = () => {
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
+      <Seo
+        title="Arbejdssøgende – Værktøjer til CV, profil og jobagent | FindJob.nu"
+        description="Få bedre matches, optimer dit CV til ATS, og aktiver jobagenter der finder relevante stillinger for dig."
+        path="/arbejdssogende"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Forside", item: "https://findjob.nu/" },
+            { "@type": "ListItem", position: 2, name: "Arbejdssøgende", item: "https://findjob.nu/arbejdssogende" }
+          ]
+        }}
+      />
       <div className="hero bg-base-100 rounded-box shadow-xl mb-10">
         <div className="hero-content text-center">
           <div className="max-w-3xl">
-            <h1 className="text-3xl md:text-4xl font-bold">For dig der søger job</h1>
+            <h1 className="text-3xl md:text-4xl font-bold flex items-center justify-center gap-2">
+              <span>For dig der søger job</span>
+              <UserIcon className="w-8 h-8 text-primary" aria-hidden="true" />
+            </h1>
             <p className="text-base-content/70 mt-2">
               Brug vores værktøjer til at lande samtalen hurtigere: et CV der scorer højt i ATS, en udfyldt profil der matcher dig med de rigtige job, og en jobagent der holder dig opdateret.
             </p>
@@ -28,7 +46,10 @@ const JobSeeker: React.FC = () => {
         <div className="card-body p-6 md:p-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="rounded-box border p-6 h-full flex flex-col gap-3">
-              <h2 className="text-xl font-semibold">Det gode CV</h2>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <span>Det gode CV</span>
+                <DocumentTextIcon className="w-5 h-5 text-primary" aria-hidden="true" />
+              </h2>
               <p className="text-base-content/80">
                 Øg din ATS-score med tydelig struktur, de rigtige nøgleord og et layout der kan læses af både systemer og mennesker.
               </p>
@@ -40,7 +61,10 @@ const JobSeeker: React.FC = () => {
             </div>
 
             <div className="rounded-box border p-6 h-full flex flex-col gap-3">
-              <h2 className="text-xl font-semibold">Profil</h2>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <span>Profil</span>
+                <IdentificationIcon className="w-5 h-5 text-secondary" aria-hidden="true" />
+              </h2>
               <p className="text-base-content/80">
                 En komplet profil gør dine anbefalinger skarpere og genbruger dine oplysninger, så du slipper for gentagelser.
               </p>
@@ -52,7 +76,10 @@ const JobSeeker: React.FC = () => {
             </div>
 
             <div className="rounded-box border p-6 h-full flex flex-col gap-3">
-              <h2 className="text-xl font-semibold">Jobagent</h2>
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <span>Jobagent</span>
+                <BriefcaseIcon className="w-5 h-5 text-accent" aria-hidden="true" />
+              </h2>
               <p className="text-base-content/80">
                 Jobagenten holder øje for dig og sender besked, så du kan reagere hurtigt på relevante opslag.
               </p>

@@ -2,6 +2,7 @@ import React from "react";
 import EditableCardFrame from "./EditableCardFrame";
 import SkillList from "../SkillList";
 import type { Skill } from "../../findjobnu-api/models/Skill";
+import { SparklesIcon } from "@heroicons/react/24/outline";
 
 interface SkillsCardProps {
   skills: Skill[];
@@ -52,7 +53,12 @@ const SkillsCard: React.FC<SkillsCardProps> = ({
 
   return (
     <EditableCardFrame
-      title={<span>Færdigheder</span>}
+      title={(
+        <span className="flex items-center gap-2">
+          Færdigheder
+          <SparklesIcon className="w-5 h-5 text-primary" aria-hidden="true" />
+        </span>
+      )}
       editTooltip="Rediger Færdigheder"
       editing={editing}
       onToggleEdit={onToggleEdit}

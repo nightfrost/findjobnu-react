@@ -6,6 +6,7 @@ import { handleApiError } from "../helpers/ErrorHelper";
 import { ProfileApi } from "../findjobnu-api";
 import { createAuthClient, createApiClient, createProfileSimple } from "../helpers/ApiFactory";
 import { prepareLinkedInLogin } from "../helpers/oauth";
+import Seo from "../components/Seo";
 
 const api = createAuthClient(AuthenticationApi);
 
@@ -115,6 +116,12 @@ const Register: React.FC = () => {
 
   return (
     <div className="card max-w-md mx-auto mt-12 p-8 bg-base-100 shadow rounded">
+      <Seo
+        title="Opret bruger | FindJob.nu"
+        description="Opret en konto på FindJob.nu for at gemme jobs, aktivere jobagenter og få personlige anbefalinger."
+        path="/register"
+        noIndex
+      />
       <form onSubmit={handleSubmit} className="grid" ref={formRef}>
         <fieldset className="fieldset gap-3">
           <legend className="fieldset-legend text-2xl font-bold text-center">Opret bruger</legend>
