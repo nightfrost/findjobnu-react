@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BriefcaseIcon, DocumentTextIcon, IdentificationIcon, UserIcon } from "@heroicons/react/24/outline";
 import { useUser } from "../context/UserContext.shared";
 import RecommendedJobs from "../components/RecommendedJobs";
@@ -7,6 +7,21 @@ import Seo from "../components/Seo";
 const JobSeeker: React.FC = () => {
   const { user } = useUser();
   const userId = user?.userId ?? "";
+  const [toolsOpen, setToolsOpen] = useState(true);
+
+  useEffect(() => {
+    const stored = globalThis.localStorage?.getItem("fj-jobseeker-tools-open");
+    if (stored === "0") setToolsOpen(false);
+    if (stored === "1") setToolsOpen(true);
+  }, []);
+
+  const toggleTools = () => {
+    setToolsOpen((prev) => {
+      const next = !prev;
+      globalThis.localStorage?.setItem("fj-jobseeker-tools-open", next ? "1" : "0");
+      return next;
+    });
+  };
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
@@ -43,51 +58,64 @@ const JobSeeker: React.FC = () => {
       </div>
 
       <div className="card bg-base-100 shadow-xl mb-10">
-        <div className="card-body p-6 md:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-box border p-6 h-full flex flex-col gap-3">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <span>Det gode CV</span>
-                <DocumentTextIcon className="w-5 h-5 text-primary" aria-hidden="true" />
-              </h2>
-              <p className="text-base-content/80">
-                Øg din ATS-score med tydelig struktur, de rigtige nøgleord og et layout der kan læses af både systemer og mennesker.
-              </p>
-              <ul className="list-disc ml-5 space-y-1 text-base-content/80">
-                <li>Automatisk tjek af nøgleord og læsbarhed</li>
-                <li>Klar guide til PDF, sektioner og sprog</li>
-              </ul>
-              <a href="/cv" className="btn btn-primary btn-sm w-fit mt-auto">Se CV-guiden</a>
+        <div className="card-body p-0">
+          <div className="collapse collapse-arrow">
+            <input
+              type="checkbox"
+              checked={toolsOpen}
+              onChange={toggleTools}
+              aria-label="Åbn eller luk værktøjer til jobsøgende"
+            />
+            <div className="collapse-title text-xl font-semibold px-6 py-4 flex items-center justify-center gap-2 text-center">
+              <span>Information</span>
             </div>
+            <div className="collapse-content px-6 pb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="rounded-box border p-6 h-full flex flex-col gap-3">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <span>Det gode CV</span>
+                    <DocumentTextIcon className="w-5 h-5 text-primary" aria-hidden="true" />
+                  </h2>
+                  <p className="text-base-content/80">
+                    Øg din ATS-score med tydelig struktur, de rigtige nøgleord og et layout der kan læses af både systemer og mennesker.
+                  </p>
+                  <ul className="list-disc ml-5 space-y-1 text-base-content/80">
+                    <li>Automatisk tjek af nøgleord og læsbarhed</li>
+                    <li>Klar guide til PDF, sektioner og sprog</li>
+                  </ul>
+                  <a href="/cv" className="btn btn-primary btn-sm w-fit mt-auto">Se CV-guiden</a>
+                </div>
 
-            <div className="rounded-box border p-6 h-full flex flex-col gap-3">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <span>Profil</span>
-                <IdentificationIcon className="w-5 h-5 text-secondary" aria-hidden="true" />
-              </h2>
-              <p className="text-base-content/80">
-                En komplet profil gør dine anbefalinger skarpere og genbruger dine oplysninger, så du slipper for gentagelser.
-              </p>
-              <ul className="list-disc ml-5 space-y-1 text-base-content/80">
-                <li>Matches på kompetencer, branche og geografi</li>
-                <li>Del samme data på tværs af ansøgninger</li>
-              </ul>
-              <a href="/profile" className="btn btn-secondary btn-sm w-fit mt-auto">Udfyld profil</a>
-            </div>
+                <div className="rounded-box border p-6 h-full flex flex-col gap-3">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <span>Profil</span>
+                    <IdentificationIcon className="w-5 h-5 text-secondary" aria-hidden="true" />
+                  </h2>
+                  <p className="text-base-content/80">
+                    En komplet profil gør dine anbefalinger skarpere og genbruger dine oplysninger, så du slipper for gentagelser.
+                  </p>
+                  <ul className="list-disc ml-5 space-y-1 text-base-content/80">
+                    <li>Matches på kompetencer, branche og geografi</li>
+                    <li>Del samme data på tværs af ansøgninger</li>
+                  </ul>
+                  <a href="/profile" className="btn btn-secondary btn-sm w-fit mt-auto">Udfyld profil</a>
+                </div>
 
-            <div className="rounded-box border p-6 h-full flex flex-col gap-3">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <span>Jobagent</span>
-                <BriefcaseIcon className="w-5 h-5 text-accent" aria-hidden="true" />
-              </h2>
-              <p className="text-base-content/80">
-                Jobagenten holder øje for dig og sender besked, så du kan reagere hurtigt på relevante opslag.
-              </p>
-              <ul className="list-disc ml-5 space-y-1 text-base-content/80">
-                <li>Notifikationer når nye opslag matcher dig</li>
-                <li>Skift filter hurtigt uden at miste historik</li>
-              </ul>
-              <a href="/profile?panel=jobAgent" className="btn btn-accent btn-sm w-fit mt-auto">Aktivér jobagent</a>
+                <div className="rounded-box border p-6 h-full flex flex-col gap-3">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <span>Jobagent</span>
+                    <BriefcaseIcon className="w-5 h-5 text-accent" aria-hidden="true" />
+                  </h2>
+                  <p className="text-base-content/80">
+                    Jobagenten holder øje for dig og sender besked, så du kan reagere hurtigt på relevante opslag.
+                  </p>
+                  <ul className="list-disc ml-5 space-y-1 text-base-content/80">
+                    <li>Notifikationer når nye opslag matcher dig</li>
+                    <li>Skift filter hurtigt uden at miste historik</li>
+                  </ul>
+                  <a href="/profile?panel=jobAgent" className="btn btn-accent btn-sm w-fit mt-auto">Aktivér jobagent</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>

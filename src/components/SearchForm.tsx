@@ -92,6 +92,7 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     if (match) {
       setCategoryInput(match.label);
       setSelectedCategoryId(match.id ?? null);
+      setCategorySuggestions(normalizedCategories.slice(0, MAX_SUGGESTIONS));
     }
   }, [queryCategory, normalizedCategories, categoryInput]);
 
@@ -199,6 +200,10 @@ const SearchForm: React.FC<Props> = ({ onSearch, categories, queryCategory }) =>
     if (categoryInput === "") {
       openAllCategories();
     } else {
+      const filtered = normalizedCategories
+        .filter(c => c.name.toLowerCase().includes(categoryInput.toLowerCase()) || c.label.toLowerCase().includes(categoryInput.toLowerCase()))
+        .slice(0, MAX_SUGGESTIONS);
+      setCategorySuggestions(filtered.length > 0 ? filtered : normalizedCategories.slice(0, MAX_SUGGESTIONS));
       setShowCategorySuggestions(true);
     }
   };

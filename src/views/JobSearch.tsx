@@ -34,6 +34,13 @@ const JobSearch: React.FC = () => {
   } | null>(null);
   const [searchParams] = useSearchParams();
 
+  const parseCategoryFromQuery = () => {
+    const raw = searchParams.get("category") ?? searchParams.get("categoryId");
+    if (!raw) return undefined;
+    const asNumber = Number(raw);
+    return Number.isFinite(asNumber) ? asNumber : undefined;
+  };
+
   const fetchAllJobs = async (page = 1) => {
     setLoading(true);
     try {
@@ -122,17 +129,19 @@ const JobSearch: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchAllJobs();
+    const categoryId = parseCategoryFromQuery();
     fetchCategories();
+    if (categoryId == null) {
+      fetchAllJobs();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const categoryParam = searchParams.get("category");
-    if (categoryParam && !lastSearchParams) {
-      const asNumber = Number(categoryParam);
-      const categoryId = Number.isFinite(asNumber) ? asNumber : undefined;
-      handleSearch({ categoryId }, 1);
+    const categoryId = parseCategoryFromQuery();
+    const lastCategory = lastSearchParams?.categoryId;
+    if (categoryId != null && categoryId !== lastCategory) {
+      handleSearch({ ...(lastSearchParams ?? {}), categoryId }, 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -193,7 +202,7 @@ const JobSearch: React.FC = () => {
                   handleSearch(params, 1);
                 }}
                 categories={categories}
-                queryCategory={searchParams.get("category") ?? undefined}
+                queryCategory={parseCategoryFromQuery()?.toString() ?? undefined}
               />
             </div>
           </div>

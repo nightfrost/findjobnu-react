@@ -27,6 +27,7 @@ const Navbar: React.FC = () => {
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-6 ml-auto">
             <ul className="flex items-center gap-4 font-medium text-base">
+              <li><Link className="link link-hover" to="/jobsearch">Jobsøgning</Link></li>
               <li><Link className="link link-hover" to="/arbejdssogende">Arbejdssøgende</Link></li>
               <li>
                 <span
@@ -59,7 +60,7 @@ const Navbar: React.FC = () => {
                 className="menu menu-m dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow text-base"
               >
                 <li><Link to="/profile">Profil</Link></li>
-                <li><Link to="/settings">Indstillinger</Link></li>
+                <li><Link to="/profile?panel=settings">Indstillinger</Link></li>
                 <li><button className="btn btn-sm btn-error btn-outline" type="button" onClick={handleLogout}>Log ud</button></li>
               </ul>
             </div>
@@ -96,6 +97,7 @@ const Navbar: React.FC = () => {
         <div className="md:hidden border-t border-base-200 bg-base-100 shadow-inner">
           <div className="px-4 py-4 flex flex-col gap-4">
             <ul className="flex flex-col gap-2 font-medium text-base">
+              <li><Link className="link" to="/jobsearch" onClick={() => setMobileOpen(false)}>Jobsøgning</Link></li>
               <li><Link className="link" to="/arbejdssogende" onClick={() => setMobileOpen(false)}>Arbejdssøgende</Link></li>
               <li>
                 <span
@@ -117,7 +119,7 @@ const Navbar: React.FC = () => {
             ) : (
               <div className="flex flex-col gap-2">
                 <Link to="/profile" className="link justify-start" onClick={() => setMobileOpen(false)}>Profil</Link>
-                <Link to="/settings" className="link justify-start" onClick={() => setMobileOpen(false)}>Indstillinger</Link>
+                <Link to="/profile?panel=settings" className="link justify-start" onClick={() => setMobileOpen(false)}>Indstillinger</Link>
                 <button type="button" className="btn btn-error btn-outline" onClick={() => { handleLogout(); setMobileOpen(false); }}>Log ud</button>
               </div>
             )}
