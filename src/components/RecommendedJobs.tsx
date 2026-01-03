@@ -134,7 +134,7 @@ const RecommendedJobs: React.FC<Props> = ({ userId }) => {
         </div>
 
         <div className="order-1 lg:order-2 shrink-0 w-full lg:w-fit">
-          <div className="card bg-base-100 shadow-sm lg:sticky lg:top-24 w-full">
+          <div className="card bg-base-100 shadow-xl lg:sticky lg:top-24 w-full">
             <div className="p-4">
               <SearchForm onSearch={handleSearch} categories={categories} />
             </div>

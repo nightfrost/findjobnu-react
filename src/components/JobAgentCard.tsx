@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { BriefcaseIcon } from "@heroicons/react/24/outline";
-import { JobAgentApi, ProfileApi } from "../findjobnu-api";
+import { JobAgentApi, JobIndexPostsApi, ProfileApi } from "../findjobnu-api";
 import { JobAgentFrequency } from "../findjobnu-api/models/JobAgentFrequency";
 import type { JobAgentDto } from "../findjobnu-api/models/JobAgentDto";
 import { createApiClient } from "../helpers/ApiFactory";
 import { handleApiError } from "../helpers/ErrorHelper";
+import LocationTypeahead from "./LocationTypeahead";
 
 interface Props {
   userId: string;
@@ -16,6 +17,13 @@ const frequencyOptions = [
   { value: JobAgentFrequency.NUMBER_2, label: "Ugentligt" },
   { value: JobAgentFrequency.NUMBER_3, label: "Månedligt" },
 ];
+
+type CategoryOption = {
+  id: number;
+  name: string;
+  label: string;
+  count: number;
+};
 
 const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
   const [loading, setLoading] = useState(true);
@@ -31,14 +39,98 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
   const [mode, setMode] = useState<"setup" | "manage">("setup");
   const [locationsInput, setLocationsInput] = useState<string>("");
   const [categoriesInput, setCategoriesInput] = useState<string>("");
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [categorySuggestions, setCategorySuggestions] = useState<CategoryOption[]>([]);
+  const [showCategorySuggestions, setShowCategorySuggestions] = useState(false);
+  const [activeCategoryIndex, setActiveCategoryIndex] = useState(-1);
   const [keywordsInput, setKeywordsInput] = useState<string>("");
   const [unsubscribeLink, setUnsubscribeLink] = useState<string | null>(null);
 
   const statusBadge = useMemo(() => {
-    const base = "badge badge-sm";
+    const base = "badge badge-md whitespace-nowrap px-3 py-2 text-xs font-semibold leading-tight";
     if (mode === "setup") return `${base} badge-outline`;
     return enabled ? `${base} badge-success` : `${base} badge-ghost`;
   }, [enabled, mode]);
+
+  const categoryDelimiter = ",";
+
+  const splitTokens = (raw: string) => raw.split(categoryDelimiter).map((t) => t.trim()).filter((t) => t.length > 0);
+
+  const matchCategory = (token: string) => {
+    const lower = token.toLowerCase();
+    return categoryOptions.find((c) => c.name.toLowerCase() === lower || c.label.toLowerCase() === lower);
+  };
+
+  const deriveCategoryIds = (input: string) => {
+    return splitTokens(input)
+      .map((token) => {
+        const match = matchCategory(token);
+        if (match?.id) return match.id;
+        const numeric = Number(token);
+        return Number.isFinite(numeric) ? numeric : null;
+      })
+      .filter((id): id is number => id != null);
+  };
+
+  const formatCategoriesInput = (ids: number[]) => {
+    if (!ids.length) return "";
+    return ids
+      .map((id) => categoryOptions.find((c) => c.id === id)?.name ?? id.toString())
+      .join(`${categoryDelimiter} `);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCategories = async () => {
+      try {
+        const api = createApiClient(JobIndexPostsApi);
+        const cats = await api.getJobCategories();
+        type RawCategory = {
+          id?: unknown;
+          name?: string;
+          category?: string;
+          categoryName?: string;
+          numberOfJobs?: unknown;
+          jobCount?: unknown;
+          count?: unknown;
+        };
+
+        const rawList = (cats as unknown as { categories?: RawCategory[]; items?: RawCategory[]; data?: RawCategory[]; })?.categories
+          ?? (cats as unknown as { items?: RawCategory[]; data?: RawCategory[]; categories?: RawCategory[]; })?.items
+          ?? (cats as unknown as { data?: RawCategory[]; categories?: RawCategory[]; items?: RawCategory[]; })?.data
+          ?? [];
+
+        const list = (Array.isArray(rawList) ? rawList : [])
+          .map((c: RawCategory) => {
+            const id = typeof c.id === "number" ? c.id : undefined;
+            const name = c.name ?? c.category ?? c.categoryName ?? "";
+            const countValue = c.numberOfJobs ?? c.jobCount ?? c.count;
+            const count = typeof countValue === "number" ? countValue : 0;
+            if (!id || !name) return null;
+            return { id, name, label: `${name} (${count})`, count } satisfies CategoryOption;
+          })
+          .filter((v): v is CategoryOption => v !== null);
+
+        if (!cancelled) {
+          setCategoryOptions(list);
+          setCategorySuggestions(list.slice(0, 8));
+          if (selectedCategoryIds.length) {
+            setCategoriesInput(formatCategoriesInput(selectedCategoryIds));
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setCategoryOptions([]);
+          setCategorySuggestions([]);
+        }
+      }
+    };
+
+    fetchCategories();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +152,9 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
       setLastSentAt(existing?.lastSentAt ? new Date(existing.lastSentAt) : null);
       setNextSendAt(existing?.nextSendAt ? new Date(existing.nextSendAt) : null);
       setLocationsInput((existing?.preferredLocations ?? []).join(", "));
-      setCategoriesInput((existing?.preferredCategoryIds ?? []).join(", "));
+      const ids = existing?.preferredCategoryIds ?? [];
+      setSelectedCategoryIds(ids);
+      setCategoriesInput(ids.length ? ids.join(", ") : "");
       setKeywordsInput((existing?.includeKeywords ?? []).join(", "));
       setUnsubscribeLink(link ?? null);
     };
@@ -93,6 +187,7 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
               setLastSentAt(null);
               setNextSendAt(null);
               setLocationsInput("");
+              setSelectedCategoryIds([]);
               setCategoriesInput("");
               setKeywordsInput("");
               setUnsubscribeLink(null);
@@ -127,12 +222,8 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
     try {
       const api = createApiClient(JobAgentApi, accessToken);
       const parsedLocations = locationsInput.split(",").map((l) => l.trim()).filter(Boolean);
-      const parsedCategoryIds = categoriesInput
-        .split(",")
-        .map((c) => c.trim())
-        .filter(Boolean)
-        .map(Number)
-        .filter((n) => !Number.isNaN(n));
+      const parsedCategoryIds = deriveCategoryIds(categoriesInput);
+      const categoryIds = parsedCategoryIds.length ? parsedCategoryIds : selectedCategoryIds;
       const parsedKeywords = keywordsInput.split(",").map((k) => k.trim()).filter(Boolean);
 
       try {
@@ -142,7 +233,7 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
             enabled,
             frequency,
             preferredLocations: parsedLocations,
-            preferredCategoryIds: parsedCategoryIds,
+            preferredCategoryIds: categoryIds,
             includeKeywords: parsedKeywords,
           },
         });
@@ -168,7 +259,9 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
       setLastSentAt(refreshed.lastSentAt ? new Date(refreshed.lastSentAt) : null);
       setNextSendAt(refreshed.nextSendAt ? new Date(refreshed.nextSendAt) : null);
       setLocationsInput((refreshed.preferredLocations ?? []).join(", "));
-      setCategoriesInput((refreshed.preferredCategoryIds ?? []).join(", "));
+      const refreshedIds = refreshed.preferredCategoryIds ?? selectedCategoryIds;
+      setSelectedCategoryIds(refreshedIds);
+      setCategoriesInput(formatCategoriesInput(refreshedIds));
       setKeywordsInput((refreshed.includeKeywords ?? []).join(", "));
       setUnsubscribeLink(link ?? null);
       setMode("manage");
@@ -221,7 +314,9 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
       setLastSentAt(refreshed.lastSentAt ?? null);
       setNextSendAt(refreshed.nextSendAt ?? null);
       setLocationsInput((refreshed.preferredLocations ?? []).join(", "));
-      setCategoriesInput((refreshed.preferredCategoryIds ?? []).join(", "));
+      const refreshedIds = refreshed.preferredCategoryIds ?? [];
+      setSelectedCategoryIds(refreshedIds);
+      setCategoriesInput(formatCategoriesInput(refreshedIds));
       setKeywordsInput((refreshed.includeKeywords ?? []).join(", "));
       setUnsubscribeLink(link ?? null);
       setMode("manage");
@@ -231,6 +326,68 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
       setError(handled.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const getLastCategoryToken = (input: string) => {
+    const parts = input.split(categoryDelimiter);
+    return (parts[parts.length - 1] ?? "").trim();
+  };
+
+  const updateCategorySuggestions = (query: string) => {
+    if (!categoryOptions.length) {
+      setCategorySuggestions([]);
+      setShowCategorySuggestions(false);
+      return;
+    }
+    const lower = query.toLowerCase();
+    const filtered = categoryOptions
+      .filter((opt) => !lower || opt.name.toLowerCase().includes(lower) || opt.label.toLowerCase().includes(lower))
+      .slice(0, 8);
+    setCategorySuggestions(filtered);
+    setShowCategorySuggestions(filtered.length > 0);
+    setActiveCategoryIndex(filtered.length ? 0 : -1);
+  };
+
+  const handleCategoriesFocus = () => {
+    updateCategorySuggestions(getLastCategoryToken(categoriesInput));
+  };
+
+  const handleCategoriesChange = (val: string) => {
+    setCategoriesInput(val);
+    setSelectedCategoryIds(deriveCategoryIds(val));
+    setActiveCategoryIndex(-1);
+    updateCategorySuggestions(getLastCategoryToken(val));
+  };
+
+  const handleCategorySuggestionClick = (option: CategoryOption) => {
+    const rawParts = categoriesInput.split(categoryDelimiter);
+    if (rawParts.length === 0) rawParts.push("");
+    rawParts[rawParts.length - 1] = option.name;
+    const normalized = rawParts.map((p) => p.trim()).filter((p) => p.length > 0);
+    const nextInput = normalized.join(`${categoryDelimiter} `);
+    setCategoriesInput(nextInput);
+    const ids = deriveCategoryIds(nextInput);
+    setSelectedCategoryIds(ids.length ? ids : [option.id]);
+    setShowCategorySuggestions(false);
+    setActiveCategoryIndex(-1);
+  };
+
+  const handleCategoriesKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showCategorySuggestions || categorySuggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveCategoryIndex((i) => (i + 1) % categorySuggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveCategoryIndex((i) => (i - 1 + categorySuggestions.length) % categorySuggestions.length);
+    } else if (e.key === "Enter") {
+      if (activeCategoryIndex >= 0 && activeCategoryIndex < categorySuggestions.length) {
+        e.preventDefault();
+        handleCategorySuggestionClick(categorySuggestions[activeCategoryIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setShowCategorySuggestions(false);
     }
   };
 
@@ -309,29 +466,59 @@ const JobAgentCard: React.FC<Props> = ({ userId, accessToken }) => {
               <label className="label flex-col items-start gap-2">
                 <span className="label-text">Foretrukne lokationer (kommasepareret)</span>
               </label>
-              <input
-                type="text"
-                className="input input-bordered"
-                placeholder="fx København, Aarhus"
+              <LocationTypeahead
                 value={locationsInput}
-                onChange={(e) => setLocationsInput(e.target.value)}
-                disabled={loading || saving}
+                onChange={setLocationsInput}
+                placeholder="fx København, Aarhus"
+                className="input input-bordered"
+                inputProps={{
+                  disabled: loading || saving,
+                  "aria-label": "Foretrukne lokationer",
+                }}
+                allowCommaSeparated
               />
             </div>
 
             <div className="form-control">
               <label className="label flex-col items-start gap-2">
-                <span className="label-text">Kategori-ID'er (kommasepareret)</span>
+                <span className="label-text">Kategorier (kommasepareret)</span>
               </label>
-              <input
-                type="text"
-                className="input input-bordered"
-                placeholder="fx 12, 34"
-                value={categoriesInput}
-                onChange={(e) => setCategoriesInput(e.target.value)}
-                disabled={loading || saving}
-              />
-              <span className="text-xs text-gray-500 mt-1">Bruger backend kategori-ID'er (tal).</span>
+              <div
+                className="relative"
+                onBlur={() => setTimeout(() => setShowCategorySuggestions(false), 100)}
+              >
+                <input
+                  type="text"
+                  className="input input-bordered w-full"
+                  placeholder="Start skriv for at vælge – understøtter komma"
+                  value={categoriesInput}
+                  onChange={(e) => handleCategoriesChange(e.target.value)}
+                  onFocus={handleCategoriesFocus}
+                  onKeyDown={handleCategoriesKeyDown}
+                  disabled={loading || saving}
+                  aria-label="Kategorier"
+                />
+                {showCategorySuggestions && categorySuggestions.length > 0 && (
+                  <ul className="absolute left-0 top-full z-30 w-full max-h-48 overflow-y-auto mt-1 p-0 border border-base-300 bg-base-100 rounded-lg shadow-lg">
+                    {categorySuggestions.map((cat, idx) => (
+                      <li key={cat.id} className="border-b last:border-b-0 border-base-200">
+                        <button
+                          type="button"
+                          className={`w-full text-left px-3 py-2 rounded-none border-0 bg-base-100 ${idx === activeCategoryIndex ? "bg-primary text-primary-content" : "hover:bg-base-200"}`}
+                          onMouseDown={(e) => { e.preventDefault(); handleCategorySuggestionClick(cat); }}
+                          onClick={() => handleCategorySuggestionClick(cat)}
+                        >
+                          <span className="flex items-center justify-between gap-2">
+                            <span>{cat.name}</span>
+                            <span className="text-xs opacity-70">{cat.count}</span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <span className="text-xs text-gray-500 mt-1">Skriv flere kategorier adskilt med komma. Matcher automatisk navne eller ID'er.</span>
             </div>
 
             <div className="form-control">

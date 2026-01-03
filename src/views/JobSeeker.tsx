@@ -121,8 +121,8 @@ const JobSeeker: React.FC = () => {
         </div>
       </div>
 
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body p-0 sm:p-4 lg:p-6">
+      <div className="">
+        <div className="p-0 sm:p-4 lg:p-6">
           {userId ? (
             <RecommendedJobs userId={userId} />
           ) : (

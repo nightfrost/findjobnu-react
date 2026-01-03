@@ -11,6 +11,8 @@ interface LocationTypeaheadProps {
   className?: string;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   useValidator?: boolean;
+  allowCommaSeparated?: boolean;
+  delimiter?: string;
 }
 
 const MAX_SUGGESTIONS = 8;
@@ -23,6 +25,8 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   className = "",
   inputProps = {},
   useValidator = true,
+  allowCommaSeparated = false,
+  delimiter = ",",
 }) => {
   const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -46,8 +50,15 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
     );
   };
 
+  const getQueryFromValue = (raw: string) => {
+    if (!allowCommaSeparated) return raw;
+    const parts = raw.split(delimiter);
+    return (parts[parts.length - 1] ?? "").trim();
+  };
+
   const handleFocus = async () => {
-    if (value === "") {
+    const query = getQueryFromValue(value);
+    if (query === "") {
       try {
         const results = await citiesApi.getAllCities();
         setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
@@ -64,11 +75,12 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     onChange(val);
+    const query = getQueryFromValue(val);
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (val.length > 0) {
+    if (query.length > 0) {
       timeoutRef.current = setTimeout(async () => {
         try {
-          const results = await citiesApi.getCitiesByQuery({ query: val });
+          const results = await citiesApi.getCitiesByQuery({ query });
           setCitySuggestions((results ?? []).slice(0, MAX_SUGGESTIONS));
           setShowSuggestions(true);
           setActiveCityIndex(-1);
@@ -91,7 +103,21 @@ const LocationTypeahead: React.FC<LocationTypeaheadProps> = ({
   };
 
   const handleSuggestionClick = (city: City) => {
-    onChange(city.name ?? "");
+    if (allowCommaSeparated) {
+      const parts = value.split(delimiter);
+      if (parts.length === 0) {
+        onChange(city.name ?? "");
+      } else {
+        parts[parts.length - 1] = city.name ?? "";
+        const normalized = parts
+          .map((p) => p.trim())
+          .filter((p) => p.length > 0)
+          .join(`${delimiter} `);
+        onChange(normalized);
+      }
+    } else {
+      onChange(city.name ?? "");
+    }
     if (onSelect) onSelect(city);
     setShowSuggestions(false);
     setActiveCityIndex(-1);

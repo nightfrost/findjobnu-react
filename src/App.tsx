@@ -85,7 +85,7 @@ const AppWithAuthCheck: React.FC = () => {
   }, [location.key, navigationType]);
 
   return (
-    <div className="min-h-screen bg-base-300 flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-base-200/90 via-base-300 to-primary/20">
       <Navbar />
       <main className="flex-1">
         <AnimatePresence mode="wait" initial={false}>
