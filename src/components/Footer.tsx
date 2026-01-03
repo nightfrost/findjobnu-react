@@ -1,13 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import logo from "../assets/RosenornSolutions.png";
 
 const Footer: React.FC = () => (
-  <footer className="mt-8 border-t bg-base-100/80 bg-base-100/60 backdrop-blur-sm shadow-lg">
+  <footer className="mt-8 border-t bg-base-100/80 backdrop-blur-sm shadow-lg">
     <div className="max-w-[1400px] w-full mx-auto px-4 py-8 text-sm text-gray-700">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <aside className="flex flex-col gap-2 text-base-content/70 w-full lg:max-w-xs lg:pl-4">
-          <span className="text-base font-semibold text-base-content">Rosenørn Solutions</span>
-          <a href="https://rosenornsolutions.dk" target="_blank" rel="noopener noreferrer" className="link link-hover w-fit">rosenornsolutions.dk</a>
+        <aside className="flex flex-col gap-3 text-base-content/70 w-full lg:max-w-xs lg:pl-4">
+          <a href="https://rosenornsolutions.dk" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-fit hover:no-underline">
+            <img src={logo} alt="Rosenørn Solutions" className="h-10 w-auto" loading="lazy" />
+            <span className="text-base font-semibold text-base-content">Rosenørn Solutions</span>
+          </a>
           <span>© {new Date().getFullYear()} Rosenørn Solutions. All rights reserved.</span>
         </aside>
 
